@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='ASCII'?>
+<robot name="test_fetch">
+  <link name="base_link"/>
+  <joint name="base_link_palm" type="fixed">
+    <origin rpy="0 0.00000000 0.00000000"/>
+    <parent link="base_link"/>
+    <child link="palm"/>
+  </joint>
+  <link name="palm">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/palm.stl" scale="1.00000000 1.00000000 1.00000000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1.00000000"/>
+      <inertia ixx="2.0000e-21" ixy="0.0000e+00" ixz="-0.0000e+00" iyy="2.0000e-21" iyz="0.0000e+00" izz="3.0000e-21"/>
+      <origin xyz="0.00007247 -0.00000000 0.00000167"/>
+    </inertial>
+  </link>
+  <link name="l_gripper_finger_link">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/l_gripper_finger_link.stl" scale="1.00000000 1.00000000 1.00000000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1.00000000"/>
+      <inertia ixx="0.0000e+00" ixy="0.0000e+00" ixz="0.0000e+00" iyy="0.0000e+00" iyz="-0.0000e+00" izz="0.0000e+00"/>
+      <origin xyz="0.00000091 0.00011000 -0.00000000"/>
+    </inertial>
+  </link>
+  <link name="l_gripper_finger_link_joint"/>
+  <joint name="palm_l_gripper_finger_link_joint" type="prismatic">
+    <origin rpy="1.57079633 0.00000000 0.00000000" xyz="0.16500000 0.02500000 -0.11000000"/>
+    <parent link="palm"/>
+    <child link="l_gripper_finger_link_joint"/>
+    <axis xyz="0.00000000 0.00000000 -1.00000000"/>
+    <limit effort="50000.00000000" lower="0.0" upper="-0.363604443068" velocity="0.52333333"/>
+  </joint>
+  <joint name="l_gripper_finger_link_joint_l_gripper_finger_link" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="l_gripper_finger_link_joint"/>
+    <child link="l_gripper_finger_link"/>
+  </joint>
+  <link name="r_gripper_finger_link">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/r_gripper_finger_link.stl" scale="1.00000000 1.00000000 1.00000000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1.00000000"/>
+      <inertia ixx="0.0000e+00" ixy="-0.0000e+00" ixz="-0.0000e+00" iyy="0.0000e+00" iyz="0.0000e+00" izz="0.0000e+00"/>
+      <origin xyz="0.00000091 -0.00011000 0.00000000"/>
+    </inertial>
+  </link>
+  <link name="r_gripper_finger_link_joint"/>
+  <joint name="palm_r_gripper_finger_link_joint" type="prismatic">
+    <origin rpy="-1.57079633 0.00000000 0.00000000" xyz="0.16500000 -0.02500000 -0.11000000"/>
+    <parent link="palm"/>
+    <child link="r_gripper_finger_link_joint"/>
+    <axis xyz="0.00000000 0.00000000 -1.00000000"/>
+    <limit effort="50000.00000000" lower="0.0" upper="-0.363604443068" velocity="0.52333333"/>
+  </joint>
+  <joint name="r_gripper_finger_link_joint_r_gripper_finger_link" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="r_gripper_finger_link_joint"/>
+    <child link="r_gripper_finger_link"/>
+  </joint>
+</robot>
