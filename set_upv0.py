@@ -8,71 +8,60 @@ import numpy as np
 
 #World Imports
 from omni.isaac.core import World
-from omni.isaac.core.objects import DynamicCuboid
-import omni.kit.commands
-
-# URDF imports  
-from omni.isaac.core.utils.extensions import get_extension_path_from_name
-from omni.isaac.urdf import _urdf
 
 # Object Initiation file
-from omni.isaac.core.utils.stage import add_reference_to_stage
-from omni.isaac.core.utils.prims import create_prim
+from omni.isaac.core.utils.prims import define_prim
 
+from omni.isaac.cloner import Cloner    # import Cloner interface
+from omni.isaac.cloner import GridCloner    # import Cloner interface
 
-
-
+from manager import Manager
+from workstation import Workstation
 
 #Initialize world
 def init_world(num_w):
-    world = World(stage_units_in_meters=1.0)
+    world = World()
+    world.scene.add_default_ground_plane(-1)
     #Create initial Workstation
-    workstation = create_prim("/World/Workstation", "Xform")
-    return world, workstation
-
-def add_urdf():
-    #Adding a .urdf file
-    urdf_interface = _urdf.acquire_urdf_interface()
-    # Set the settings in the import config
-    import_config = _urdf.ImportConfig()
-    import_config.merge_fixed_joints = False
-    import_config.convex_decomp = False
-    import_config.import_inertia_tensor = True
-    import_config.fix_base = True
-    import_config.make_default_prim = True
-    import_config.self_collision = False
-    import_config.create_physics_scene = True
-    import_config.import_inertia_tensor = False
-    import_config.default_drive_strength = 1047.19751
-    import_config.default_position_drive_damping = 52.35988
-    import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION
-    import_config.distance_scale = 1
-    import_config.density = 0.0
-    import_config.make_instanceable = False
-
-    urdf_path = "/home/felipe/Documents/urdf/fetch_gripper/fetch_gripper.urdf"
-    result, prim_path = omni.kit.commands.execute( "URDFParseAndImportFile", urdf_path=urdf_path,import_config=import_config,)
-
-# Resetting the world needs to be called before querying anything related to an articulation specifically.
-# Its recommended to always do a reset after adding your assets, for physics handles to be propagated properly
-
-def add_usd(usd_path):
-    #omni.usd.get_context().open_stage(usd_path)
-    usd_added = add_reference_to_stage(usd_path= usd_path, prim_path = "/World/Stuff")
+    work = define_prim("/World/Workstation")
+    cloner = GridCloner(spacing = 1)
+    target_paths = cloner.generate_paths('World/Workstation', num_w)
+    cloner.clone(source_prim_path = "/World/Workstation", prim_paths = target_paths)
+    
+    return world, target_paths
 
 
 
 if __name__ == "__main__":
-    num_w= 4 # Number of Workstations
-    world, workstation = init_world(4)
+    # Initialize Manager 
+    json_path = "/home/felipe/Documents/isaac_sim_grasping/grasp_data/Grasps_dataset.json"
+    grippers_path = "/home/felipe/Documents/isaac_sim_grasping/grippers"
+    objects_path = "/home/felipe/Documents/isaac_sim_grasping/objects"
+    manager = Manager(json_path, grippers_path, objects_path)    
 
-    #add_urdf()
+    num_w= manager.n_jobs # Number of Workstations to create
+    #initialize World
+    world, workstation_paths = init_world(num_w)
+    #print(workstation_paths)
+    workstations = []
+    #Initialize Workstations
+    for i in range(len(workstation_paths)):
+        tmp = Workstation(i, manager, workstation_paths[i], world)
+        workstations.append(tmp)
+    
+    
     world.reset()
+    
+    
+    
     while simulation_app.is_running():
         world.step(render=True) # execute one physics step and one rendering step
         if world.is_playing():
             if world.current_time_step_index == 0:
-                world.reset()
+                #world.reset()
+                pass
+
+        
 
 
     simulation_app.close() # close Isaac Sim

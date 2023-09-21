@@ -14,12 +14,12 @@ if __name__ == "__main__":
     for i in json_files:
         tmp = pd.read_json(os.path.join(path_to_json, i))
         if df.empty:
-            df = tmp[:5]
+            df = tmp[:samples]
         else:
-            df = pd.concat([df,tmp[:5]],ignore_index= True)
-    print(df)
+            df = pd.concat([df,tmp[:samples]],ignore_index= True)
+    print(df.iloc[0]['grasps']['pose'][3:])
 
-    result = df.to_json(os.path.join(path_to_json, "Grasps_dataset.json"))
+    #result = df.to_json(os.path.join(path_to_json, "Grasps_dataset.json"))
         #print(tmp.head(4))
 
 

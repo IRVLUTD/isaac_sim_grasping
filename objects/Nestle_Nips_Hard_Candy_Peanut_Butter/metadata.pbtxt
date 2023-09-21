@@ -1,0 +1,35 @@
+model {
+  file: "model.sdf"
+}
+name: "Nestle_Nips_Hard_Candy_Peanut_Butter"
+description: "Nestle Nips Hard Candy Peanut Butter"
+version: 1
+authors {
+  name: "Google"
+  email: "scanned-objects@google.com"
+}
+legal {
+  copyright: "Copyright 2020 Google LLC."
+  license: "Creative Commons Attribution 4.0 International"
+}
+annotations {
+  key: "brand"
+  value: "Nestle"
+}
+annotations {
+  key: "gtin"
+  value: "00028000942458"
+}
+annotations {
+  key: "sku"
+  value: "00028000942458"
+}
+compatibilities {
+  name: "Gazebo"
+  version {
+    major: 11
+  }
+}
+categories {
+  first: "Consumer Goods"
+}

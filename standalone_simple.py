@@ -19,6 +19,7 @@ from omni.isaac.franka.tasks import FollowTarget
 # .USD file
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.utils.prims import create_prim
+from omni.isaac.core.prims import XFormPrim
 
 world = World(stage_units_in_meters=1.0)
 world.scene.add_default_ground_plane()
@@ -35,10 +36,12 @@ fancy_cube =  world.scene.add(
     ))
 
 # add .usd file
-usd_path = "home/felipe/Documents/Isaac Sim/Environment/Collected_fetch/fetch.usd"
+
+usd_path = "/home/felipe/Documents/isaac_sim_grasping/gripper_usd/robotiq_3finger/robotiq_3finger.usd"
 #Create empty
-New = create_prim("/World/First", "Xform")
-robot = add_reference_to_stage(usd_path=usd_path, prim_path="/World/USD_Robot")
+#New = create_prim("/World/First", "Xform")
+robot = add_reference_to_stage(usd_path=usd_path, prim_path="/World/fetch_gripper")
+world.scene.add(XFormPrim(prim_path = "/World/fetch_gripper", name="fetch_gripper", position = [0,0,0], orientation = [0.7071068,0, 0,0.7071068]))
 
 #Adding a .urdf file
 urdf_interface = _urdf.acquire_urdf_interface()
@@ -58,8 +61,8 @@ import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITIO
 import_config.distance_scale = 1
 import_config.density = 0.0
 
-urdf_path = "/home/felipe/Documents/Isaac Sim/urdf/fetch_gripper/fetch_gripper.urdf"
-result, prim_path = omni.kit.commands.execute( "URDFParseAndImportFile", urdf_path=urdf_path,import_config=import_config,)
+#urdf_path = "/home/felipe/Documents/Isaac Sim/urdf/fetch_gripper/fetch_gripper.urdf"
+#result, prim_path = omni.kit.commands.execute( "URDFParseAndImportFile", urdf_path=urdf_path,import_config=import_config,)
 
 # Resetting the world needs to be called before querying anything related to an articulation specifically.
 # Its recommended to always do a reset after adding your assets, for physics handles to be propagated properly
