@@ -80,6 +80,6 @@ if __name__ == "__main__":
     objects_path = "/home/felipe/Documents/isaac_sim_grasping/objects"
 
     man = Manager(json_path, grippers_path, objects_path)
-
+    
     print(man.gripper_names)
     print(man.grasps.iloc[0])
