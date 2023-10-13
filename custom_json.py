@@ -17,7 +17,9 @@ if __name__ == "__main__":
             df = tmp[:samples]
         else:
             df = pd.concat([df,tmp[:samples]],ignore_index= True)
-    print(df.iloc[0]['grasps']['pose'][3:])
+    for i in range(20):
+        print(df.iloc[i]['gripper'])
+        print(df.iloc[i]['grasps']['dofs'])
 
     #result = df.to_json(os.path.join(path_to_json, "Grasps_dataset.json"))
         #print(tmp.head(4))

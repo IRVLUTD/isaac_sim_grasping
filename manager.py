@@ -32,7 +32,12 @@ class Manager:
         # Current task
         self.task_pointer = 0
         self.n_jobs = self.grasps.shape[0]
-
+        #End effector axis (+/- 1,2,3) x,y, z respectively
+        self.EF_axis = {
+            "fetch_gripper" : 1,
+            "sawyer": 3,
+            "robotiq_3finger":2
+        }
 
     def _check_gripper_usd(self,grippers_path):
         """ Check if the gripper usds are readable by program

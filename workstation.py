@@ -6,7 +6,14 @@ import omni.kit.commands
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.utils.prims import create_prim
 from omni.isaac.core.prims import XFormPrim
+from omni.isaac.core.prims.rigid_prim import RigidPrim    
+from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.robots import Robot
+from omni.isaac.core.utils.prims import get_prim_at_path
+from omni.isaac.core.utils.transformations import get_relative_transform, pose_from_tf_matrix, tf_matrix_from_pose, get_world_pose_from_relative
+from omni.isaac.core.utils.prims import create_prim, delete_prim
+from utils import InverseT
+
 
 class Workstation():
 
@@ -16,9 +23,14 @@ class Workstation():
         self.ID = ID
         self.path = "/" + path # Addition to make absolute path (Used by Isaac Sim)
         self.world = world
-        
+        self.prim = get_prim_at_path(self.path)
+        self.pose = get_world_pose_from_relative(self.prim,[0,0,0],[1,0,0,0])
+        self.worldT = tf_matrix_from_pose(self.pose[0],self.pose[1])
         self.robot = self._import_gripper()
         self.payload = self._import_object()
+        
+
+        
         #print(self.path, self.robot.num_dof)
         #self._import_urdf() # Import .urdf file directly\
 
@@ -53,21 +65,81 @@ class Workstation():
         result, prim_path = omni.kit.commands.execute( "URDFParseAndImportFile", urdf_path=urdf_path,import_config=import_config,)
 
     def _import_gripper(self):
+        # Pose loading
+        EF_axis = self.manager.EF_axis[self.job['gripper']]
+        if (EF_axis == 1):
+            self.T_EF = np.array([[ 0,0,1,0],
+                             [ 0,1,0,0],
+                             [-1,0,0,0],
+                             [0,0,0,1]])
+        elif (EF_axis == 2):
+            self.T_EF = np.array([[1, 0,0,0],
+                             [0, 0,1,0],
+                             [0,-1,0,0],
+                             [0, 0,0,1]])
+        elif (EF_axis == 3):
+            self.T_EF = np.array([[1, 0, 0,0],
+                             [0,-1, 0,0],
+                             [0, 0,-1,0],
+                             [0, 0, 0,1]])
+        elif (EF_axis == -1):
+            self.T_EF = np.array([[0,0,-1,0],
+                             [0,1, 0,0],
+                             [1,0, 0,0],
+                             [0,0, 0,1]])
+        elif (EF_axis == -2):
+            self.T_EF = np.array([[1,0, 0,0],
+                             [0,0,-1,0],
+                             [0,1, 0,0],
+                             [0,0, 0,1]])
+        elif (EF_axis == -3):
+            self.T_EF = np.array([[1,0,0,0],
+                             [0,1,0,0],
+                             [0,0,1,0],
+                             [0,0,0,1]])
+        
+        # Robot Pose
+        T = np.matmul(self.worldT, self.T_EF)
+        self.gripper_pose= pose_from_tf_matrix(T)
+
+        # Adding usd
         usd_path = self.manager.gripper_dict[self.job['gripper']] 
         add_reference_to_stage(usd_path=usd_path, prim_path=self.path+"/gripper_"+str(self.ID))
-        robot = self.world.scene.add(Robot(prim_path = self.path+"/gripper_"+str(self.ID), name="gripper_"+str(self.ID)))
-        q = self.job['grasps']['pose'][3:]
-        reorder = [3, 0, 1, 2]
-        q = [q[i] for i in reorder]
-        robot.set_local_pose(self.job['grasps']['pose'][:3],q)
+        robot = self.world.scene.add(Robot(prim_path = self.path+"/gripper_"+str(self.ID), name="gripper_"+str(self.ID),
+                                           position = self.gripper_pose[0], orientation = self.gripper_pose[1]))
         return robot
     
     def _import_object(self):
+        # Pose Calculation
+        T = np.matmul(self.worldT, self.T_EF)
+        pos =  self.job['grasps']['pose'][:3]
+        q = self.job['grasps']['pose'][3:]
+        reorder = [3, 0, 1, 2]
+        q = [q[i] for i in reorder]
+        tmp = tf_matrix_from_pose(pos, q)
+        tmp = InverseT(tmp)
+        T_final = np.matmul(T, tmp)        
+        self.object_init_pose= pose_from_tf_matrix(T_final)
+
         usd_path = self.manager.object_dict[self.job["object_id"]]
         add_reference_to_stage(usd_path=usd_path, prim_path=self.path+"/object_"+str(self.ID))
-        payload = self.world.scene.add(XFormPrim(prim_path = self.path+"/object_"+str(self.ID), name="object_"+str(self.ID)))
+        payload = self.world.scene.add(GeometryPrim(prim_path = self.path+"/object_"+str(self.ID), name="object_"+str(self.ID),
+                                                 position = self.object_init_pose[0], orientation = self.object_init_pose[1]))
         return payload
 
+    def print_robot_info(self):
+        print("Workstation " + str(self.ID) + " Info: ")
+        print("Gripper: " + str(self.job["gripper"]) )
+        print("# DoF = " + str(self.robot.num_dof)) # prints 2
+        print("DoF names: "+ str(self.robot.dof_names))
+        print("Joint Positions for Workstation " + str(self.ID) + ": " + str(self.robot.get_joint_positions()))
+
+    def set_robot_pos(self):
+        robot_pos = self.job["grasps"]['dofs']
+        if self.job["gripper"] == "fetch_robot":
+            robot_pos = [robot_pos, robot_pos]
+       
+        self.robot.set_joint_positions(robot_pos)
 
 
 

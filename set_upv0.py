@@ -11,12 +11,14 @@ from omni.isaac.core import World
 
 # Object Initiation file
 from omni.isaac.core.utils.prims import define_prim
-
 from omni.isaac.cloner import Cloner    # import Cloner interface
 from omni.isaac.cloner import GridCloner    # import Cloner interface
-
 from manager import Manager
 from workstation import Workstation
+
+import omni
+from pxr import Gf, Sdf, UsdPhysics
+
 
 #Initialize world
 def init_world(num_w):
@@ -37,7 +39,17 @@ if __name__ == "__main__":
     json_path = "/home/felipe/Documents/isaac_sim_grasping/grasp_data/Grasps_dataset.json"
     grippers_path = "/home/felipe/Documents/isaac_sim_grasping/grippers"
     objects_path = "/home/felipe/Documents/isaac_sim_grasping/objects"
-    manager = Manager(json_path, grippers_path, objects_path)    
+    manager = Manager(json_path, grippers_path, objects_path)   
+
+    #Set Gravity to 0
+    stage = omni.usd.get_context().get_stage()
+    # Add a physics scene prim to stage
+    scene = UsdPhysics.Scene.Define(stage, Sdf.Path("/World/physicsScene"))
+
+    # Set gravity vector
+    scene.CreateGravityDirectionAttr().Set(Gf.Vec3f(0.0, 0.0, -1.0))
+    scene.CreateGravityMagnitudeAttr().Set(9.8)
+
 
     num_w= manager.n_jobs # Number of Workstations to create
     #initialize World
@@ -51,15 +63,18 @@ if __name__ == "__main__":
     
     
     world.reset()
-    
+
     
     
     while simulation_app.is_running():
         world.step(render=True) # execute one physics step and one rendering step
         if world.is_playing():
             if world.current_time_step_index == 0:
-                #world.reset()
-                pass
+                world.reset()
+                for i in workstations:
+                    i.robot.initialize()
+                    i.set_robot_pos()
+                    #i.print_robot_info()
 
         
 

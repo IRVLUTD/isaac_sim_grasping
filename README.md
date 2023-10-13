@@ -6,6 +6,7 @@ Graspit Grasping Filtering in Isaac Sim
 Notes: 
 - Need to be from the issac sim directory
 - set_upv0.py contains global directories that are not yet implemented as args (To use you need to change manually within the file)
+- Deactivate conda if you have an active environment, it may cause some errors when running isaac sim
 
 ## Isaac Sim Manual
 https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
