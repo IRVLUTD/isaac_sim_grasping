@@ -21,13 +21,13 @@ class Workstation():
         self.manager = manager
         self.job = manager.grasps.iloc[ID]
         self.ID = ID
-        self.path = "/" + path # Addition to make absolute path (Used by Isaac Sim)
+        self.path = path # Addition to make absolute path (Used by Isaac Sim)
         self.world = world
-        self.prim = get_prim_at_path(self.path)
+        self.prim = get_prim_at_path(path)
         self.pose = get_world_pose_from_relative(self.prim,[0,0,0],[1,0,0,0])
         self.worldT = tf_matrix_from_pose(self.pose[0],self.pose[1])
         self.robot = self._import_gripper()
-        self.payload = self._import_object()
+        #self.payload = self._import_object()
         
 
         
@@ -136,10 +136,10 @@ class Workstation():
 
     def set_robot_pos(self):
         robot_pos = self.job["grasps"]['dofs']
-        if self.job["gripper"] == "fetch_robot":
-            robot_pos = [robot_pos, robot_pos]
-       
-        self.robot.set_joint_positions(robot_pos)
+
+        print(robot_pos)
+        #self.robot.set_joint_efforts([1010])
+        self.robot.set_joint_positions([-1])
 
 
 

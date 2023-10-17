@@ -5,16 +5,18 @@ simulation_app = SimulationApp({"headless": False}) # we can also run as headles
 
 #External Libraries
 import numpy as np
+import math
 
 #World Imports
 from omni.isaac.core import World
 
 # Object Initiation file
 from omni.isaac.core.utils.prims import define_prim
-from omni.isaac.cloner import Cloner    # import Cloner interface
-from omni.isaac.cloner import GridCloner    # import Cloner interface
+from omni.isaac.core.utils.prims import create_prim
+from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from manager import Manager
 from workstation import Workstation
+from omni.isaac.core.utils.prims import get_prim_at_path
 
 import omni
 from pxr import Gf, Sdf, UsdPhysics
@@ -25,12 +27,27 @@ def init_world(num_w):
     world = World()
     world.scene.add_default_ground_plane(-1)
     #Create initial Workstation
-    work = define_prim("/World/Workstation")
-    cloner = GridCloner(spacing = 1)
-    target_paths = cloner.generate_paths('World/Workstation', num_w)
-    cloner.clone(source_prim_path = "/World/Workstation", prim_paths = target_paths)
+    workstation_name = "/World/Workstation"
+    spacing = 1
+    rows = math.floor(math.sqrt(num_w))
+    workstations_paths = []
+    #workstation_prims = []
+    j = -1
+    print("ROOOOOWWWWS " + str(rows))
     
-    return world, target_paths
+    for i in range(num_w):
+        if (i%rows == 0):j = j+1
+        position = [(i%rows)* spacing, j * spacing, 0]
+        prim = create_prim(workstation_name + "_" + str(i), 'Xform', position)
+        prim = get_prim_at_path(workstation_name + "_" + str(i))
+        path = workstation_name + "_" + str(i)
+        workstations_paths.append(path)
+        #workstation_prims.append(prim)
+        #print(type(prim))
+
+    world.reset()
+    
+    return world, workstations_paths
 
 
 
@@ -53,14 +70,15 @@ if __name__ == "__main__":
 
     num_w= manager.n_jobs # Number of Workstations to create
     #initialize World
-    world, workstation_paths = init_world(10)
+    print(num_w)
+    world, workstation_paths = init_world(1000)
     #print(workstation_paths)
     workstations = []
     #Initialize Workstations
     for i in range(len(workstation_paths)):
-        tmp = Workstation(i, manager, "/" + workstation_paths[i], world)
+        tmp = Workstation(i, manager, workstation_paths[i], world)
         workstations.append(tmp)
-    
+        #print(i)
     
     world.reset()
     for i in workstations:
@@ -68,8 +86,6 @@ if __name__ == "__main__":
                     i.set_robot_pos()
                     #i.print_robot_info()
 
-
-    
     
     while simulation_app.is_running():
         world.step(render=True) # execute one physics step and one rendering step
@@ -77,7 +93,7 @@ if __name__ == "__main__":
             if world.current_time_step_index == 0:
                 world.reset()
                 for i in workstations:
-                    i.robot.initialize()
+                    #i.robot.initialize()
                     i.set_robot_pos()
                     #i.print_robot_info()
 
