@@ -38,6 +38,12 @@ class Manager:
             "sawyer": 3,
             "robotiq_3finger":2
         }
+        #Controllers Information
+        self.close_dir= {
+            "fetch_gripper" : [-1,-1],
+            "sawyer": [1,1]
+        }
+
 
     def _check_gripper_usd(self,grippers_path):
         """ Check if the gripper usds are readable by program

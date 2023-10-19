@@ -1,8 +1,12 @@
+#External Libraries
 import numpy as np
 import pandas as pd
+
+#Custom Classes and utils
 from manager import Manager
-from omni.isaac.urdf import _urdf
-import omni.kit.commands
+from utils import InverseT
+
+#Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.utils.prims import create_prim
 from omni.isaac.core.prims import XFormPrim
@@ -10,63 +14,90 @@ from omni.isaac.core.prims.rigid_prim import RigidPrim
 from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.robots import Robot
 from omni.isaac.core.utils.prims import get_prim_at_path
-from omni.isaac.core.utils.transformations import get_relative_transform, pose_from_tf_matrix, tf_matrix_from_pose, get_world_pose_from_relative
+from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matrix_from_pose, get_world_pose_from_relative
 from omni.isaac.core.utils.prims import create_prim, delete_prim
-from utils import InverseT
+from omni.isaac.core.utils.types import ArticulationAction
+from omni.isaac.core.controllers import BaseController, BaseGripperController
+
+#Dynamic control API
+from omni.isaac.dynamic_control import _dynamic_control
+dc = _dynamic_control.acquire_dynamic_control_interface()
+
+class CustomController(BaseGripperController):
+    def __init__(self, ID, close_dir, effort_mask):
+        name = "Controller_"+str(ID)
+        super().__init__(name=name)
+        self.close_dir = close_dir
+        self.effort_mask = effort_mask
+        return 
+
+    def close(self,command):
+        joint_command = np.multiply(self.close_dir,self.effort_mask)
+        joint_command = np.multiply(joint_command,command)
+        #print(joint_command)
+        return ArticulationAction(joint_efforts=joint_command)
+    
+    def open(self,command):
+        joint_command = -1 * np.multiply(self.close_dir,self.effort_mask)
+        joint_command = np.multiply(joint_command,command)
+        return ArticulationAction(joint_efforts=joint_command)
+
+    def forward(self, action, command):
+        # command will have two elements, first element is the forward velocity
+        # second element is the angular velocity (yaw only).
+
+        if action == 'close':
+            actions = self.close(command)
+        if action == 'open':
+            actions = self.open(command)
+        # A controller has to return an ArticulationAction
+        return actions
 
 
 class Workstation():
 
-    def __init__(self, ID, manager, path, world):
+    def __init__(self, ID, manager, path, world, effort_mask = None, effort_step = 0.05):
+        #External Objects Information
+        self.world = world
         self.manager = manager
-        self.job = manager.grasps.iloc[ID]
+        
+        #Important info for Workstations
+        self.job = manager.request_job(ID)
         self.ID = ID
         self.path = path # Addition to make absolute path (Used by Isaac Sim)
-        self.world = world
+
+        # Positional information for workstations
         self.prim = get_prim_at_path(path)
         self.pose = get_world_pose_from_relative(self.prim,[0,0,0],[1,0,0,0])
         self.worldT = tf_matrix_from_pose(self.pose[0],self.pose[1])
+
+        # Initialize gripper and object
         self.robot = self._import_gripper()
-        #self.payload = self._import_object()
+        self.payload = self._import_object()
+
+        #Controller Information
+        self.current_effort = 1.1 #percentage
+        close_dir = manager.close_dir[self.job['gripper']]
+        close_dir = np.asarray(close_dir)
+        if (effort_mask == None):
+            effort_mask = np.ones_like(close_dir)
+        self.controller = CustomController(ID,close_dir, effort_mask)
+        self.effort_step = effort_step
         
 
-        
-        #print(self.path, self.robot.num_dof)
-        #self._import_urdf() # Import .urdf file directly\
-
-    def step(self):
+    def job_step(self):
         self.job = self.manager.request_job()
         return self.job
     
-    def _import_urdf(self):
-        """ Import URDF from manager.grippers dictionary
-
-        Args: None
-        """
-        #Adding a .urdf file
-        urdf_interface = _urdf.acquire_urdf_interface()
-        # Set the settings in the import config
-        import_config = _urdf.ImportConfig()
-        import_config.merge_fixed_joints = False
-        import_config.convex_decomp = False
-        import_config.import_inertia_tensor = True
-        import_config.fix_base = True
-        import_config.make_default_prim = True
-        import_config.self_collision = False
-        import_config.create_physics_scene = True
-        import_config.import_inertia_tensor = True
-        import_config.default_drive_strength = 1047.19751
-        import_config.default_position_drive_damping = 52.35988
-        import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION
-        import_config.distance_scale = 1
-        import_config.density = 0.0
-
-        urdf_path = self.manager.object_dict[self.job['object_id']]
-        result, prim_path = omni.kit.commands.execute( "URDFParseAndImportFile", urdf_path=urdf_path,import_config=import_config,)
-
     def _import_gripper(self):
         # Pose loading
+        # Pointing gripper Downward
         EF_axis = self.manager.EF_axis[self.job['gripper']]
+        # No transform needed EF_axis == -3 (default self.T_EF)
+        self.T_EF = np.array([[1,0,0,0],
+                             [0,1,0,0],
+                             [0,0,1,0],
+                             [0,0,0,1]])
         if (EF_axis == 1):
             self.T_EF = np.array([[ 0,0,1,0],
                              [ 0,1,0,0],
@@ -92,17 +123,13 @@ class Workstation():
                              [0,0,-1,0],
                              [0,1, 0,0],
                              [0,0, 0,1]])
-        elif (EF_axis == -3):
-            self.T_EF = np.array([[1,0,0,0],
-                             [0,1,0,0],
-                             [0,0,1,0],
-                             [0,0,0,1]])
+
         
         # Robot Pose
         T = np.matmul(self.worldT, self.T_EF)
         self.gripper_pose= pose_from_tf_matrix(T)
 
-        # Adding usd
+        # Adding Robot usd
         usd_path = self.manager.gripper_dict[self.job['gripper']] 
         add_reference_to_stage(usd_path=usd_path, prim_path=self.path+"/gripper_"+str(self.ID))
         robot = self.world.scene.add(Robot(prim_path = self.path+"/gripper_"+str(self.ID), name="gripper_"+str(self.ID),
@@ -121,6 +148,7 @@ class Workstation():
         T_final = np.matmul(T, tmp)        
         self.object_init_pose= pose_from_tf_matrix(T_final)
 
+        #Adding Object usd
         usd_path = self.manager.object_dict[self.job["object_id"]]
         add_reference_to_stage(usd_path=usd_path, prim_path=self.path+"/object_"+str(self.ID))
         payload = self.world.scene.add(GeometryPrim(prim_path = self.path+"/object_"+str(self.ID), name="object_"+str(self.ID),
@@ -128,19 +156,47 @@ class Workstation():
         return payload
 
     def print_robot_info(self):
+        '''Print Robot Information to Terminal'''
         print("Workstation " + str(self.ID) + " Info: ")
         print("Gripper: " + str(self.job["gripper"]) )
         print("# DoF = " + str(self.robot.num_dof)) # prints 2
         print("DoF names: "+ str(self.robot.dof_names))
         print("Joint Positions for Workstation " + str(self.ID) + ": " + str(self.robot.get_joint_positions()))
 
-    def set_robot_pos(self):
-        robot_pos = self.job["grasps"]['dofs']
+    def reset_robot(self):
+        '''Reset Robot to Initial Position'''
+        self.robot.initialize()
+        robot_pos = np.array(self.job["grasps"]['dofs'])
+        if(self.job["gripper"]=="fetch_gripper"):
+            robot_pos = robot_pos/-100
+        self.current_effort = 1
+        #print(robot_pos)
+        self.robot.set_joint_positions(robot_pos)
 
-        print(robot_pos)
-        #self.robot.set_joint_efforts([1010])
-        self.robot.set_joint_positions([-1])
+    def physics_step(self,step_size):
+        """ Physics step performed by physics API of Isaac Sim
 
+        Args: 
+            step_size: time difference between physics steps (Default frquency is 60 Hz)
+        """
+
+        #Initialize articulation Run on first simulation step (needed for functions to work)
+        if (self.current_effort==1): 
+            articulation = dc.get_articulation(self.path+"/gripper_"+str(self.ID))
+            dof_props = dc.get_articulation_dof_properties(articulation)
+            self.max_efforts = []
+            for i in dof_props:
+                self.max_efforts.append(i[6])
+            self.max_efforts=np.asarray(self.max_efforts)
+                
+        effort = self.max_efforts*self.current_effort
+
+        #Percent per second you will reduce
+        self.current_effort -= self.effort_step*step_size
+        #print(step_size)
+        actions = self.controller.forward('close', effort)
+        self.robot.apply_action(actions)
+        return
 
 
 if __name__ == "__main__":
