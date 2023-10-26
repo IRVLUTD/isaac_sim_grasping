@@ -43,6 +43,7 @@ class Manager:
             "fetch_gripper" : [-1,-1],
             "sawyer": [1,1]
         }
+        self.job_pointer = 0
 
 
     def _check_gripper_usd(self,grippers_path):
@@ -74,15 +75,32 @@ class Manager:
         
         #print(self.object_dict)
 
-    def request_job(self, job_ID):
-        """ Function used by workstations to request job\
-        
-        Args: 
-            job_ID: ID of job (Dataframe index)
+    def request_job(self):
+        """ Function used by workstations to request job
         """
-        job = self.grasps.iloc[job_ID]
+        if(self.job_pointer<=self.n_jobs):
+            job = self.grasps.iloc[self.job_pointer]
+            self.job_pointer +=1
+            print("Current Job:" + str(self.job_pointer))
+        else:
+            return None
         #self.task_pointer = self.task_pointer+1
         return job
+    
+    def translate_dofs(self, gripper, dofs):
+        """ Function to translate the GraspIt dofs to Isaac Sim dofs
+        
+        Args: 
+            gripper: name of the gripper to translate dofs
+            dofs: np array of dofs to translate
+        """
+
+        if(gripper=="fetch_gripper"):
+            robot_pos = dofs/-100
+        if(gripper=="sawyer"):
+            robot_pos = dofs/1000
+        return robot_pos
+
 
 
 if __name__ == "__main__":

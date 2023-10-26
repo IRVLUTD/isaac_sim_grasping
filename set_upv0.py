@@ -17,6 +17,7 @@ from pxr import Gf, Sdf, UsdPhysics
 # Custom Classes
 from manager import Manager
 from workstation import Workstation
+from controllers import ForceController, PositionController
 
 
 def init_world(num_w):
@@ -59,7 +60,7 @@ if __name__ == "__main__":
 
 
     num_w= manager.n_jobs # Number of Workstations to create
-    num_w =70 # Reduce for debugging
+    num_w =50 # Reduce for debugging
 
     #initialize World with Workstations Coordinate frames
     world, workstation_paths = init_world(num_w)
@@ -68,14 +69,14 @@ if __name__ == "__main__":
     #initialize Workstations
     workstations = []
     for i in range(len(workstation_paths)):
-        tmp = Workstation(i, manager, "/" + workstation_paths[i], world)
+        tmp = Workstation(i, manager, "/" + workstation_paths[i], world, PositionController, test_time=5)
         workstations.append(tmp)
     
     #Reset World and create set up first robot positions
     world.reset()
     for i in workstations:
         i.reset_robot()
-        world.add_physics_callback("Step_Robot_"+ str(i), callback_fn=i.physics_step)
+        world.add_physics_callback("physics_step_ws_"+ str(i), callback_fn=i.physics_step)
 
 
     
