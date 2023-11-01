@@ -1,6 +1,6 @@
 import numpy as np
 import omni.kit.commands
-from omni.isaac.urdf import _urdf
+#from omni.isaac.urdf import _urdf
 
 def InverseT(x):
     R = x[:3,:3]

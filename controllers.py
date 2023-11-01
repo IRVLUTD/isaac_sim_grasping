@@ -12,11 +12,12 @@ class ForceController(BaseGripperController):
         super().__init__(name=name)
         self.close_mask = close_mask
         self.init_dofs = init_dofs
-        self.type = 'force'
+        self.type = 'force_control_v0'
         self.hot_init = False #Need to initialize dynamic control when the physics simulation is running 
         self.path = path
         self.ID = ID
         self.total_time = test_time
+        self.last_action = np.zeros_like(init_dofs)
         return 
 
     def close(self,time):
@@ -44,6 +45,7 @@ class ForceController(BaseGripperController):
             else:
                 actions = self.open(time)
         # A controller has to return an ArticulationAction
+        self.last_actions = actions
         return actions
     
     def reset(self, close_mask ,init_dofs):
@@ -54,7 +56,11 @@ class ForceController(BaseGripperController):
         for i in dof_props:
             self.max_efforts.append(i[6])
         self.max_efforts=np.asarray(self.max_efforts)
-        return ArticulationAction(joint_positions=init_dofs, joint_efforts =np.zeros_like(init_dofs), joint_velocities= np.zeros_like(init_dofs))
+        return ArticulationAction(joint_positions=init_dofs, joint_efforts =np.zeros_like(init_dofs))
+
+    def get_last_action(self):
+        return self.last_actions
+
 
 
 
@@ -64,11 +70,12 @@ class PositionController(BaseGripperController):
         super().__init__(name=name)
         self.close_mask = close_mask
         self.init_dofs = init_dofs
-        self.type = 'position'
+        self.type = 'position_control_v0'
         self.hot_init = False #Need to initialize dynamic control when the physics simulation is running 
         self.path = path
         self.ID = ID
         self.total_time = test_time
+        self.last_action = np.zeros_like(init_dofs)
         return 
 
     def close(self,time):
@@ -85,19 +92,8 @@ class PositionController(BaseGripperController):
             self.hot_init = True
             return self.reset(self.close_mask, self.init_dofs)
             
-        """
-        if action == 'close':
-            actions = self.close(time)
-        if action == 'open':
-            actions = self.open(time)
-        if action == 'any': # Any is used by workstation py
-            if time < self.total_time/2:
-                actions = self.close(time)
-            else:
-                actions = self.open(time)
-        # A controller has to return an ArticulationAction
-        """
         actions = self.close(time)
+        self.last_actions = actions
         return actions
     
     def reset(self, close_mask ,init_dofs):
@@ -124,3 +120,6 @@ class PositionController(BaseGripperController):
         #print(self.close_position)
         #print(dof_props)
         return ArticulationAction(joint_positions=init_dofs, joint_efforts =np.zeros_like(init_dofs), joint_velocities= np.zeros_like(init_dofs))
+
+    def get_last_action(self):
+        return self.last_action

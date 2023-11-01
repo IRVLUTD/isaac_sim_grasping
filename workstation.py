@@ -34,7 +34,7 @@ class Workstation():
         self.manager = manager
         
         #Important info for Workstations
-        self.job = manager.request_job()
+        self.job, self.job_ID = manager.request_job()
         self.ID = ID
         self.path = path # Addition to make absolute path (Used by Isaac Sim)
 
@@ -58,8 +58,7 @@ class Workstation():
         # Initialize gripper and object
         self.robot = self._import_gripper()
         self.object_parent_prim = self._import_object()
-
-        
+        world.add_physics_callback("physics_step_ws_"+ str(ID), callback_fn=self.physics_step)
     
     def _import_gripper(self):
         # Pose loading
@@ -152,27 +151,45 @@ class Workstation():
         Args: 
             step_size: time difference between physics steps (Default frquency is 60 Hz)
         """
+        if self.job_ID < 0:
+            return
         # Check object Pose
         object_pose = self.object_prim.get_world_pose()
         if ((object_pose[0][2]<-0.5 and self.current_time!=self.initial_time) or self.current_time>=self.test_time): #If object fell
             self.test_finish()
             return
+        
+        
         self.current_time += step_size
         #print(self.current_time)
 
         actions = self.controller.forward('any', self.current_time)
         self.robot.apply_action(actions)
+        #print(self.robot.get_measured_joint_forces())
+        
         return
     
     def test_finish(self): 
+        """
+        Reports Test and gets new one
+        """
         ## Code for Logging Results
         #- Time and actions for: Slip, Fall and Reset
-        #- Controller Type
+        #print("Finished Test: ", self.ID)
+        #print(self.job)
+        self.manager.report_fall(self.job_ID,self.current_time,self.controller.type, self.test_time)
+
         ###
 
         #Get new job
-        self.job = self.manager.request_job()
-
+        self.job, self.job_ID = self.manager.request_job()
+        #print(self.valid, self.ID)
+        if (self.job_ID < 0): 
+            self.robot.set_visibility(False)
+            self.object_parent_prim.set_visibility(False)
+            #self.world.remove_physics_callback("physics_step_ws_"+ str(self.ID))
+            return
+        
         #Reset controller
         close_dir = self.manager.close_dir[self.job['gripper']]
         close_dir = np.asarray(close_dir)

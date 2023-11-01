@@ -15,9 +15,11 @@ class Manager:
                  world=None):
         # Loading files and urdfs
         self.world = world
+        print("Loading File: ", grasps_path)
         self.grasps = pd.read_json(grasps_path)
         self.gripper_names = [] #List of gripper names
         self.object_names =[] #List of object names 
+
         for i, row in self.grasps.iterrows():
             if row['gripper'] not in self.gripper_names:
                 self.gripper_names.append(row['gripper'])
@@ -32,6 +34,7 @@ class Manager:
         # Current task
         self.task_pointer = 0
         self.n_jobs = self.grasps.shape[0]
+        print(self.n_jobs)
         #End effector axis (+/- 1,2,3) x,y, z respectively
         self.EF_axis = {
             "fetch_gripper" : 1,
@@ -44,6 +47,10 @@ class Manager:
             "sawyer": [1,1]
         }
         self.job_pointer = 0
+        self.test_type = [None] * len(self.grasps)
+        self.total_test_time = np.zeros(len(self.grasps))
+        self.fall_time = np.zeros(len(self.grasps))
+        self.completed = np.zeros(len(self.grasps))
 
 
     def _check_gripper_usd(self,grippers_path):
@@ -78,14 +85,18 @@ class Manager:
     def request_job(self):
         """ Function used by workstations to request job
         """
-        if(self.job_pointer<=self.n_jobs):
+        job_ID = -1
+        job = None
+        if(self.job_pointer<self.n_jobs):
+            job_ID = self.job_pointer
             job = self.grasps.iloc[self.job_pointer]
             self.job_pointer +=1
-            print("Current Job:" + str(self.job_pointer))
+            #print("Current Job:" + str(self.job_pointer))
         else:
-            return None
+            job = self.grasps.iloc[self.n_jobs-1]
+            job_ID = -1
         #self.task_pointer = self.task_pointer+1
-        return job
+        return job, job_ID
     
     def translate_dofs(self, gripper, dofs):
         """ Function to translate the GraspIt dofs to Isaac Sim dofs
@@ -100,6 +111,30 @@ class Manager:
         if(gripper=="sawyer"):
             robot_pos = dofs/1000
         return robot_pos
+
+    def report_fall(self, job_ID, value, test_type, test_time):
+        """ Reports fall
+        
+        """
+        
+        if(self.completed[job_ID]== 0):
+            self.fall_time[job_ID] = value
+            self.test_type[job_ID] = test_type
+            self.total_test_time[job_ID] = test_time
+            self.completed[job_ID]= 1
+        else: 
+            raise IndexError("Two workstations performed the same task")
+        return
+    
+    def save_json(self,output_path):
+        print("Saving File at: ",output_path)
+        self.grasps["test_type"] = self.test_type
+        self.grasps["total_test_time"] = self.total_test_time
+        self.grasps["fall_time"] = self.fall_time
+        self.grasps.to_json(output_path)
+        return
+    
+    
 
 
 
