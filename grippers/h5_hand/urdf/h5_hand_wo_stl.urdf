@@ -1,0 +1,305 @@
+<robot name="h5">
+    <material name="default">
+        <color rgba="0.8 0.8 0.8 1.0"/>
+    </material>
+
+    <link name="base_link">
+        <inertial>
+            <mass value="0.32908300000000001"/>
+            <origin rpy="0 0 0" xyz="-0.000001 0.000038 -0.032103"/>
+            <inertia ixx="0.00041124" iyy="0.000150111" izz="0.00044493100000000003" ixy="5.7588800000000003e-06" ixz="0" iyz="0"/>
+        </inertial>
+
+        <collision name="h5_collision">
+            <origin rpy="0.000000 -0.000000 0.000000" xyz="0.000000 0.000000 -0.015"/>
+            <geometry>
+                <box size="0.052000 0.100000 0.020000"/>
+            </geometry>
+        </collision>
+        <collision name="h5_collision">
+            <origin rpy="0.000000 -0.000000 0.000000" xyz="0.000000 0.000000 -0.0325000"/>
+            <geometry>
+                <box size="0.062000 0.100000 0.030000"/>
+            </geometry>
+        </collision>
+        <collision name="h5_collision">
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.005"/>
+            <geometry>
+                <cylinder radius="0.028" length="0.01" />
+            </geometry>
+        </collision>
+        <collision name="h5_collision">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.0 -0.0355 -0.0405"/>
+            <geometry>
+                <cylinder radius="0.016" length="0.062" />
+            </geometry>
+        </collision>
+        <collision name="h5_collision">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.0 +0.0355 -0.0405"/>
+            <geometry>
+                <cylinder radius="0.016" length="0.062" />
+            </geometry>
+        </collision>
+
+        <visual name="h5_visual">
+            <origin rpy="0.000000 -0.000000 0.000000" xyz="0.000000 0.000000 -0.015"/>
+            <geometry>
+                <box size="0.052000 0.100000 0.020000"/>
+            </geometry>
+            d<material name="default" />
+        </visual>
+        <visual name="h5_visual">
+            <origin rpy="0.000000 -0.000000 0.000000" xyz="0.000000 0.000000 -0.0325000"/>
+            <geometry>
+                <box size="0.062000 0.100000 0.030000"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        <visual name="h5_visual">
+            <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.005"/>
+            <geometry>
+                <cylinder radius="0.028" length="0.01" />
+            </geometry>
+            <material name="default" />
+        </visual>
+        <visual name="h5_visual">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.0 -0.0355 -0.0405"/>
+            <geometry>
+                <cylinder radius="0.016" length="0.062" />
+            </geometry>
+            <material name="default" />
+        </visual>
+        <visual name="h5_visual">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.0 +0.0355 -0.0405"/>
+            <geometry>
+                <cylinder radius="0.016" length="0.062" />
+            </geometry>
+            <material name="default" />
+        </visual>
+ 
+        <!--
+        <visual name="h5_visual_1">
+            <origin rpy="0.000000 -0.000000 0.000000" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <mesh filename="package://h5_hand_description/meshes/base.stl" scale="1 1 1"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        -->
+
+    </link>
+    <joint name="left_link_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="left_link_link"/>
+        <axis xyz="1.000000 0.000000 0.000000"/>
+        <limit effort="10000" velocity="10000" lower="-1.3788101090755203" upper="0.87266462599716477"/>
+        <origin rpy="0 -0 0" xyz="-0.021500 -0.035500 -0.040500"/>
+    </joint>
+    <link name="left_link_link">
+        <inertial>
+            <mass value="0.016848999999999999"/>
+            <origin rpy="0 0 0" xyz="0.016570 -0.004451 -0.017355"/>
+            <inertia ixx="4.3095500000000001e-06" iyy="1.0579499999999999e-05" izz="8.1009200000000004e-06" ixy="0" ixz="1.79745e-06" iyz="0"/>
+        </inertial>
+
+        <collision name="h5_collision_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.021500 -0.0060000 -0.024000"/>
+            <geometry>
+                <box size="0.060000 0.040000 0.0180000"/>
+            </geometry>
+        </collision>
+
+        <visual name="h5_visual_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.021500 -0.0060000 -0.024000"/>
+            <geometry>
+                <box size="0.060000 0.040000 0.0180000"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+
+        <!--
+        <visual name="h5_visual_2">
+            <origin rpy="0.000000 -0.000000 0.000000" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <mesh filename="package://h5_hand_description/meshes/left_link.stl" scale="1 1 1"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        -->
+
+    </link>
+    <joint name="left_tip_joint" type="revolute">
+        <parent link="left_link_link"/>
+        <child link="left_tip_link"/>
+        <axis xyz="1.000000 0.000000 0.000000"/>
+        <limit effort="10000" velocity="10000" lower="-0.87266462599716477" upper="1.3788101090755203"/>
+        <origin rpy="0 -0 0" xyz="0.021500 0.000000 -0.043000"/>
+        <mimic joint="left_link_joint" multiplier="-1" offset="0"/>
+    </joint>
+    <link name="left_tip_link">
+        <inertial>
+            <mass value="0.046234999999999998"/>
+            <origin rpy="0 0 0" xyz="0.000003 -0.038401 -0.083889"/>
+            <inertia ixx="9.8584099999999993e-06" iyy="1.7064199999999998e-05" izz="1.00253e-05" ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+
+        <collision name="h5_collision">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <cylinder radius="0.0032" length="0.044" />
+            </geometry>
+        </collision>
+        <collision name="h5_collision_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 0.000000 -0.025000"/>
+            <geometry>
+                <box size="0.041000 0.041000 0.010000"/>
+            </geometry>
+        </collision>
+        <collision name="h5_collision_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 -0.009 -0.021500"/>
+            <geometry>
+                <box size="0.054000 0.048000 0.008000"/>
+            </geometry>
+        </collision>
+
+        <visual name="h5_visual">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <cylinder radius="0.0032" length="0.044" />
+            </geometry>
+            <material name="default" />
+        </visual>
+        <visual name="h5_visual_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 0.000000 -0.025000"/>
+            <geometry>
+                <box size="0.041000 0.041000 0.010000"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        <visual name="h5_visual_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 -0.009 -0.021500"/>
+            <geometry>
+                <box size="0.054000 0.048000 0.008000"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+
+        <!--
+        <visual name="h5_visual_2">
+            <origin rpy="0.000000 -0.000000 0.000000" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <mesh filename="package://h5_hand_description/meshes/left_tip.stl" scale="1 1 1"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        -->
+
+    </link>
+    <joint name="right_link_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="right_link_link"/>
+        <axis xyz="1.000000 0.000000 0.000000"/>
+        <limit effort="10000" velocity="10000" lower="-0.87266462599716477" upper="1.3788101090755203"/>
+        <origin rpy="0 -0 0" xyz="0.021500 0.035500 -0.040500"/>
+    </joint>
+    <link name="right_link_link">
+        <inertial>
+            <mass value="0.016848999999999999"/>
+            <origin rpy="0 0 0" xyz="-0.016570 0.004451 -0.017355"/>
+            <inertia ixx="4.3095500000000001e-06" iyy="1.0579499999999999e-05" izz="8.1009200000000004e-06" ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+
+        <collision name="h5_collision_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="-0.021500 0.0060000 -0.024000"/>
+            <geometry>
+                <box size="0.060000 0.040000 0.0180000"/>
+            </geometry>
+        </collision>
+
+        <visual name="h5_visual_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="-0.021500 0.0060000 -0.024000"/>
+            <geometry>
+                <box size="0.060000 0.040000 0.0180000"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+
+        <!--
+        <visual name="h5_visual_2">
+            <origin rpy="0.000000 -0.000000 3.14159" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <mesh filename="package://h5_hand_description/meshes/left_link.stl" scale="1 1 1"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        -->
+
+    </link>
+    <joint name="right_tip_joint" type="revolute">
+        <parent link="right_link_link"/>
+        <child link="right_tip_link"/>
+        <axis xyz="1.000000 0.000000 0.000000"/>
+        <limit effort="10000" velocity="10000" lower="-1.3788101090755203" upper="0.87266462599716477"/>
+        <origin rpy="0 -0 0" xyz="-0.021500 0.000000 -0.043000"/>
+        <mimic joint="right_link_joint" multiplier="-1" offset="0"/>
+    </joint>
+    <link name="right_tip_link">
+        <inertial>
+            <mass value="0.046234999999999998"/>
+            <origin rpy="0 0 0" xyz="-0.000003 0.038401 -0.083889"/>
+            <inertia ixx="9.8584099999999993e-06" iyy="1.7064199999999998e-05" izz="1.00253e-05" ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+
+        <collision name="h5_collision">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <cylinder radius="0.0032" length="0.044" />
+            </geometry>
+        </collision>
+        <collision name="h5_collision_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 0.000000 -0.025000"/>
+            <geometry>
+                <box size="0.041000 0.041000 0.010000"/>
+            </geometry>
+        </collision>
+        <collision name="h5_collision_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 0.009 -0.021500"/>
+            <geometry>
+                <box size="0.054000 0.048000 0.008000"/>
+            </geometry>
+        </collision>
+
+        <visual name="h5_visual">
+            <origin rpy="-1.570796 0.000000 1.570796" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <cylinder radius="0.0032" length="0.044" />
+            </geometry>
+            <material name="default" />
+        </visual>
+        <visual name="h5_visual_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 0.000000 -0.025000"/>
+            <geometry>
+                <box size="0.041000 0.041000 0.010000"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        <visual name="h5_visual_1">
+            <origin rpy="1.570796 0.000000 0.000000" xyz="0.000000 0.009 -0.021500"/>
+            <geometry>
+                <box size="0.054000 0.048000 0.008000"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+
+        <!--
+        <visual name="h5_visual_2">
+            <origin rpy="0.000000 -0.000000 3.14159" xyz="0.000000 0.000000 0.000000"/>
+            <geometry>
+                <mesh filename="package://h5_hand_description/meshes/left_tip.stl" scale="1 1 1"/>
+            </geometry>
+            <material name="default" />
+        </visual>
+        -->
+
+    </link>
+</robot>
