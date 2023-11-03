@@ -4,7 +4,7 @@ import pandas as pd
 
 #Custom Classes and utils
 from manager import Manager
-from utils import InverseT
+from utils import InverseT, re, te, R_t_from_tf
 from controllers import ForceController
 
 #Omni Libraries
@@ -19,6 +19,7 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matrix_from_pose, get_world_pose_from_relative
 from omni.isaac.core.utils.prims import create_prim, delete_prim
 
+from controllers import ForceController, PositionController
 
 
 #Dynamic control API
@@ -28,13 +29,15 @@ dc = _dynamic_control.acquire_dynamic_control_interface()
 
 class Workstation():
 
-    def __init__(self, ID, manager, path, world, controller, test_time):
+    def __init__(self, ID, manager, path, world, test_time):
         #External Objects Information
         self.world = world
         self.manager = manager
-        
+        self.reported_slip = 0
+
         #Important info for Workstations
         self.job, self.job_ID = manager.request_job()
+        if(self.job_ID==-1): return
         self.ID = ID
         self.path = path # Addition to make absolute path (Used by Isaac Sim)
 
@@ -50,7 +53,8 @@ class Workstation():
         close_dir = manager.close_dir[self.job['gripper']]
         close_dir = np.asarray(close_dir)
 
-
+        controller = manager.controllers[self.job["gripper"]]
+        #controller = ForceController
         robot_pos = np.array(self.job["grasps"]['dofs'])
         init_dofs = self.manager.translate_dofs(self.job["gripper"], robot_pos)
         self.controller = controller(path,ID,close_dir,init_dofs, test_time)
@@ -105,6 +109,7 @@ class Workstation():
         add_reference_to_stage(usd_path=usd_path, prim_path=self.path+"/gripper_"+str(self.ID))
         robot = self.world.scene.add(Articulation(prim_path = self.path+"/gripper_"+str(self.ID), name="gripper_"+str(self.ID),
                                            position = self.gripper_pose[0], orientation = self.gripper_pose[1], enable_dof_force_sensors = True))
+        robot.set_enabled_self_collisions(False)
         return robot
     
     def _import_object(self):
@@ -116,8 +121,8 @@ class Workstation():
         q = [q[i] for i in reorder]
         tmp = tf_matrix_from_pose(pos, q)
         tmp = InverseT(tmp)
-        T_final = np.matmul(T, tmp)        
-        self.object_init_pose= pose_from_tf_matrix(T_final)
+        self.init_T = np.matmul(T, tmp)        
+        self.object_init_pose= pose_from_tf_matrix(self.init_T)
 
         #Adding Object usd
         usd_path = self.manager.object_dict[self.job["object_id"]]
@@ -125,7 +130,6 @@ class Workstation():
         payload = self.world.scene.add(GeometryPrim(prim_path = self.path+"/object_"+str(self.ID), name="object_"+str(self.ID)))
         self.object_prim = XFormPrim(prim_path= self.path +"/object_"+str(self.ID) + "/baseLink",
                                                  position = self.object_init_pose[0], orientation = self.object_init_pose[1])
-        
         return payload
 
     def print_robot_info(self):
@@ -155,14 +159,30 @@ class Workstation():
             return
         # Check object Pose
         object_pose = self.object_prim.get_world_pose()
-        if ((object_pose[0][2]<-0.5 and self.current_time!=self.initial_time) or self.current_time>=self.test_time): #If object fell
+        object_T = tf_matrix_from_pose(object_pose[0], object_pose[1])
+        # Calculate height and orientation changes
+        object_R, object_t = R_t_from_tf(object_T)
+        init_R, init_t = R_t_from_tf(self.init_T)
+        t_error = abs(te(init_t,object_t))      
+        r_error = abs(re(init_R, object_R))
+
+        #print("T_error: " +str(t_error))
+        #print("R_error: " +str(r_error))
+        if ((self.reported_slip == 0) and (t_error > 0.02 or r_error > 5)):
+            self.manager.report_slip(self.job_ID, self.current_time)
+            self.reported_slip = 1
+            #print("Slip reported WS: " + str(self.ID))
+
+
+        if ((t_error>0.3 and self.current_time!=self.initial_time) or self.current_time>=self.test_time): #If object fell
             self.test_finish()
             return
         
+
         
         self.current_time += step_size
         #print(self.current_time)
-
+        #print(self.robot.get_measured_joint_efforts()) #Isaac 2023
         actions = self.controller.forward('any', self.current_time)
         self.robot.apply_action(actions)
         #print(self.robot.get_measured_joint_forces())
@@ -180,7 +200,7 @@ class Workstation():
         self.manager.report_fall(self.job_ID,self.current_time,self.controller.type, self.test_time)
 
         ###
-
+        
         #Get new job
         self.job, self.job_ID = self.manager.request_job()
         #print(self.valid, self.ID)
@@ -209,13 +229,15 @@ class Workstation():
         q = [q[i] for i in reorder]
         tmp = tf_matrix_from_pose(pos, q)
         tmp = InverseT(tmp)
-        T_final = np.matmul(T, tmp)        
-        self.object_init_pose= pose_from_tf_matrix(T_final)
+        self.init_T = np.matmul(T, tmp)        
+        self.object_init_pose= pose_from_tf_matrix(self.init_T)
         self.object_prim.set_world_pose(position = self.object_init_pose[0], orientation = self.object_init_pose[1])
 
         #Reset Control var
         self.current_time = self.initial_time
         
+        #Slip var
+        self.reported_slip = 0
         return
 
 

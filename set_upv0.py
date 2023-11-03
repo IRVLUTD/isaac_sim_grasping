@@ -39,7 +39,7 @@ def init_world(num_w):
         target_paths: prim paths for the Workstation coordinate frames
     """
     world = World()
-    world.scene.add_default_ground_plane(-1)
+    #world.scene.add_default_ground_plane(-1)
     #Create initial Workstation
     work = define_prim("/World/Workstation")
     cloner = GridCloner(spacing = 1)
@@ -51,13 +51,21 @@ def init_world(num_w):
 
 
 if __name__ == "__main__":
-    # Local Directories, use complete paths****
+    # Directories
     json_directory = "/home/felipe/Documents/isaac_sim_grasping/grasp_data"
     grippers_directory = "/home/felipe/Documents/isaac_sim_grasping/grippers"
     objects_directory = "/home/felipe/Documents/isaac_sim_grasping/objects"
     output_directory = "/home/felipe/Documents/isaac_sim_grasping/Outputs"
-    num_w = 150
-    physics_dt = 1/30
+
+    # Hyperparameters
+    num_w = 500
+    physics_dt = 1/20
+    test_time = 5
+    fall_threshold = 5 #Just for final print (Not in json)
+    slip_threshold = 2 #Just for final print (Not in json)
+
+    #Debugging
+    render = False
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
@@ -72,29 +80,33 @@ if __name__ == "__main__":
         #Initialize Workstations
         workstations = []
         for i in range(len(workstation_paths)):
-            tmp = Workstation(i, manager, "/" + workstation_paths[i], world, ForceController, test_time=6)
+            tmp = Workstation(i, manager, "/" + workstation_paths[i], world, test_time=test_time)
             workstations.append(tmp)
 
         #Set desired physics_dt
         physicsContext = world.get_physics_context()
-        #physicsContext.set_physics_dt(physics_dt)
+        physicsContext.set_physics_dt(physics_dt)
         physicsContext.enable_gpu_dynamics(True)
+        #world.set_simulation_dt(physics_dt,2*physics_dt)
 
-        world.set_simulation_dt(physics_dt,2*physics_dt)
-        #Reset World and create set up first robot positions
+        #Reset World and create set first robot positions
         world.reset()
         for i in workstations:
+            if (i.job_ID ==-1) : continue
             i.reset_robot()
             
-        #Code that runs in simulation
+        #Run Sim
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
-                world.step(render=True) # execute one physics step and one rendering step if not headless
+                world.step(render=render) # execute one physics step and one rendering step if not headless
                 #pbar.reset(total = len(manager.completed))
                 if pbar.n != np.sum(manager.completed):
                     pbar.update(np.sum(manager.completed)-pbar.n)
+
+        #Save new json with results
         manager.save_json(output_directory+"/simulated-"+j)
-        
+        manager.report_results(fall_threshold,slip_threshold)
+        world.pause()
         world.clear_all_callbacks()
         world.clear()
 

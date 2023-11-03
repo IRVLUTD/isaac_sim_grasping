@@ -24,3 +24,6 @@ https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
 ## Helpful code for python standalones (code snippet samples)
 https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
 
+# Run without warnings 
+Add this arguments in command line:
+ --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error

@@ -1,5 +1,6 @@
 import numpy as np
 import omni.kit.commands
+import math
 #from omni.isaac.urdf import _urdf
 
 def InverseT(x):
@@ -39,3 +40,36 @@ def import_urdf(manager, job):
     urdf_path = manager.object_dict[job['object_id']]
     result, prim_path = omni.kit.commands.execute( "URDFParseAndImportFile", urdf_path=urdf_path,import_config=import_config,)
     return
+
+def re(R_est, R_gt):
+    """
+    Rotational Error.
+
+    :param R_est: Rotational element of the estimated pose (3x1 vector).
+    :param R_gt: Rotational element of the ground truth pose (3x1 vector).
+    :return: Error of t_est w.r.t. t_gt.
+    """
+    assert(R_est.shape == R_gt.shape == (3, 3))
+    error_cos = 0.5 * (np.trace(R_est.dot(np.linalg.inv(R_gt))) - 1.0)
+    error_cos = min(1.0, max(-1.0, error_cos)) # Avoid invalid values due to numerical errors
+    error = math.acos(error_cos)
+    error = 180.0 * error / np.pi # [rad] -> [deg]
+    return error
+
+def te(t_est, t_gt):
+    """
+    Translational Error.
+
+    :param t_est: Translation element of the estimated pose (3x1 vector).
+    :param t_gt: Translation element of the ground truth pose (3x1 vector).
+    :return: Error of t_est w.r.t. t_gt.
+    """
+    assert(t_est.size == t_gt.size == 3)
+    error = np.linalg.norm(t_gt - t_est)
+    return error
+
+def R_t_from_tf(T):
+    "Returns the Rotational matrix and the translation element of T matrix"
+    R = T[:3,:3]
+    t = T[:,3][:3]
+    return R,t

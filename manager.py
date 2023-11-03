@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+from controllers import ForceController, PositionController
 
 class Manager:
     """ Grasp Data Manager:
@@ -34,7 +35,7 @@ class Manager:
         # Current task
         self.task_pointer = 0
         self.n_jobs = self.grasps.shape[0]
-        print(self.n_jobs)
+        print("Number of Grasps: " + str(self.n_jobs))
         #End effector axis (+/- 1,2,3) x,y, z respectively
         self.EF_axis = {
             "fetch_gripper" : 1,
@@ -42,15 +43,22 @@ class Manager:
             "robotiq_3finger":2
         }
         #Controllers Information
+        self.controllers= {
+            "fetch_gripper" : ForceController,
+            "sawyer": PositionController
+        }
         self.close_dir= {
             "fetch_gripper" : [-1,-1],
             "sawyer": [1,1]
         }
+        
         self.job_pointer = 0
         self.test_type = [None] * len(self.grasps)
         self.total_test_time = np.zeros(len(self.grasps))
         self.fall_time = np.zeros(len(self.grasps))
+        self.slip_time = np.zeros(len(self.grasps))
         self.completed = np.zeros(len(self.grasps))
+        self.reported_slips = np.zeros(len(self.grasps))
 
 
     def _check_gripper_usd(self,grippers_path):
@@ -126,12 +134,35 @@ class Manager:
             raise IndexError("Two workstations performed the same task")
         return
     
+    def report_slip(self, job_ID, value):
+        """ Reports slip
+        
+        """        
+        if(self.reported_slips[job_ID]== 0):
+            self.slip_time[job_ID] = value
+            self.reported_slips[job_ID] = 1
+        else: 
+            raise IndexError("Slip was reported twice")
+        return
+    
     def save_json(self,output_path):
         print("Saving File at: ",output_path)
         self.grasps["test_type"] = self.test_type
         self.grasps["total_test_time"] = self.total_test_time
         self.grasps["fall_time"] = self.fall_time
+        self.grasps["slip_time"] = self.slip_time
         self.grasps.to_json(output_path)
+        return
+
+    def report_results(self,ft, st):
+        print("Completed " + str(round(np.sum(self.completed),0))+ " out of " + str(len(self.completed)))
+        passed = (self.fall_time > ft).sum()
+        print("Total Test Time: " +str(self.total_test_time[0]))
+        print("Fall Tests Passed (th = " +str(ft)+ "): "+ str(passed))
+        print("Mean: " +str(round(np.mean(self.fall_time),3)) + "-- Std: " +str(round(np.std(self.fall_time),3)) + "-- Variance: " +str(round(np.var(self.fall_time),3)))
+        passed = (self.slip_time > st).sum()
+        print("Slip Tests Passed (th = " +str(st)+ "): "+ str(passed))
+        print("Mean: " +str(round(np.mean(self.slip_time),3)) + "-- Std: " +str(round(np.std(self.slip_time),3)) + "-- Variance: " +str(round(np.var(self.slip_time),3)))
         return
     
     

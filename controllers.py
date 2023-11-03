@@ -21,12 +21,12 @@ class ForceController(BaseGripperController):
         return 
 
     def close(self,time):
-        joint_command = 1.1*(self.total_time-2*time)*np.multiply(self.close_mask,self.max_efforts)
+        joint_command = 0.5*(self.total_time-2*time)*np.multiply(self.close_mask,self.max_efforts)
         #print(joint_command)
         return ArticulationAction(joint_efforts=joint_command)
     
     def open(self,time):
-        joint_command =  1.1*(self.total_time-2*time)*np.multiply(self.close_mask,self.max_efforts)
+        joint_command =  0.5*(self.total_time-2*time)*np.multiply(self.close_mask,self.max_efforts)
         return ArticulationAction(joint_efforts=joint_command)
 
     def forward(self, action, time):
