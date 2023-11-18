@@ -2,7 +2,7 @@
 #default first two lines in any standalone application
 from omni.isaac.kit import SimulationApp
 config= {
-    "headless": True,
+    "headless": False,
     'max_bounces':0,
     'max_specular_transmission_bounces':0,
 }
@@ -14,7 +14,6 @@ from tqdm import tqdm
 import os
 
 #World Imports
-import omni.usd
 from omni.isaac.core import World
 from omni.isaac.core.utils.prims import define_prim
 from omni.isaac.cloner import Cloner    # import Cloner interface
@@ -58,14 +57,14 @@ if __name__ == "__main__":
     output_directory = "/home/felipe/Documents/isaac_sim_grasping/Outputs"
 
     # Hyperparameters
-    num_w = 500
-    physics_dt = 1/20
+    num_w = 50
+    physics_dt = 1/60
     test_time = 5
     fall_threshold = 5 #Just for final print (Not in json)
     slip_threshold = 2 #Just for final print (Not in json)
 
     #Debugging
-    render = False
+    render = True
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
@@ -83,6 +82,8 @@ if __name__ == "__main__":
             tmp = Workstation(i, manager, "/" + workstation_paths[i], world, test_time=test_time)
             workstations.append(tmp)
 
+        # Create prim view ** Juge liability in code Needs to be the same in workstation and manage class, be careful when changing
+
         #Set desired physics_dt
         physicsContext = world.get_physics_context()
         physicsContext.set_physics_dt(physics_dt)
@@ -91,6 +92,7 @@ if __name__ == "__main__":
 
         #Reset World and create set first robot positions
         world.reset()
+        
         for i in workstations:
             if (i.job_ID ==-1) : continue
             i.reset_robot()

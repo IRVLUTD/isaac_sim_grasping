@@ -27,3 +27,6 @@ https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
 # Run without warnings 
 Add this arguments in command line:
  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+
+ # Install Packages Using isaac sim python.sh
+ ./python.sh -m pip install name_of_package_here

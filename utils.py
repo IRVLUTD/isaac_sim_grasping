@@ -1,7 +1,14 @@
 import numpy as np
 import omni.kit.commands
 import math
+import pickle
 #from omni.isaac.urdf import _urdf
+
+def load_pickle(fname):
+    with open(fname, 'rb') as pf:
+        data = pickle.load(pf)
+    return data
+
 
 def InverseT(x):
     R = x[:3,:3]

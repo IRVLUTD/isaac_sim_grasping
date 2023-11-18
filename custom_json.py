@@ -11,7 +11,7 @@ if __name__ == "__main__":
     #Samples to get from .json files
     samples= 100
     df = pd.DataFrame()
-    for i in json_files:
+    for i in json_files: 
         tmp = pd.read_json(os.path.join(path_to_json, i))
         if df.empty:
             df = tmp[:samples]
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     print(df.head(4))
     df["tests"] = np.zeros(len(df))
     df['tests'][2] = 1 
-    result = df.to_json(os.path.join(path_to_json, "Grasps_dataset3.json"))
+    result = df.to_json(os.path.join(path_to_json, "Grasps_dataset1.json"))
     
 
 
