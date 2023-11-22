@@ -27,9 +27,9 @@ class Manager:
         for i, row in self.grasps.iterrows():
             if row['gripper'] not in self.gripper_names:
                 self.gripper_names.append(row['gripper'])
-            if row['object_id'] not in self.gripper_names:
+            if row['object_id'] not in self.object_names:
                 self.object_names.append(row['object_id'])
-        
+        #print(self.object_names)
         # Initialize dictionaries (paths to objects and grippers)
         self.gripper_dict = {}
         self._check_gripper_usd(grippers_path)
@@ -138,6 +138,7 @@ class Manager:
         for i in self.object_names :
             abs_path = os.path.join(objects_path, i, i+".usd")
             if (os.path.exists(abs_path)) : 
+                print("adding path " + abs_path)
                 self.object_dict[i] = abs_path
             else: 
                 raise LookupError("Couldn't find object .usd file for " + abs_path)

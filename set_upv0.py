@@ -83,7 +83,7 @@ if __name__ == "__main__":
             workstations.append(tmp)
 
         # Create prim view ** Juge liability in code Needs to be the same in workstation and manage class, be careful when changing
-
+        
         #Set desired physics_dt
         physicsContext = world.get_physics_context()
         physicsContext.set_physics_dt(physics_dt)

@@ -1,0 +1,35 @@
+model {
+  file: "model.sdf"
+}
+name: "ACE_Coffee_Mug_Kristen_16_oz_cup"
+description: "ACE Coffee Mug, Kristen, 16 oz cup"
+version: 1
+authors {
+  name: "Google"
+  email: "scanned-objects@google.com"
+}
+legal {
+  copyright: "Copyright 2020 Google LLC."
+  license: "Creative Commons Attribution 4.0 International"
+}
+annotations {
+  key: "brand"
+  value: "ACE"
+}
+annotations {
+  key: "gtin"
+  value: "00033805062065"
+}
+annotations {
+  key: "sku"
+  value: "00033805062065"
+}
+compatibilities {
+  name: "Gazebo"
+  version {
+    major: 11
+  }
+}
+categories {
+  first: "Consumer Goods"
+}
