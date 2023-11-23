@@ -78,12 +78,10 @@ def import_gripper(work_path,usd_path, EF_axis):
         return robot, T_EF
 
 def import_object(work_path, usd_path):
-    print(usd_path)
-    print(work_path)
     add_reference_to_stage(usd_path=usd_path, prim_path=work_path+"/object")
     object_parent = world.scene.add(GeometryPrim(prim_path = work_path+"/object", name="object"))
     object_prim = []
-    object_prim = RigidPrim(prim_path= work_path +"/object")
+    object_prim = RigidPrim(prim_path= work_path +"/object" + "/baseLink")
     return object_parent, object_prim
 
     
@@ -110,6 +108,7 @@ if __name__ == "__main__":
     
     for j in json_files:
         # Initialize Manager (first)
+        
         manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory)   
 
         #initialize World with Workstations Coordinate frames

@@ -2,7 +2,7 @@
 #default first two lines in any standalone application
 from omni.isaac.kit import SimulationApp
 config= {
-    "headless": False,
+    "headless": True,
     'max_bounces':0,
     'max_specular_transmission_bounces':0,
 }
@@ -51,25 +51,28 @@ def init_world(num_w):
 
 if __name__ == "__main__":
     # Directories
-    json_directory = "/home/felipe/Documents/isaac_sim_grasping/grasp_data"
+    json_directory = "/home/felipe/Documents/obj8"
     grippers_directory = "/home/felipe/Documents/isaac_sim_grasping/grippers"
-    objects_directory = "/home/felipe/Documents/isaac_sim_grasping/objects"
-    output_directory = "/home/felipe/Documents/isaac_sim_grasping/Outputs"
+    objects_directory = "/home/felipe/Documents/GoogleScannedObjects_USD"
+    output_directory = "/home/felipe/Documents/Filtered_Data"
 
     # Hyperparameters
-    num_w = 50
-    physics_dt = 1/60
+    num_w = 300
+    physics_dt = 1/80
     test_time = 5
     fall_threshold = 5 #Just for final print (Not in json)
     slip_threshold = 2 #Just for final print (Not in json)
 
     #Debugging
-    render = True
+    render = False
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
     
     for j in json_files:
+        out_path = os.path.join(output_directory,j)
+        if(os.path.exists(out_path)):
+            continue
         # Initialize Manager (first)
         manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory)   
 
@@ -106,7 +109,7 @@ if __name__ == "__main__":
                     pbar.update(np.sum(manager.completed)-pbar.n)
 
         #Save new json with results
-        manager.save_json(output_directory+"/simulated-"+j)
+        manager.save_json(out_path)
         manager.report_results(fall_threshold,slip_threshold)
         world.pause()
         world.clear_all_callbacks()
