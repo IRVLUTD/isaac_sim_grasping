@@ -1,5 +1,8 @@
 # Custom Includes
 .vscode/
+grasp_data/
+objects/
+Outputs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
