@@ -1,8 +1,10 @@
 # Custom Includes
 .vscode/
 grasp_data/
-objects/
 Outputs/
+# Ignore the objects dir, even if its a symlink (techincally symlink is a file)
+objects/
+/objects
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
