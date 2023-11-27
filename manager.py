@@ -52,6 +52,18 @@ class Manager:
             "shadow_hand": -2,
             "HumanHand": -2
         }
+        self.dts = {
+            "fetch_gripper": 1/30,
+            "franka_panda": 1/30,
+            "sawyer": 1/30,
+            "wsg_50": 1/30,
+            "Barrett": 1/50,
+            "robotiq_3finger": 1/50,
+            "jaco_robot": 1/50,
+            "Allegro": 1/80,
+            "shadow_hand": 1/80,
+            "HumanHand": 1/80
+        }
         #Controllers Information
         self.controllers= {
             "fetch_gripper" : ForceController,

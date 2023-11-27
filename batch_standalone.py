@@ -51,17 +51,18 @@ def init_world(num_w):
 
 if __name__ == "__main__":
     # Directories
-    json_directory = "/home/felipe/Documents/obj8"
+    json_directory = "/home/felipe/Documents/obj7"
     grippers_directory = "/home/felipe/Documents/isaac_sim_grasping/grippers"
     objects_directory = "/home/felipe/Documents/GoogleScannedObjects_USD"
-    output_directory = "/home/felipe/Documents/Filtered_Data"
+    output_directory = "/home/felipe/Documents/obj7_filtered"
+
 
     # Hyperparameters
-    num_w = 300
+    num_w = 500
     physics_dt = 1/80
     test_time = 5
-    fall_threshold = 5 #Just for final print (Not in json)
-    slip_threshold = 2 #Just for final print (Not in json)
+    fall_threshold = 2 #Just for final print (Not in json)
+    slip_threshold = 1 #Just for final print (Not in json)
 
     #Debugging
     render = False
@@ -75,7 +76,11 @@ if __name__ == "__main__":
             continue
         # Initialize Manager (first)
         manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory)   
-
+        if manager.gripper_names[0] == "Allegro":
+            continue
+        elif manager.gripper_names[0] =="shadow_hand":
+            continue
+        physics_dt = manager.dts[manager.gripper_names[0]]
         #initialize World with Workstations Coordinate frames
         world, workstation_paths = init_world(num_w)
 
@@ -95,6 +100,8 @@ if __name__ == "__main__":
 
         #Reset World and create set first robot positions
         world.reset()
+        physicsContext.set_physics_dt(physics_dt)
+        physicsContext.enable_gpu_dynamics(True)
         
         for i in workstations:
             if (i.job_ID ==-1) : continue
@@ -102,6 +109,7 @@ if __name__ == "__main__":
             
         #Run Sim
         with tqdm(total=len(manager.completed)) as pbar:
+            print(physicsContext.is_gpu_dynamics_enabled())
             while not all(manager.completed):
                 world.step(render=render) # execute one physics step and one rendering step if not headless
                 #pbar.reset(total = len(manager.completed))
