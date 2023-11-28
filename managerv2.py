@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from controllers import ForceController, PositionController
+from controllersv2 import ForceController
 import utils
 import json
 
@@ -19,22 +19,53 @@ class Manager:
         # Loading files and urdfs
         self.world = world
         print("Loading File: ", grasps_path)
-        self.grasps = pd.read_json(grasps_path)
-        self.gripper_names = self.grasps.iloc[0]['gripper']
-        self.gripper = self.grasps.iloc[0]['gripper']
-        self.object = self.grasps.iloc[0]['object_id']
-        self.object_names =self.grasps.iloc[0]['object_id']
+        self.json = pd.read_json(grasps_path)
+        self.gripper = self.json.iloc[0]['gripper']
+        self.object = self.json.iloc[0]['object_id']
+
+        #Translate DoFs Info
         self.pickle_file_data = utils.load_pickle(os.path.join(grippers_path, "gripper_pyb_info.pk"))
-        
+
+        # Extract grasps and reorder quaternions
+        self.grasps = []
+        self.dofs = []
+        for i, r in self.json.iterrows():
+            self.grasps.append(r['grasps']['pose'])
+            self.dofs.append(r['grasps']['dofs'])
+        self.dofs = np.asarray(self.dofs)
+        self.grasps = np.asarray(self.grasps)
+        self.grasps[:,[3,4,5,6]]= self.grasps[:,[6,3,4,5]]
+
         # Initialize dictionaries (paths to objects and grippers)
         self._check_gripper_usd(grippers_path)
         self._check_object_usd(objects_path)
-        # Current task
-        self.task_pointer = 0
+
         self.n_jobs = self.grasps.shape[0]
         print("Number of Grasps: " + str(self.n_jobs))
+
+        #GRIPPER SPECIFIC DATA
+        self._init_gripper_dicts()
+        
+        # Extract info from dicts
+        self.controller = self.controllers[self.gripper]
+        self.close_mask = self.close_dir[self.gripper]
+        self.contact_th = self.contact_ths[self.gripper]
+        self.physics_dt = self.dts[self.gripper]
+        self.c_names = self.contact_names[self.gripper]
+        self.EF_axis = self.EF_axes[self.gripper]
+
+        #Pointer and reporting vars
+        self.job_pointer = 0 # Start to 0
+        self.test_type = np.asarray([None] * len(self.grasps))
+        self.total_test_time = np.zeros(len(self.grasps))
+        self.fall_time = np.zeros(len(self.grasps))
+        self.slip_time = np.zeros(len(self.grasps))
+        self.completed = np.zeros(len(self.grasps))
+        self.reported_slips = np.zeros(len(self.grasps))
+
+    def _init_gripper_dicts(self):
         #End effector axis (+/- 1,2,3) x,y, z respectively
-        self.EF_axis = {
+        self.EF_axes = {
             "fetch_gripper": 1,
             "franka_panda": 3,
             "sawyer": 3,
@@ -46,6 +77,21 @@ class Manager:
             "shadow_hand": -2,
             "HumanHand": -2
         }
+
+        #Custom Physics dts (increase filtering speed)
+        self.dts = {
+            "fetch_gripper": 1/30,
+            "franka_panda": 1/30,
+            "sawyer": 1/30,
+            "wsg_50": 1/30,
+            "Barrett": 1/50,
+            "robotiq_3finger": 1/60,
+            "jaco_robot": 1/50,
+            "Allegro": 1/80,
+            "shadow_hand": 1/80,
+            "HumanHand": 1/80
+        }
+
         #Controllers Information
         self.controllers= {
             "fetch_gripper" : ForceController,
@@ -55,10 +101,11 @@ class Manager:
             "Barrett": ForceController,
             "jaco_robot": ForceController,
             "robotiq_3finger": ForceController,
-            "Allegro": PositionController,
+            "Allegro": ForceController,
             "HumanHand": ForceController,
             "shadow_hand": ForceController
         }
+
         self.close_dir= {
             "fetch_gripper" : [1,1],
             "franka_panda": [-1, -1], # NOTE, franka_panda gripper by default is closed, so need to open before, Opendir = [1, 1]
@@ -70,7 +117,8 @@ class Manager:
             "Allegro": [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        }     
+        }
+
         self.contact_names= { #List of names of joints to check for collisions ** USE BASE XFORM OF MESHES
             "fetch_gripper" : ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
             "franka_panda": ["panda_hand", "panda_leftfinger", "panda_rightfinger"], 
@@ -87,10 +135,11 @@ class Manager:
                            "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
             "shadow_hand": []
         }
-        self.contact_th = { # Amount of contacts needed to count for grasp set up
+
+        self.contact_ths = { # Amount of contacts needed to count for grasp set up
             "fetch_gripper" : 2,
             "franka_panda": 2, 
-            "sawyer": 2,
+            "sawyer": 1,
             "wsg_50": 2, 
             "Barrett": 2,
             "jaco_robot": 2,
@@ -99,36 +148,25 @@ class Manager:
             "HumanHand": 2,
             "shadow_hand": 2
         }
-        self.job_pointer = 0
-        self.test_type = [None] * len(self.grasps)
-        self.total_test_time = np.zeros(len(self.grasps))
-        self.fall_time = np.zeros(len(self.grasps))
-        self.slip_time = np.zeros(len(self.grasps))
-        self.completed = np.zeros(len(self.grasps))
-        self.reported_slips = np.zeros(len(self.grasps))
-        self.rigid_view = 0
-
-
     def _check_gripper_usd(self,gripper_path):
         """ Check if the gripper usds are readable by program
 
             grippers_path: Path to directory containing all gripper files. Make sure every gripper.urdf is within a folder with the same name
         """
-        i = self.gripper_names 
+        i = self.gripper
         self.gripper_path = os.path.join(gripper_path, i, i, i+".usd")
         if (os.path.exists(self.gripper_path)) : 
             print("Found Gripper")
         else: 
             raise LookupError("Couldn't find gripper .usd file at " + self.gripper_path )
         return
-
     def _check_object_usd(self,object_path):
         """ Check if the object usds are readable by program
         
         Args:
             objects_path: Path to directory containing all object files. Make sure every object.urdf is within a folder with the same name
         """
-        i = self.object_names
+        i = self.object
         self.object_path = os.path.join(object_path, i, i+".usd")
         if (os.path.exists(self.object_path)) : 
             print("Found Object")
@@ -136,113 +174,128 @@ class Manager:
             raise LookupError("Couldn't find object .usd file for " + self.object_path )
         return
 
-    def request_job(self):
+    def request_jobs(self, n):
         """ Function used by workstations to request job
         """
-        job_ID = -1
-        job = None
-        if(self.job_pointer<self.n_jobs):
-            job_ID = self.job_pointer
-            job = self.grasps.iloc[self.job_pointer]
-            self.job_pointer +=1
-            #print("Current  Job:" + str(self.job_pointer))
-        else:
-            job = self.grasps.iloc[self.n_jobs-1]
-            job_ID = -1
-        #self.task_pointer = self.task_pointer+1
-        return job, job_ID
+        job_IDs = []
+        tmp = []
+        poses = []
+        dofs = []
+        for i in range(n):
+            if(self.job_pointer<self.n_jobs):
+                job_IDs.append(self.job_pointer)
+                tmp.append(self.job_pointer)
+                self.job_pointer +=1
+            else:
+                tmp.append(0)
+                job_IDs.append(-1)
+
+        poses = np.asarray(self.grasps[tmp,:])
+        dofs = np.asarray(self.dofs[tmp,:])
+        job_IDs = np.asarray(job_IDs)
+        #print('Jobs given ', job_IDs)
+        return dofs, poses, job_IDs
     
-    def translate_dofs(self, gripper, dofs, robot_idx):
+    def translate_dofs(self, robot_idx):
         """ Function to translate the GraspIt dofs to Isaac Sim dofs
         
         Args: 
             gripper: name of the gripper to translate dofs
             dofs: np array of dofs to translate
         """
-        #print(robot_idx)
-        json_idx = self.pickle_file_data[gripper][1]
+        json_idx = self.pickle_file_data[self.gripper][1]
 
-        if gripper == "fetch_gripper":
-            robot_pos = [(dofs / 1000.0) * 10.0, (dofs / 1000.0) * 10.0]
-            #robot_pos = [0.25,0.25]
-        elif gripper == "franka_panda":
-            robot_pos = [dofs/ 1000,dofs/ 1000]
-        elif gripper == "Barrett":
-            # assert len(dofs) == len(joint_idxs)
-            robot_pos = [ 
-                dofs[0],
-                dofs[1],
-                dofs[1] / 3.0,
-                dofs[0],
-                dofs[2],
-                dofs[2] / 3.0,
-                dofs[3],
-                dofs[3] / 3.0,
-            ]
-        elif gripper == "Allegro":
-            robot_pos = dofs
+        if self.gripper == "fetch_gripper":
+            robot_pos = np.asarray([(self.dofs / 1000.0) * 10.0, (self.dofs / 1000.0) * 10.0])
+            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
+        elif self.gripper == "franka_panda":
+            robot_pos = np.asarray([self.dofs/ 1000,self.dofs/ 1000])
+            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
+        elif self.gripper == "Barrett":
+            robot_pos = np.asarray([ 
+                self.dofs[:,0],
+                self.dofs[:,1],
+                self.dofs[:,1] / 3.0,
+                self.dofs[:,0],
+                self.dofs[:,2],
+                self.dofs[:,2] / 3.0,
+                self.dofs[:,3],
+                self.dofs[:,3] / 3.0,
+            ])
+            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
+        elif self.gripper == "Allegro":
+            robot_pos = self.dofs
             for i in range(len(json_idx)):
                     json_idx[i]= json_idx[i].replace(".","_")
-        elif gripper in {
+        elif self.gripper in {
             "HumanHand", 
             "robotiq_3finger",
             "jaco_robot",
             "shadow_hand",
         }:
-            robot_pos = dofs
-        elif gripper in {"wsg_50", "sawyer"}:
-            robot_pos = dofs/1000.0
+            robot_pos = self.dofs
+        elif self.gripper in {"wsg_50", "sawyer"}:
+            robot_pos = self.dofs/1000.0
         else:
             raise(LookupError("No dof translation for gripper"))
-
-        #print(json_idx)
-        dof_dict = {json_idx[i]: robot_pos[i] for i in range(len(robot_pos))}
+  #      print(self.dofs.shape)
+   #     print(robot_idx)
+    #    print(json_idx)
+     #   print(robot_pos)
+      #  print(robot_pos.shape)
+        dof_dict = {json_idx[i]: robot_pos[:,i] for i in range(robot_pos.shape[1])}
         tmp = np.zeros_like(robot_pos)
         c = 0
-        #print(dof_dict)
+       # print(dof_dict)
         for i in robot_idx:
-            tmp[c] = dof_dict[i] 
+            tmp[:,c] = dof_dict[i] 
             c +=1
-        #print(robot_pos)
-        #print(tmp)
+       # print(robot_pos)
         robot_pos = np.squeeze(tmp)
-        
-       # if gripper == "robotiq_3finger":
-            #robot_pos=[0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0]
+        self.dofs = robot_pos
+      #  print(robot_pos)
         return robot_pos
 
-    def report_fall(self, job_ID, value, test_type, test_time):
+    def report_fall(self, job_ID, value,test_type, test_time):
         """ Reports fall
         
         """
-        
-        if(self.completed[job_ID]== 0):
+        #print(job_ID,value,test_type,test_time)
+        job_ID = np.squeeze(job_ID).astype(int)
+        value = np.squeeze(value)
+        #print(job_ID,value)
+        #print(self.completed[job_ID])
+
+        if(self.completed[job_ID].any()):
+            pass
+            #print(job_ID)
+            #print(np.sum(self.completed))
+        else:
             self.fall_time[job_ID] = value
             self.test_type[job_ID] = test_type
             self.total_test_time[job_ID] = test_time
             self.completed[job_ID]= 1
-        else: 
-            raise IndexError("Two workstations performed the same task")
+            #print(" Reported ", job_ID, job_ID.shape)
         return
     
     def report_slip(self, job_ID, value):
         """ Reports slip
         
         """        
-        if(self.reported_slips[job_ID]== 0):
-            self.slip_time[job_ID] = value
-            self.reported_slips[job_ID] = 1
-        else: 
-            raise IndexError("Slip was reported twice")
+        job_ID = np.squeeze(job_ID).astype(int)
+        value = np.squeeze(value)
+        self.slip_time[job_ID] = value
+        self.reported_slips[job_ID] = 1
+        #print(" Reported ", job_ID, job_ID.shape, value)
         return
     
     def save_json(self,output_path):
         print("Saving File at: ",output_path)
-        self.grasps["test_type"] = self.test_type
-        self.grasps["total_test_time"] = self.total_test_time
-        self.grasps["fall_time"] = self.fall_time
-        self.grasps["slip_time"] = self.slip_time
-        self.grasps.to_json(output_path)
+        self.json["test_type"] = self.test_type
+        self.json["total_test_time"] = self.total_test_time
+        self.json["fall_time"] = self.fall_time
+        self.json["slip_time"] = self.slip_time
+        self.json.to_json(output_path)
         return
 
     def report_results(self,ft, st):
