@@ -35,7 +35,11 @@ Add this arguments in command line:
  ./python.sh /home/felipe/Documents/isaac_sim_grasping/v2_standalone.py json=/home/felipe/Documents/GoogleScannedObjects_10Grippers-selected/obj8 grippers=/home/felipe/Documents/isaac_sim_grasping/grippers objects=/home/felipe/Documents/GoogleScannedObjects_USD output=/home/felipe/Documents/GoogleScannedObjects_10Grippers-selected/obj8_filtered  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error      
 
  json=path
+ 
  grippers=path
+ 
  objects=path
+ 
  output=path
+ 
  All paths can be implemented in command line
