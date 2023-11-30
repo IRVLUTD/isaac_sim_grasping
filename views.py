@@ -24,9 +24,9 @@ from omni.isaac.core.utils.prims import create_prim, delete_prim
 class View():
 
     def __init__(self, work_path, contact_names_expr, num_w,  manager, world, test_time, mass):
-        self.grippers = ArticulationView(prim_paths_expr = work_path[:-1]+"*"+"/gripper",reset_xform_properties = False)
-        self.objects = RigidPrimView(prim_paths_expr= work_path[:-1]+"*"+"/object/base_link", track_contact_forces = True, prepare_contact_sensors = True, 
-                                        contact_filter_prim_paths_expr  = contact_names_expr, reset_xform_properties = False)
+        self.objects = world.scene.add(RigidPrimView(prim_paths_expr= work_path[:-1]+"*"+"/object/base_link", track_contact_forces = True, prepare_contact_sensors = True, 
+                                        contact_filter_prim_paths_expr  = contact_names_expr, reset_xform_properties = False, disable_stablization = False))
+        self.grippers = world.scene.add(ArticulationView(prim_paths_expr = work_path[:-1]+"*"+"/gripper",reset_xform_properties = False))
         #print("GRIPPER PATHS",self.grippers.prim_paths)
         #print(work_path[:-1]+"*"+"/gripper")
         #print("Object PATHS",self.objects.prim_paths)
@@ -125,8 +125,13 @@ class View():
 
             # Implement slip
             te_slip = np.squeeze(t_error>0.02)
+            R_current = quats_to_rot_matrices(np.squeeze(current_rotations))
+            R_init = quats_to_rot_matrices(np.squeeze(self.init_rotations[active_ind]))
+            re_slip = re_batch(R_current, R_init) > 5
+            slip = np.logical_or(te_slip, re_slip)
+            
             tmp = np.squeeze(self.reported_slips[active_ind] == 0 )
-            s_ind = np.squeeze(active_ind[np.multiply(te_slip,tmp)])
+            s_ind = np.squeeze(active_ind[np.multiply(slip,tmp)])
             #print("s_ind", s_ind)
             s_ind=np.atleast_1d(s_ind)
             if(len(s_ind)>0):
@@ -136,18 +141,10 @@ class View():
                 self.manager.report_slip(self.current_job_IDs[s_ind],self.current_times[s_ind])
                 self.reported_slips[s_ind] = 1
             
-
-
-            
-
             
         tmp_active = np.squeeze(self.current_job_IDs>=0)
-
         # Apply forces to seted up grasp
-        tmp = np.squeeze((self.grasp_set_up==1))
-        
-        tmp = np.multiply(tmp,tmp_active)
-        g_ind = np.argwhere(tmp ==1)[:,0]
+        g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0]
         #print("g", g_ind)
         if (len(g_ind)>0):
             
@@ -155,16 +152,13 @@ class View():
         self.objects.apply_forces(self.gravities)
 
         # Rigid Body Probing
-        tmp = np.squeeze(self.grasp_set_up==0 )
-        tmp = np.multiply(tmp,tmp_active)
-        rb_ind = np.argwhere(tmp==1)[:,0]
+        rb_ind = np.argwhere(np.multiply(np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0]
         #print("rb_ind", rb_ind)
         if (len(rb_ind)>0):
             self.objects.set_velocities([0,0,0,0,0,0],rb_ind) 
             self.objects.set_world_poses(self.init_positions[rb_ind], self.init_rotations[rb_ind],rb_ind)
-            tmp = np.sum(self.objects.get_contact_force_matrix(rb_ind),axis =2)
-            #print(tmp)
-            tmp = np.count_nonzero(tmp,axis=1)
+
+            tmp = np.count_nonzero(np.sum(self.objects.get_contact_force_matrix(rb_ind),axis =2),axis=1)
             #Update grasp_setup
             self.current_times[rb_ind[tmp>=self.manager.contact_th]]=0
             self.grasp_set_up[rb_ind[tmp>=self.manager.contact_th]]=1
@@ -179,19 +173,14 @@ class View():
         self.current_times += step_size
 
         #End of time
-        tmp = np.squeeze((self.current_times>self.test_time))
-        tmp = np.multiply(tmp,tmp_active)
-        time_ind = np.argwhere(tmp)[:,0]
+        time_ind = np.argwhere(np.multiply(np.squeeze((self.current_times>self.test_time)),tmp_active))[:,0]
         #print("time", time_ind)
         if (len(time_ind)>0):
             
             self.test_finish(time_ind)
 
         #Failed grasps 
-        tmp = np.squeeze(self.current_times>=1)
-        tmp = np.multiply(tmp, np.squeeze(self.grasp_set_up==0))
-        tmp = np.multiply(tmp,tmp_active)
-        failed_ind = np.argwhere((tmp==1))[:,0]
+        failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=1), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
         #print("failed", failed_ind)  
         if(len(failed_ind)>0):
                      
@@ -215,8 +204,7 @@ class View():
         self.current_times[finish_ind] = 0
         self.grasp_set_up[finish_ind] = 0
         self.reported_slips[finish_ind] = 0
-        tmp = np.zeros((len(finish_ind),3))
-        self.gravities[finish_ind] = tmp
+        self.gravities[finish_ind] = np.zeros((len(finish_ind),3))
 
         #print("Runs")
 

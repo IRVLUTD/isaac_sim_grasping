@@ -2,7 +2,7 @@
 #default first two lines in any standalone application
 from omni.isaac.kit import SimulationApp
 config= {
-    "headless": True,
+    "headless": False,
     'max_bounces':0,
     'max_specular_transmission_bounces':0,
 }
@@ -24,15 +24,15 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
 from managerv2 import Manager
-from workstationv2 import Workstation
+#from workstationv2 import Workstation
 from controllersv2 import ForceController
 from views import View
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage
-from omni.isaac.core.prims.rigid_prim import RigidPrim, RigidPrimView    
+from omni.isaac.core.prims.rigid_prim import RigidPrim 
 from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.articulations import Articulation
-from omni.isaac.core.utils.prims import get_prim_at_path, get_prim_children, get_prim_path
+from omni.isaac.core.utils.prims import get_prim_at_path, get_prim_children, get_prim_path, delete_prim
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matrix_from_pose, get_world_pose_from_relative
 
 
@@ -120,13 +120,13 @@ if __name__ == "__main__":
         raise ValueError("Output directory not given correctly")
 
     # Hyperparameters
-    num_w = 500
+    num_w = 10
     test_time = 5
     fall_threshold = 2 #Just for final print (Not in json)
     slip_threshold = 1 #Just for final print (Not in json)
 
     #Debugging
-    render = False
+    render = True
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
@@ -187,14 +187,11 @@ if __name__ == "__main__":
 
         # Set desired physics_dt
         physicsContext = world.get_physics_context()
-        physicsContext.set_physics_dt(manager.physics_dt)
-        physicsContext.enable_gpu_dynamics(True)
-        physicsContext.set_gravity(0)
         world.reset()
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
-        
         physicsContext.set_gravity(0)
+
         viewer.grippers.initialize(world.physics_sim_view)
         viewer.objects.initialize(world.physics_sim_view)
         viewer.post_reset()
@@ -207,12 +204,12 @@ if __name__ == "__main__":
 
                 if pbar.n != np.sum(manager.completed):
                     pbar.update(np.sum(manager.completed)-pbar.n)
-
+        
+        world.pause()
         #Save new json with results
         manager.save_json(out_path)
-        manager.report_results(fall_threshold,slip_threshold)
-        world.pause()
         world.clear_all_callbacks()
         world.clear()
+        manager.report_results(fall_threshold,slip_threshold)
 
     simulation_app.close() # close Isaac Sim

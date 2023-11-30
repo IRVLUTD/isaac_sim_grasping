@@ -72,32 +72,21 @@ def re_batch(R_est, R_gt):
     :param R_gt: Rotational element of the ground truth pose (3x1 vector).
     :return: Error of t_est w.r.t. t_gt.
     """
+    if R_est.ndim <3:
+        R_est = np.expand_dims(R_est, axis=0)
+        R_gt = np.expand_dims(R_gt, axis=0)
     assert(R_est.shape[0] == R_gt.shape[0])
-    R= R_est[0].dot(np.linalg.inv(R_gt[0]))
-    print("R", R)
-    error_cos = 0.5 * (np.trace(R) - 1.0)
 
-    print("error_cos", error_cos)
-    error_cos = min(1.0, max(-1.0, error_cos)) # Avoid invalid values due to numerical errors
-    print("error_cos", error_cos)
+    # Calculate the dot product of the two sets of rotation matrices
+    dot_products = 0.5 * (np.einsum('ijk,ikj->i', R_est, np.linalg.inv(R_gt))-1)
 
-    error = math.acos(error_cos)
-    print("error", error)
-    error = 180.0 * error / np.pi # [rad] -> [deg]
-    print(np.linalg.inv(R_gt).shape)
-    R = np.tensordot(R_est, np.linalg.inv(R_gt), axes = ([1,2],[2,1]))
-    print("R", R)
-    print(R.shape)
-    error_cos = 0.5 * (np.trace(R) - 1.0)
-    print("error_cos", error_cos)
-    error_cos = np.minimum(1.0, np.maximum(-1.0, error_cos)) # Avoid invalid values due to numerical errors
-    print("error_cos", error_cos)
-    error = np.arccos(error_cos)
-    print("error", error)
-    error = 180.0 * error / np.pi # [rad] -> [deg]
+    # Ensure dot products are within the valid range [-1, 1]
+    dot_products = np.clip(dot_products, -1.0, 1.0)
 
+    # Calculate the angles using arccosine and convert to degrees
+    angles = np.degrees(np.arccos((dot_products)))
 
-    return error
+    return angles
 
 
 def te(t_est, t_gt):

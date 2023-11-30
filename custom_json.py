@@ -4,7 +4,8 @@ import os
 
 if __name__ == "__main__":
     # Use complete paths due to python.sh directory
-    path_to_json = "/home/felipe/Documents/isaac_sim_grasping/grasp_data"
+    path_to_json = "/home/felipe/Documents/cmp"
+    output_path = "/home/felipe/Documents/tests"
     json_files = [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
     print(json_files)  
     #json_files = ["/home/felipe/Documents/isaac_sim_grasping/grasp_data/out.json"]
@@ -13,6 +14,9 @@ if __name__ == "__main__":
     df = pd.DataFrame()
     for i in json_files: 
         tmp = pd.read_json(os.path.join(path_to_json, i))
+        print(i)
+
+        result = tmp[:samples].to_json(os.path.join(output_path, i))
         if df.empty:
             df = tmp[:samples]
         else:
@@ -27,10 +31,10 @@ if __name__ == "__main__":
     print(len(df))
     zero = np.zeros(len(df))
     print(not any(zero))
-    print(df.head(4))
-    df["tests"] = np.zeros(len(df))
-    df['tests'][2] = 1 
-    result = df.to_json(os.path.join(path_to_json, "Grasps_dataset1.json"))
+    for i,r in df.iterrows():
+        print(r["grasps"]["dofs"])
+
+    #
     
 
 

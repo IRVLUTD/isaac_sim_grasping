@@ -24,7 +24,6 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
 from managerv2 import Manager
-from workstationv2 import Workstation
 from controllersv2 import ForceController
 from views import View
 #Omni Libraries

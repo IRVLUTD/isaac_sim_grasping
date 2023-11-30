@@ -137,10 +137,10 @@ class Manager:
         }
 
         self.contact_ths = { # Amount of contacts needed to count for grasp set up
-            "fetch_gripper" : 2,
-            "franka_panda": 2, 
+            "fetch_gripper" : 1,
+            "franka_panda": 1, 
             "sawyer": 1,
-            "wsg_50": 2, 
+            "wsg_50": 1, 
             "Barrett": 2,
             "jaco_robot": 2,
             "robotiq_3finger": 2,
