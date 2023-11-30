@@ -85,7 +85,7 @@ class Manager:
             "sawyer": 1/30,
             "wsg_50": 1/30,
             "Barrett": 1/50,
-            "robotiq_3finger": 1/60,
+            "robotiq_3finger": 1/50,
             "jaco_robot": 1/50,
             "Allegro": 1/80,
             "shadow_hand": 1/80,

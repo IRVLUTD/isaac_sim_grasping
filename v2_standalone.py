@@ -2,7 +2,7 @@
 #default first two lines in any standalone application
 from omni.isaac.kit import SimulationApp
 config= {
-    "headless": False,
+    "headless": True,
     'max_bounces':0,
     'max_specular_transmission_bounces':0,
 }
@@ -120,13 +120,13 @@ if __name__ == "__main__":
         raise ValueError("Output directory not given correctly")
 
     # Hyperparameters
-    num_w = 10
+    num_w = 500
     test_time = 5
     fall_threshold = 2 #Just for final print (Not in json)
     slip_threshold = 1 #Just for final print (Not in json)
 
     #Debugging
-    render = True
+    render = False
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
