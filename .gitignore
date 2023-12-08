@@ -1,4 +1,5 @@
 # Custom Includes
+data/
 .vscode/
 grasp_data/
 Outputs/
@@ -6,6 +7,8 @@ Outputs/
 objects/
 /objects
 
+__pycache__/
+*.pyc
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
