@@ -13,6 +13,7 @@ import numpy as np
 from tqdm import tqdm
 import os
 import sys
+import argparse
 
 #World Imports
 from omni.isaac.core import World
@@ -88,35 +89,33 @@ def import_object(work_path, usd_path):
 
     return object_parent, mass
 
-    
+
+def make_parser():
+    parser = argparse.ArgumentParser(description='Standalone script for grasp filtering.')
+    parser.add_argument('--json_dir', type=str, help='Dir with Graspit Json Grasps', default='/home/ninad/isaac_sim_grasping/data/grasps/')
+    parser.add_argument('--gripper_dir', type=str, help='Dir with Gripper urdf/usd', default='/home/ninad/isaac_sim_grasping/grippers/')
+    parser.add_argument('--objects_dir', type=str, help='Dir with Object usd', default='/home/ninad/isaac_sim_grasping/data/object_usd/')
+    parser.add_argument('--output_dir', type=str, help='Output dir for jsons', default='/home/ninad/isaac_sim_grasping/data/output/')
+    return parser
+
 
 if __name__ == "__main__":
-    n = len(sys.argv)
+    parser = make_parser()
+    args = parser.parse_args()
     
     # Directories
-    json_directory = []
-    grippers_directory = []
-    objects_directory = []
-    output_directory = []
+    json_directory = args.json_dir
+    grippers_directory = args.gripper_dir
+    objects_directory = args.objects_dir
+    output_directory = args.output_dir
     
-    for i in range(1,n):
-        tmp = sys.argv[i].split('=')
-        if tmp[0] == "json":
-            json_directory = tmp[1]
-        if tmp[0] == "grippers":
-            grippers_directory = tmp[1]
-        if tmp[0] == "objects":
-            objects_directory = tmp[1]
-        if tmp[0] == "output":
-            output_directory = tmp[1]
-
-    if len(json_directory)== 0 or not os.path.exists(json_directory):
+    if not os.path.exists(json_directory):
         raise ValueError("Json directory not given correctly")
-    elif len(grippers_directory)== 0 or not os.path.exists(grippers_directory):
+    elif not os.path.exists(grippers_directory):
         raise ValueError("Grippers directory not given correctly")
-    elif len(objects_directory)== 0 or not os.path.exists(objects_directory):
+    elif not os.path.exists(objects_directory):
         raise ValueError("Objects directory not given correctly")
-    elif len(output_directory)== 0 or not os.path.exists(output_directory): 
+    elif not os.path.exists(output_directory): 
         raise ValueError("Output directory not given correctly")
 
     # Hyperparameters
