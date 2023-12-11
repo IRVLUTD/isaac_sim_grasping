@@ -2,7 +2,7 @@
 #default first two lines in any standalone application
 from omni.isaac.kit import SimulationApp
 config= {
-    "headless": False,
+    "headless": True,
     'max_bounces':0,
     'max_specular_transmission_bounces':0,
 }
@@ -21,11 +21,7 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from pxr import Gf, Sdf, UsdPhysics
 from omni.isaac.core.utils.stage import add_reference_to_stage, open_stage, save_stage
 
-# Custom Classes
-from managerv2 import Manager
-from workstationv2 import Workstation
-from controllersv2 import ForceController, PositionController
-from views import View
+
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.prims.rigid_prim import RigidPrim, RigidPrimView    
