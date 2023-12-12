@@ -20,7 +20,7 @@ def import_urdf(urdf_path, dest_path):
     _config.fix_base = False
     _config.distance_scale = 1
     _config.make_instanceable = True
-    _config.density = 1.0
+    _config.density = 100
 
     result = omni.kit.commands.execute(
             "URDFParseAndImportFile", 
