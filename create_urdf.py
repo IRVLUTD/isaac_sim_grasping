@@ -55,7 +55,7 @@ def main(args):
     with open(args.models_file) as f:
         model_names = f.read().splitlines()
 
-    DENSITY = 500
+    DENSITY = 100
     for model in model_names:
         model_dir = os.path.join(args.google_dir, model) 
         mesh_p =  os.path.join("meshes", "model.obj")
