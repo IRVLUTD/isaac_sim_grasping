@@ -86,6 +86,11 @@ def import_object(work_path, usd_path):
     
     object_prim = RigidPrim(prim_path= get_prim_path(l[0]))
     mass= object_prim.get_mass()
+    if mass < 1e-3:
+        print("[WARNING/ERROR] Very low mass?")
+        # TODO: Reset using stored mass via oritented_bbox volume and density of 100 kg/m3?
+        # NOTE: Currently setting to a good default value of 0.05 kg (50 g) as objects are hollow
+        mass = 0.05
 
     return object_parent, mass
 
@@ -119,7 +124,7 @@ if __name__ == "__main__":
         raise ValueError("Output directory not given correctly")
 
     # Hyperparameters
-    num_w = 500
+    num_w = 5
     test_time = 5
     fall_threshold = 2 #Just for final print (Not in json)
     slip_threshold = 1 #Just for final print (Not in json)
@@ -137,10 +142,10 @@ if __name__ == "__main__":
             continue
         # Initialize Manager
         manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory)   
-        if manager.gripper == "Allegro":
-            continue
-        elif manager.gripper=="shadow_hand":
-            continue
+        # if manager.gripper == "Allegro":
+        #     continue
+        # elif manager.gripper=="shadow_hand":
+        #     continue
         #initialize World 
         world = World(set_defaults = False)
         #world.scene.add_default_ground_plane(-1)
