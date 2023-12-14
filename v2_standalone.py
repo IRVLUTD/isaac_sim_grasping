@@ -2,7 +2,7 @@
 #default first two lines in any standalone application
 from omni.isaac.kit import SimulationApp
 config= {
-    "headless": True,
+    "headless": False,
     'max_bounces':0,
     'max_specular_transmission_bounces':0,
 }
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     slip_threshold = 1 #Just for final print (Not in json)
 
     #Debugging
-    render = False
+    render = True
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
@@ -186,6 +186,7 @@ if __name__ == "__main__":
         #world.initialize_physics()
 
         # Translate DoFs and get new jobs (must be done after reset)
+        print(robot.dof_names)
         manager.translate_dofs(robot.dof_names)
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
 

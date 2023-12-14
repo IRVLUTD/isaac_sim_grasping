@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from controllersv2 import ForceController
+from controllersv2 import ForceController,PositionController
 import utils
 import json
 
@@ -94,7 +94,7 @@ class Manager:
 
         #Controllers Information
         self.controllers= {
-            "fetch_gripper" : ForceController,
+            "fetch_gripper" : PositionController,
             "franka_panda": ForceController, 
             "sawyer": ForceController,
             "wsg_50": ForceController, 
@@ -103,7 +103,7 @@ class Manager:
             "robotiq_3finger": ForceController,
             "Allegro": ForceController,
             "HumanHand": ForceController,
-            "shadow_hand": ForceController
+            "shadow_hand": PositionController
         }
 
         self.close_dir= {
@@ -114,9 +114,9 @@ class Manager:
             "Barrett": [0, 0, 1, 1, 1, 0, 0, 0],
             "jaco_robot": [1, 1, 1],
             "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-            "Allegro": [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "Allegro": [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
             "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
 
         self.contact_names= { #List of names of joints to check for collisions ** USE BASE XFORM OF MESHES
@@ -133,7 +133,11 @@ class Manager:
                         "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],
             "HumanHand": ["base_link","index1_joint","index2_joint","index3_joint", "mid1_joint","mid2_joint","mid3_joint", "pinky1_joint","pinky2_joint","pinky3_joint",
                            "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
-            "shadow_hand": []
+            "shadow_hand": ["base_link", "index_finger_knuckle", "index_finger_proximal", "index_finger_middle", "index_finger_distal",
+                            "little_finger_knuckle", "little_finger_proximal", "little_finger_middle", "little_finger_distal",
+                            "middle_finger_knuckle", "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
+                            "ring_finger_knuckle", "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
+                            "thumb_proximal", "thumb_middle", "thumb_distal"]
         }
 
         self.contact_ths = { # Amount of contacts needed to count for grasp set up
@@ -303,7 +307,7 @@ class Manager:
         passed = (self.fall_time > ft).sum()
         print("Total Test Time: " +str(self.total_test_time[0]))
         print("Fall Tests Passed (th = " +str(ft)+ "): "+ str(passed))
-        print("Mean: " +str(round(np.mean(self.fall_time),3)) + "-- Std: " +str(round(np.std(self.fall_time),3)) + "-- Variance: " +str(round(np.var(self.fall_time),3)))
+        print("Mean: " +str(round(np.mean(self.fall_time[self.fall_time>0]),3)) + "-- Std: " +str(round(np.std(self.fall_time[self.fall_time>0]),3)) + "-- Variance: " +str(round(np.var(self.fall_time[self.fall_time>0]),3)))
         passed = (self.slip_time > st).sum()
         print("Slip Tests Passed (th = " +str(st)+ "): "+ str(passed))
         print("Mean: " +str(round(np.mean(self.slip_time),3)) + "-- Std: " +str(round(np.std(self.slip_time),3)) + "-- Variance: " +str(round(np.var(self.slip_time),3)))

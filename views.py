@@ -27,13 +27,8 @@ class View():
         self.objects = world.scene.add(RigidPrimView(prim_paths_expr= work_path[:-1]+"*"+"/object/base_link", track_contact_forces = True, prepare_contact_sensors = True, 
                                         contact_filter_prim_paths_expr  = contact_names_expr, reset_xform_properties = False, disable_stablization = False))
         self.grippers = world.scene.add(ArticulationView(prim_paths_expr = work_path[:-1]+"*"+"/gripper",reset_xform_properties = False))
-        #print("GRIPPER PATHS",self.grippers.prim_paths)
-        #print(work_path[:-1]+"*"+"/gripper")
-        #print("Object PATHS",self.objects.prim_paths)
-        #print(work_path[:-1]+"*"+"/object/base_link")
+
         # Initialize
-        #print(self.objects.count)
-        #print(self.grippers.count)
         self.num_w = num_w
         self.test_time = test_time
         self.work_path = work_path
@@ -113,6 +108,7 @@ class View():
         #self.current_job_IDs[0]=-1
         #Check active workstations
         active_ind = np.argwhere(self.current_job_IDs>=0) #ws indices
+
         if(len(active_ind)>0):
             #print("active", active_ind)
             current_positions, current_rotations = self.objects.get_world_poses(active_ind)
@@ -122,7 +118,7 @@ class View():
             finish_ind = active_ind[t_error>0.3]
             if(len(finish_ind)>0):
                 self.test_finish(finish_ind)
-
+                
             # Implement slip
             te_slip = np.squeeze(t_error>0.02)
             R_current = quats_to_rot_matrices(np.squeeze(current_rotations))
@@ -135,12 +131,10 @@ class View():
             #print("s_ind", s_ind)
             s_ind=np.atleast_1d(s_ind)
             if(len(s_ind)>0):
-                
                 #print(self.current_job_IDs[s_ind])
                 #print(self.current_times[s_ind])
                 self.manager.report_slip(self.current_job_IDs[s_ind],self.current_times[s_ind])
                 self.reported_slips[s_ind] = 1
-            
             
         tmp_active = np.squeeze(self.current_job_IDs>=0)
         # Apply forces to seted up grasp
@@ -167,6 +161,8 @@ class View():
         #Apply actions
         current_dofs = self.grippers.get_joint_positions()
         actions = self.controller.forward('any', self.current_times, current_dofs, self.close_positions)
+        
+        
         self.grippers.apply_action(actions)
         
         #Update time

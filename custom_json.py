@@ -34,7 +34,7 @@ if __name__ == "__main__":
     for i,r in df.iterrows():
         print(r["grasps"]["dofs"])
 
-    #
+    df.to_json(output_path)
     
 
 
