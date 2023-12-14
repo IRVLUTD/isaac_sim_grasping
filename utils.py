@@ -5,12 +5,22 @@ import pickle
 #from omni.isaac.urdf import _urdf
 
 def load_pickle(fname):
+    """Loads pickle file from disk
+    
+    Args:
+        fname: path to file
+    """
     with open(fname, 'rb') as pf:
         data = pickle.load(pf)
     return data
 
 
 def InverseT(x):
+    """Returns the inverse of a Transformation Matrix (4x4)
+    
+    Args:
+        x: T matrix
+    """
     R = x[:3,:3]
     p = x[:,3][:3]
     RT = R.T
@@ -24,7 +34,7 @@ def InverseT(x):
 def import_urdf(manager, job):
     """ Import URDF from manager.grippers dictionary
 
-    Args: None
+    Args: -- DEPRICATED
     """
     #Adding a .urdf file
     urdf_interface = _urdf.acquire_urdf_interface()

@@ -18,9 +18,7 @@ import argparse
 #World Imports
 from omni.isaac.core import World
 from omni.isaac.core.utils.prims import define_prim
-from omni.isaac.cloner import Cloner    # import Cloner interface
 from omni.isaac.cloner import GridCloner    # import Cloner interface
-from pxr import Gf, Sdf, UsdPhysics
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
@@ -33,12 +31,20 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.prims.rigid_prim import RigidPrim 
 from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.articulations import Articulation
-from omni.isaac.core.utils.prims import get_prim_at_path, get_prim_children, get_prim_path, delete_prim
-from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matrix_from_pose, get_world_pose_from_relative
+from omni.isaac.core.utils.prims import get_prim_children, get_prim_path
+from omni.isaac.core.utils.transformations import pose_from_tf_matrix
 
 
 
 def import_gripper(work_path,usd_path, EF_axis):
+        """ Imports Gripper to World
+
+        Args: 
+            work_path: prim_path of workstation
+            usd_path: path to .usd file of gripper
+            EF_axis: End effector axis needed for proper positioning of gripper
+        
+        """
         T_EF = np.array([[1,0,0,0],
                         [0,1,0,0],
                         [0,0,1,0],
@@ -69,7 +75,6 @@ def import_gripper(work_path,usd_path, EF_axis):
                                 [0,1, 0,0],
                                 [0,0, 0,1]])
         #Robot Pose
-        #T_EF.astype(float)
         gripper_pose= pose_from_tf_matrix(T_EF.astype(float))
         
         # Adding Robot usd
@@ -80,6 +85,12 @@ def import_gripper(work_path,usd_path, EF_axis):
         return robot, T_EF
 
 def import_object(work_path, usd_path):
+    """ Import Object .usd to World
+
+    Args:
+        work_path: prim_path to workstation
+        usd_path: path to .usd file of object
+    """
     add_reference_to_stage(usd_path=usd_path, prim_path=work_path+"/object")
     object_parent = world.scene.add(GeometryPrim(prim_path = work_path+"/object", name="object"))
     l = get_prim_children(object_parent.prim)
@@ -96,6 +107,7 @@ def import_object(work_path, usd_path):
 
 
 def make_parser():
+    """ Input Parser """
     parser = argparse.ArgumentParser(description='Standalone script for grasp filtering.')
     parser.add_argument('--json_dir', type=str, help='Dir with Graspit Json Grasps', default='/home/ninad/isaac_sim_grasping/data/grasps/')
     parser.add_argument('--gripper_dir', type=str, help='Dir with Gripper urdf/usd', default='/home/ninad/isaac_sim_grasping/grippers/')
@@ -105,6 +117,7 @@ def make_parser():
 
 
 if __name__ == "__main__":
+    #Parser
     parser = make_parser()
     args = parser.parse_args()
     
@@ -123,10 +136,10 @@ if __name__ == "__main__":
     elif not os.path.exists(output_directory): 
         raise ValueError("Output directory not given correctly")
 
-    # Hyperparameters
+    # Testing Hyperparameters (More at manager.py)
     num_w = 5
-    test_time = 5
-    fall_threshold = 2 #Just for final print (Not in json)
+    test_time = 6
+    fall_threshold = 2.5 #Just for final print (Not in json)
     slip_threshold = 1 #Just for final print (Not in json)
 
     #Debugging
@@ -136,21 +149,19 @@ if __name__ == "__main__":
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
     
     for j in json_files:
+        #path to output .json file
         out_path = os.path.join(output_directory,j)
 
-        if(os.path.exists(out_path)):
+        if(os.path.exists(out_path)): #Skip completed
             continue
+
         # Initialize Manager
         manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory)   
-        # if manager.gripper == "Allegro":
-        #     continue
-        # elif manager.gripper=="shadow_hand":
-        #     continue
+
         #initialize World 
         world = World(set_defaults = False)
-        #world.scene.add_default_ground_plane(-1)
 
-        #Create initial Workstation
+        #Create initial Workstation Prim
         work_path = "/World/Workstation_0"
         work_prim = define_prim(work_path)
 
@@ -164,39 +175,34 @@ if __name__ == "__main__":
         object_parent, mass = import_object(work_path, manager.object_path)
         
         #Clone
-        offsets = np.asarray([0,0,-1])
-        #offsets = np.zeros((num_w-1,3)) *offsets
         cloner = GridCloner(spacing = 1)
         target_paths = []
         for i in range(num_w):
              target_paths.append(work_path[:-1]+str(i))
-        #print(target_paths)
         cloner.clone(source_prim_path = "/World/Workstation_0", prim_paths = target_paths,
                      copy_from_source = True, replicate_physics = True, base_env_path = "/World",
                      root_path = "/World/Workstation_")
 
+        # ISAAC SIM views initialization
         viewer = View(work_path,contact_names,num_w, manager,world, test_time, mass)
 
-        
-
         #Reset World and create set first robot positions
-        
-        #world.scene.add(viewer.grippers)
         world.reset()
-        #world.initialize_physics()
 
         # Translate DoFs and get new jobs (must be done after reset)
         print(robot.dof_names)
         manager.translate_dofs(robot.dof_names)
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
 
-        # Set desired physics_dt
+        # Set desired physics Context options
         physicsContext = world.get_physics_context()
         world.reset()
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
         physicsContext.set_gravity(0)
+        physicsContext.set_solver_type("PGS")
 
+        #Initialize views
         viewer.grippers.initialize(world.physics_sim_view)
         viewer.objects.initialize(world.physics_sim_view)
         viewer.post_reset()
@@ -206,13 +212,15 @@ if __name__ == "__main__":
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
                 world.step(render=render) # execute one physics step and one rendering step if not headless
-
-                if pbar.n != np.sum(manager.completed):
+                if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
         
+        # Pause world
         world.pause()
         #Save new json with results
         manager.save_json(out_path)
+
+        #Reset World
         world.clear_all_callbacks()
         world.clear()
         manager.report_results(fall_threshold,slip_threshold)

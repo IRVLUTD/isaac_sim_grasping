@@ -7,12 +7,15 @@ import json
 
 class Manager:
     """ Grasp Data Manager:
-    Makes sure everythin needed by Isaac Sim is present within the local directory and ensures that every grasp is tested.
+    Manages the information of all grippers, controllers and the reporting of results (Verbosity and saving)
+    This class takes in a specific .json structure, if it is desired to change the .json format, this is the place to make
+    the simulation compatible to the new format.
 
     Args:
-        graps_path: .json file containing the grasp information
+        grasps_path: .json file containing the grasp information.
         grippers_path: folder path for all the gripper .usd folders
         objects_path: folder path for all the object .urdf files
+        world: Isaac Sim World object
     """
     def __init__(self, grasps_path, grippers_path, objects_path,
                  world=None):
@@ -64,6 +67,10 @@ class Manager:
         self.reported_slips = np.zeros(len(self.grasps))
 
     def _init_gripper_dicts(self):
+        """ GRIPPER INFORMATION INITIALIZATION
+        Any new gripper should have its information added here
+        
+        """
         #End effector axis (+/- 1,2,3) x,y, z respectively
         self.EF_axes = {
             "fetch_gripper": 1,
@@ -82,7 +89,7 @@ class Manager:
         self.dts = {
             "fetch_gripper": 1/30,
             "franka_panda": 1/30,
-            "sawyer": 1/30,
+            "sawyer": 1/40,
             "wsg_50": 1/30,
             "Barrett": 1/50,
             "robotiq_3finger": 1/50,
@@ -92,17 +99,17 @@ class Manager:
             "HumanHand": 1/80
         }
 
-        #Controllers Information
+        #Controllers Used for specific grippers
         self.controllers= {
             "fetch_gripper" : PositionController,
-            "franka_panda": ForceController, 
-            "sawyer": ForceController,
-            "wsg_50": ForceController, 
-            "Barrett": ForceController,
-            "jaco_robot": ForceController,
-            "robotiq_3finger": ForceController,
-            "Allegro": ForceController,
-            "HumanHand": ForceController,
+            "franka_panda": PositionController, 
+            "sawyer": PositionController,
+            "wsg_50": PositionController, 
+            "Barrett": PositionController,
+            "jaco_robot": PositionController,
+            "robotiq_3finger": PositionController,
+            "Allegro": PositionController,
+            "HumanHand": PositionController,
             "shadow_hand": PositionController
         }
 
@@ -114,12 +121,13 @@ class Manager:
             "Barrett": [0, 0, 1, 1, 1, 0, 0, 0],
             "jaco_robot": [1, 1, 1],
             "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-            "Allegro": [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            "Allegro": [0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
             "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
 
-        self.contact_names= { #List of names of joints to check for collisions ** USE BASE XFORM OF MESHES
+        #List of names of joints to check for collisions it must be as specified in the .usd of the gripper
+        self.contact_names= { 
             "fetch_gripper" : ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
             "franka_panda": ["panda_hand", "panda_leftfinger", "panda_rightfinger"], 
             "sawyer": ["base_link", "leftfinger", "rightfinger"],
@@ -139,11 +147,12 @@ class Manager:
                             "ring_finger_knuckle", "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
                             "thumb_proximal", "thumb_middle", "thumb_distal"]
         }
-
-        self.contact_ths = { # Amount of contacts needed to count for grasp set up
+        
+        #Amount of contacts required for the grasp to be considered as ready
+        self.contact_ths = { 
             "fetch_gripper" : 1,
             "franka_panda": 1, 
-            "sawyer": 1,
+            "sawyer": 2,
             "wsg_50": 1, 
             "Barrett": 2,
             "jaco_robot": 2,
@@ -152,8 +161,10 @@ class Manager:
             "HumanHand": 2,
             "shadow_hand": 2
         }
+
+
     def _check_gripper_usd(self,gripper_path):
-        """ Check if the gripper usds are readable by program
+        """ Check if the gripper usd exist
 
             grippers_path: Path to directory containing all gripper files. Make sure every gripper.urdf is within a folder with the same name
         """
@@ -164,6 +175,7 @@ class Manager:
         else: 
             raise LookupError("Couldn't find gripper .usd file at " + self.gripper_path )
         return
+    
     def _check_object_usd(self,object_path):
         """ Check if the object usds are readable by program
         
@@ -179,7 +191,7 @@ class Manager:
         return
 
     def request_jobs(self, n):
-        """ Function used by workstations to request job
+        """ Function used by views.py to request job
         """
         job_IDs = []
         tmp = []
@@ -242,58 +254,64 @@ class Manager:
             robot_pos = self.dofs/1000.0
         else:
             raise(LookupError("No dof translation for gripper"))
-  #      print(self.dofs.shape)
-   #     print(robot_idx)
-    #    print(json_idx)
-     #   print(robot_pos)
-      #  print(robot_pos.shape)
+
         dof_dict = {json_idx[i]: robot_pos[:,i] for i in range(robot_pos.shape[1])}
         tmp = np.zeros_like(robot_pos)
         c = 0
-       # print(dof_dict)
+
         for i in robot_idx:
             tmp[:,c] = dof_dict[i] 
             c +=1
-       # print(robot_pos)
+
         robot_pos = np.squeeze(tmp)
         self.dofs = robot_pos
-      #  print(robot_pos)
+
         return robot_pos
 
     def report_fall(self, job_ID, value,test_type, test_time):
-        """ Reports fall
+        """ Reports falls of objects (used in view.py)
         
+        Args:
+            job_ID: IDs of workstations where objects fell
+            value: time of fall
+            test_type: controller information
+            test_time: total test time
         """
-        #print(job_ID,value,test_type,test_time)
+
         job_ID = np.squeeze(job_ID).astype(int)
         value = np.squeeze(value)
-        #print(job_ID,value)
-        #print(self.completed[job_ID])
 
         if(self.completed[job_ID].any()):
             pass
-            #print(job_ID)
-            #print(np.sum(self.completed))
         else:
             self.fall_time[job_ID] = value
             self.test_type[job_ID] = test_type
             self.total_test_time[job_ID] = test_time
             self.completed[job_ID]= 1
-            #print(" Reported ", job_ID, job_ID.shape)
+
         return
     
     def report_slip(self, job_ID, value):
-        """ Reports slip
+        """ Reports slip of objects (used in view.py)
         
+        Args:
+            job_ID: IDs of workstations where objects slipped
+            value: time of slip        
         """        
         job_ID = np.squeeze(job_ID).astype(int)
         value = np.squeeze(value)
         self.slip_time[job_ID] = value
         self.reported_slips[job_ID] = 1
-        #print(" Reported ", job_ID, job_ID.shape, value)
+
         return
     
     def save_json(self,output_path):
+        """ Saves json on disk
+
+        Args: 
+            out_path: path to save json at
+        
+        """
         print("Saving File at: ",output_path)
         self.json["test_type"] = self.test_type
         self.json["total_test_time"] = self.total_test_time
@@ -303,6 +321,12 @@ class Manager:
         return
 
     def report_results(self,ft, st):
+        """ Verbosity for results of .json file filter
+
+        Args:
+            ft: fall_threshold
+            st: slip_threshold
+        """
         print("Completed " + str(round(np.sum(self.completed),0))+ " out of " + str(len(self.completed)))
         passed = (self.fall_time > ft).sum()
         print("Total Test Time: " +str(self.total_test_time[0]))
@@ -312,17 +336,3 @@ class Manager:
         print("Slip Tests Passed (th = " +str(st)+ "): "+ str(passed))
         print("Mean: " +str(round(np.mean(self.slip_time),3)) + "-- Std: " +str(round(np.std(self.slip_time),3)) + "-- Variance: " +str(round(np.var(self.slip_time),3)))
         return
-    
-    
-
-
-
-if __name__ == "__main__":
-    json_path = "/home/felipe/Documents/isaac_sim_grasping/grasp_data/Grasps_dataset.json"
-    grippers_path = "/home/felipe/Documents/isaac_sim_grasping/grippers"
-    objects_path = "/home/felipe/Documents/isaac_sim_grasping/objects"
-
-    man = Manager(json_path, grippers_path, objects_path)
-    
-    print(man.gripper_names)
-    print(man.grasps.iloc[0])

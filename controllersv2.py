@@ -7,12 +7,15 @@ from omni.isaac.dynamic_control import _dynamic_control
 dc = _dynamic_control.acquire_dynamic_control_interface()
 
 class ForceController(BaseGripperController):
-    def __init__(self, close_mask, test_time, max_efforts):
+    def __init__(self, close_mask, test_time, max_efforts,robots):
         name = "Controller"
         super().__init__(name=name)
         self.close_mask = close_mask
         self.type = 'force_control_v0'
         self.total_time = test_time
+        ind = np.squeeze(np.argwhere(max_efforts[0]!=0))
+
+        robots.set_max_efforts(np.zeros_like(ind),joint_indices=ind.reshape((1,len(ind))))
         self.max_efforts = max_efforts
         return 
 
@@ -42,7 +45,7 @@ class ForceController(BaseGripperController):
 
 
 class PositionController(BaseGripperController):
-    def __init__(self, close_mask, test_time, max_efforts):
+    def __init__(self, close_mask, test_time, max_efforts, robots):
         name = "Controller"
         super().__init__(name=name)
         self.close_mask = close_mask
