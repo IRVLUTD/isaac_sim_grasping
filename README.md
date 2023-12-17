@@ -58,5 +58,5 @@ Add this arguments in command line:
 - The simulation supports a specific .json file format, if the format wants to be changed, the manager class must be editted.
 - Readability is very fragile for examples in Isaac Sim, you should only modify Test.py.
 - Don't use the stop button to reset example, instead use the reset below loading example.
-- Be sure to run render = False and "headless" option for config as True whe running standalone.
+- Be sure to run render = False and "headless" = True option for config as True whe running standalone.
 - Many Isaac Sim API functions were found to give the incorrect data when called, if errors arise when implementing new code beware of this fact.
