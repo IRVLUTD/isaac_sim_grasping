@@ -37,17 +37,6 @@ Import object to Isaac Sim with the use of the GUI and save as .usd.
 2) Add the .json files describing the object grasps to the grasps directory.
 3) Test the object's collider preferably by visualizing within the simulation.
 
-Notes: 
-- You can change the command to the different set_up files we have.
-- Need to run command from the issac sim directory, used 2023 Isaac Sim version
-- Deactivate conda if you have an active environment, it may cause some errors when running isaac sim
-- Always use complete paths, errors may occur otherwise
-- The simulation supports a specific .json file format, if the format wants to be changed, the manager class must be editted.
-- Readability is very fragile for examples in Isaac Sim, you should only modify Test.py.
-- Don't use the stop button to reset example, instead use the reset below loading example.
-- Be sure to run render = False and "headless" option for config as True whe running standalone.
-- Many Isaac Sim API functions were found to give the incorrect data when called, if errors arise when implementing new code beware of this fact.
-
 ## Isaac Sim Manual
 https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
 
@@ -63,3 +52,14 @@ Add this arguments in command line:
 
 ## Install Packages Using isaac sim python.sh
  ./python.sh -m pip install name_of_package_here
+
+ # Notes: 
+- You can change the command to the different set_up files we have.
+- Need to run command from the issac sim directory, used 2023 Isaac Sim version
+- Deactivate conda if you have an active environment, it may cause some errors when running isaac sim
+- Always use complete paths, errors may occur otherwise
+- The simulation supports a specific .json file format, if the format wants to be changed, the manager class must be editted.
+- Readability is very fragile for examples in Isaac Sim, you should only modify Test.py.
+- Don't use the stop button to reset example, instead use the reset below loading example.
+- Be sure to run render = False and "headless" option for config as True whe running standalone.
+- Many Isaac Sim API functions were found to give the incorrect data when called, if errors arise when implementing new code beware of this fact.
