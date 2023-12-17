@@ -37,23 +37,20 @@ Import object to Isaac Sim with the use of the GUI and save as .usd.
 2) Add the .json files describing the object grasps to the grasps directory.
 3) Test the object's collider preferably by visualizing within the simulation.
 
-## Isaac Sim Manual
+# Isaac Sim Manual
 https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
 
 ## Helpful code for python standalones (code snippet samples)
 https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
 
-## Command to run standalone:
- ./python.sh ~/Documents/isaac_sim_grasping/v2_standalone.py
-
-## Run without warnings 
+### Run standalone without warnings 
 Add this arguments in command line:
  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 
 ## Install Packages Using isaac sim python.sh
  ./python.sh -m pip install name_of_package_here
 
- # Notes: 
+ ## Notes: 
 - You can change the command to the different set_up files we have.
 - Need to run command from the issac sim directory, used 2023 Isaac Sim version
 - Deactivate conda if you have an active environment, it may cause some errors when running isaac sim
