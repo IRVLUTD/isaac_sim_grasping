@@ -113,6 +113,9 @@ def make_parser():
     parser.add_argument('--gripper_dir', type=str, help='Dir with Gripper urdf/usd', default='/home/ninad/isaac_sim_grasping/grippers/')
     parser.add_argument('--objects_dir', type=str, help='Dir with Object usd', default='/home/ninad/isaac_sim_grasping/data/object_usd/')
     parser.add_argument('--output_dir', type=str, help='Output dir for jsons', default='/home/ninad/isaac_sim_grasping/data/output/')
+    parser.add_argument('--/log/level', type=str, help='isaac sim args', default='')
+    parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim args', default='')
+    parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim args', default='')
     return parser
 
 
