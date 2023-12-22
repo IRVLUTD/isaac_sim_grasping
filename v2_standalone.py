@@ -218,12 +218,12 @@ if __name__ == "__main__":
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
         
-        # Pause world
-        world.pause()
+        
         #Save new json with results
         manager.save_json(out_path)
 
         #Reset World
+        world.stop()
         world.clear_all_callbacks()
         world.clear()
         manager.report_results(fall_threshold,slip_threshold)
