@@ -14,18 +14,19 @@ from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matric
 
 
 class View():
+    """ISAAC SIM VIEWS Class 
+    Facilitates the probing and the programming of the simulation. In this class you will find all the code of the simulation behavior.
+
+    Args:
+        work_path: prim_path of workstation prim
+        contact_names_expr: Names of gripper meshes to filter collisions from in the Isaac Sim format
+        num_w: Total number of workstations
+        manager: Manager class containing grasp information
+        world: Isaac Sim World object
+        test_time: Total test time of each test
+        mass: Mass of the object to test
+    """
     def __init__(self, work_path, contact_names_expr, num_w,  manager, world, test_time, mass):
-        """ISAAC SIM VIEWS Class 
-        Facilitates the probing and the programming of the simulation. In this class you will find all the code of the simulation behavior.
-        Args:
-            work_path: prim_path of workstation prim
-            contact_names_expr: Names of gripper meshes to filter collisions from in the ISAAC SIM FORMAT
-            num_w: Total number of workstations
-            manager: Manager class containing grasp information
-            world: Isaac Sim World object
-            test_time: Total test time of each test
-            mass: Mass of the object to test
-        """
         #Create Views
         self.objects = world.scene.add(
             RigidPrimView(
@@ -40,7 +41,7 @@ class View():
                 prim_paths_expr = work_path[:-1]+"*"+"/gripper",
                 reset_xform_properties = False))
 
-        # Initialize
+        # Initialize Variables
         self.num_w = num_w
         self.test_time = test_time
         self.work_path = work_path
@@ -62,12 +63,16 @@ class View():
         world.add_physics_callback("physics_steps", callback_fn=self.physics_step)
         
     def get_jobs(self,n):
-        """Request jobs from manager class"""
+        """Request jobs from manager class
+        
+        Args:
+            n: number of jobs to request
+        """
         dofs, poses, job_IDs = self.manager.request_jobs(n)
         return dofs, poses, job_IDs
     
     def post_reset(self):
-        """ Code that needs to run after the reset of the world (dependent on the existence of physics context)"""
+        """ Code that needs to run after the reset of the world (dependent on the existence of physics context object)"""
         # Set grippers dofs
         self.grippers.set_joint_positions(self.dofs)
 
@@ -110,11 +115,14 @@ class View():
         return
     
     def physics_step(self,step_size):
+        """ Function runs before every physics frame
+
+        step_size: time since last physics step. Depends on physics_dt
+        """
         #Check  for active workstations
         active_ind = np.argwhere(self.current_job_IDs>=0) #ws indices
-
         if(len(active_ind)>0):
-            # Calculate errors for fall and slips
+            # Calculate falls
             current_positions, current_rotations = self.objects.get_world_poses(active_ind)
             t_error = abs(te_batch(self.init_positions[active_ind], current_positions))
             
@@ -123,7 +131,7 @@ class View():
             if(len(finish_ind)>0):
                 self.test_finish(finish_ind)
                 
-            # Implement slip
+            # Calculate slips
             te_slip = np.squeeze(t_error>0.02)
             R_current = quats_to_rot_matrices(np.squeeze(current_rotations))
             R_init = quats_to_rot_matrices(np.squeeze(self.init_rotations[active_ind]))
@@ -138,14 +146,14 @@ class View():
                 self.manager.report_slip(self.current_job_IDs[s_ind],self.current_times[s_ind])
                 self.reported_slips[s_ind] = 1
             
-        # Apply forces to ready grasps
+        # Apply gravity to ready grasps
         tmp_active = np.squeeze(self.current_job_IDs>=0)
         g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0]
         if (len(g_ind)>0):
             self.gravities[g_ind] = self.gravity
         self.objects.apply_forces(self.gravities)
 
-        # Rigid Body Probing, mark as ready
+        # Rigid Body Probing, mark grasps as ready
         rb_ind = np.argwhere(np.multiply(np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0]
         if (len(rb_ind)>0):
             self.objects.set_velocities([0,0,0,0,0,0],rb_ind) 
@@ -156,22 +164,22 @@ class View():
             self.current_times[rb_ind[tmp>=self.manager.contact_th]]=0
             self.grasp_set_up[rb_ind[tmp>=self.manager.contact_th]]=1
 
-        #Apply actions
+        # Apply gripper actions
         current_dofs = self.grippers.get_joint_positions()
         set_up_timers = np.zeros_like(self.current_times)
         set_up_timers[g_ind]= self.current_times[g_ind]
         actions = self.controller.forward('any', set_up_timers, current_dofs, self.close_positions)
         self.grippers.apply_action(actions)
         
-        #Update time
+        # Update time
         self.current_times += step_size
 
-        #End of testing time
+        # End of testing time
         time_ind = np.argwhere(np.multiply(np.squeeze((self.current_times>self.test_time)),tmp_active))[:,0]
         if (len(time_ind)>0):
             self.test_finish(time_ind)
 
-        #Failed grasps 
+        # Failed grasps; gripper never touched object
         failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=0.5), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
         if(len(failed_ind)>0): 
             self.current_times[failed_ind] = -1
@@ -179,6 +187,11 @@ class View():
         return
     
     def test_finish(self, finish_ind):
+        """ Function to reset workstations after tests are finished
+        
+        Args:
+            finished_ind: IDs of Workstations that completed the test.
+        """
         finish_ind=np.atleast_1d(np.squeeze(finish_ind))
 
         #Report Fall
