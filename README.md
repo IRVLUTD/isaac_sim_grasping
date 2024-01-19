@@ -1,8 +1,17 @@
 # isaac_sim_grasping
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif)
-Graspit generated grasps filtered with simulations in Isaac Sim. Simulation standalone executable is the v2_standalone.py file, a command to run the simulation is shown below. The standalone takes in the directories of the .json files describing the GraspIt grasps, the directory for the gripper .usd files, the directory for the objects .usd files and the output where to save the simulation results. The simulation loads the grasps described within one .json file, loads the corresponding gripper-object pair and tries to grasp the object with the specified controller for the gripper (Manager class). The simulation then gets the corresponding slip and fall times of the objects when realizing the grasps. Failed grasps will be given a negative fall time (-1). The Simulation iterates through all .json files and skips any already existing in the output_dir. 
+Simulation based grasp filter. This repository contains a grasp filter developed using Isaac Sim, it has the objective of testing generated grasps for a large amount of objects and grippers. In our case, the grasps tested were generated using GraspIt. These grasps were found to be of varied quality; upon close inspection many grasps could easily been classified as suboptimal grasps or failed grasps. Consequently, this simulation was created to evaluate the different grasps, creating multiple metrics with which they could be filtered and thus providing a large dataset of tested grasps that could be used for different purposes. Each grasp information consists of the relative pose between the object and gripper, as well as the dof information of the gripper. 
 
-## Files used for simulation
+The simulation can use any gripper and object provided they are prepared correctly and transformed to a .usd format for Isaac Sim. It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps in. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the times are recorded and then saved to the output file. Any failed grasps will be recorded as a negative "fall time". Additionally, the slip metric was implemented by calculating the moment begins to slip from the grasp of the gripper.
+
+A standalone executable (standalone.py file) for the simulation is within the repository; a command to run the simulation is shown below. The standalone takes as input:
+- grasp data directory (.json file)
+- gripper directory (folder containing all the gripper .usd files)
+- object directory (folder containing all the object .usd files)
+- output directory (directory to save the outputed .json file)
+- 
+
+## Repository Structure
 1) v2_standalone.py: standalone executable
 2) views.py: Simulation's behavioral code, contains View Class
 3) managerv2.py: contains gripper information and the reporting of results, contains Manager class
