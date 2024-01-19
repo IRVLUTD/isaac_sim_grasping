@@ -6,7 +6,7 @@ Simulation based grasp filter. This repository contains a grasp filter developed
 The simulation can use any gripper and object provided they are prepared correctly and transformed to a .usd format for Isaac Sim. It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps in. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the times are recorded and then saved to the output file. Any failed grasps will be recorded as a negative "fall time". Additionally, the slip metric was implemented by calculating the moment begins to slip from the grasp of the gripper.
 
 ### Parameters and Inputs
-A standalone executable (standalone.py file) for the simulation is within the repository; a command to run the simulation is shown below. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory.
+A standalone executable (standalone.py file) for the simulation is within the repository; a command to run the simulation is shown below. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory. For this simulation Isaac Sim 2023.1.0 was used.
 
 
 ./python.sh (standalone folder)/standalone.py --json_dir=(json folder)/obj8 --gripper_dir=(repo directory)/grippers --objects_dir=(object directory) --output_dir=(output directory) --num_w=300 --test_time=6 --controller=position --headless --print_results
@@ -55,26 +55,18 @@ Import object to Isaac Sim with the use of the GUI and save as .usd.
 2) Add the .json files describing the object grasps to the grasps directory.
 3) Test the object's collider preferably by visualizing within the simulation.
 
-# Isaac Sim Manual
-https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
+### More Documentation
+- Add Grippers
+- Add Objects
+- Add Controllers
 
-## Helpful code for python standalones (code snippet samples)
-https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
+### Helpful Links
+- Isaac Sim Manual: https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
+- Helpful code for python standalones (code snippet samples): https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
+- Installing Packages for use with isaac sim python.sh: https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_python.html
 
-### Run standalone without warnings 
-Add this arguments in command line:
-
-
-## Install Packages Using isaac sim python.sh
- ./python.sh -m pip install name_of_package_here
-
- ## Notes: 
-- You can change the command to the different set_up files we have.
-- Need to run command from the issac sim directory, used 2023 Isaac Sim version
-- Deactivate conda if you have an active environment, it may cause some errors when running isaac sim
-- Always use complete paths, errors may occur otherwise
-- The simulation supports a specific .json file format, if the format wants to be changed, the manager class must be editted.
-- Readability is very fragile for examples in Isaac Sim, you should only modify Test.py.
-- Don't use the stop button to reset example, instead use the reset below loading example.
-- Be sure to run render = False and "headless" = True option for config as True whe running standalone.
-- Many Isaac Sim API functions were found to give the incorrect data when called, if errors arise when implementing new code beware of this fact.
+### Notes: 
+- Deactivate conda if you have an active environment, it may cause some errors when running isaac sim.
+- Always use complete paths for the directories, errors may occur otherwise
+- The simulation supports a specific .json file format, to change or add compatibility to other formats the manager class within manager.py must be editted.
+- Many Isaac Sim API functions were found to give the incorrect data when called, if errors arise when implementing new code beware of this.
