@@ -1,20 +1,11 @@
 # isaac_sim_grasping
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif)
 Simulation based grasp filter. This repository contains a grasp filter developed using Isaac Sim, it has the objective of testing generated grasps for a large amount of objects and grippers. In our case, the grasps tested were generated using GraspIt. These grasps were found to be of varied quality; upon close inspection many grasps could easily been classified as suboptimal grasps or failed grasps. Consequently, this simulation was created to evaluate the different grasps, creating multiple metrics with which they could be filtered and thus providing a large dataset of tested grasps that could be used for different purposes. Each grasp information consists of the relative pose between the object and gripper, as well as the Degree of Freedom (DoF) information of the gripper. 
-
-## Repository Structure
-1) standalone.py: standalone executable
-2) views.py: Simulation's behavioral code.
-3) manager.py: contains grasp information and the reporting of results
-4) controllers.py: Programmed gripper controllers to test with
-5) utils.py: general utility functions
-6) Helpful Scripts: Scripts found to be useful when developing simulations in Isaac Sim
-7) grippers: gripper .usd files
    
 ## Simulation Behavior
 The simulation can use any gripper and object provided they are prepared correctly and transformed to a .usd format for Isaac Sim. It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps in. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the times are recorded and then saved to the output file. Any failed grasps will be recorded as a negative "fall time". Additionally, the slip metric was implemented by calculating the moment begins to slip from the grasp of the gripper.
 
-# Parameters and Inputs
+### Parameters and Inputs
 A standalone executable (standalone.py file) for the simulation is within the repository; a command to run the simulation is shown below. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory.
 
 
@@ -33,6 +24,16 @@ The standalone takes as input:
 
 Note: To run the simulation without warning add the following parameters to the command: 
  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+
+## Repository Structure
+1) standalone.py: standalone executable
+2) views.py: Simulation's behavioral code.
+3) manager.py: contains grasp information and the reporting of results
+4) controllers.py: Programmed gripper controllers to test with
+5) utils.py: general utility functions
+6) Helpful Scripts: Scripts found to be useful when developing simulations in Isaac Sim
+7) grippers: gripper .usd files
+
 
 # Adding Grippers
 Import the grippers to Isaac Sim using the GUI and save them as .usd in the gripper directory exactly the same way as the other grippers. The .usd grippers must be tested and made ready for use within the simulation. To do so the user_examples folder was added to the repository. You should copy it to "~/.local/share/ov/pkg/isaac_sim-2022.2.1/exts/omni.isaac.examples/omni/isaac/examples" that way it can be loaded and used to test .usd files faster with the GUI. To load in the GUI go to the Isaac Examples tab >  ScratchPad > Testing.
