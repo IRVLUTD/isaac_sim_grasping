@@ -1,31 +1,38 @@
 # isaac_sim_grasping
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif)
-Simulation based grasp filter. This repository contains a grasp filter developed using Isaac Sim, it has the objective of testing generated grasps for a large amount of objects and grippers. In our case, the grasps tested were generated using GraspIt. These grasps were found to be of varied quality; upon close inspection many grasps could easily been classified as suboptimal grasps or failed grasps. Consequently, this simulation was created to evaluate the different grasps, creating multiple metrics with which they could be filtered and thus providing a large dataset of tested grasps that could be used for different purposes. Each grasp information consists of the relative pose between the object and gripper, as well as the dof information of the gripper. 
+Simulation based grasp filter. This repository contains a grasp filter developed using Isaac Sim, it has the objective of testing generated grasps for a large amount of objects and grippers. In our case, the grasps tested were generated using GraspIt. These grasps were found to be of varied quality; upon close inspection many grasps could easily been classified as suboptimal grasps or failed grasps. Consequently, this simulation was created to evaluate the different grasps, creating multiple metrics with which they could be filtered and thus providing a large dataset of tested grasps that could be used for different purposes. Each grasp information consists of the relative pose between the object and gripper, as well as the Degree of Freedom (DoF) information of the gripper. 
 
+## Repository Structure
+1) standalone.py: standalone executable
+2) views.py: Simulation's behavioral code.
+3) manager.py: contains grasp information and the reporting of results
+4) controllers.py: Programmed gripper controllers to test with
+5) utils.py: general utility functions
+6) Helpful Scripts: Scripts found to be useful when developing simulations in Isaac Sim
+7) grippers: gripper .usd files
+   
+## Simulation Behavior
 The simulation can use any gripper and object provided they are prepared correctly and transformed to a .usd format for Isaac Sim. It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps in. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the times are recorded and then saved to the output file. Any failed grasps will be recorded as a negative "fall time". Additionally, the slip metric was implemented by calculating the moment begins to slip from the grasp of the gripper.
 
-A standalone executable (standalone.py file) for the simulation is within the repository; a command to run the simulation is shown below. The standalone takes as input:
+# Parameters and Inputs
+A standalone executable (standalone.py file) for the simulation is within the repository; a command to run the simulation is shown below. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory.
+
+
+./python.sh (standalone folder)/standalone.py --json_dir=(json folder)/obj8 --gripper_dir=(repo directory)/grippers --objects_dir=(object directory) --output_dir=(output directory) --num_w=300 --test_time=6 --controller=position --headless --print_results
+
+The standalone takes as input:
 - grasp data directory (.json file)
 - gripper directory (folder containing all the gripper .usd files)
 - object directory (folder containing all the object .usd files)
 - output directory (directory to save the outputed .json file)
-- 
+- num_w: Number of Workstations to run the simulation with (gripper, object pair) (default: 150)
+- test_time: total test time for each grasp test (default:6).
+- controller: controller reference (within controllers.py)
+- (Optional) print_results: Verbosity of standalone after finishing one .json file.
+- (Optional) headless: Run the simulation headless
 
-## Repository Structure
-1) v2_standalone.py: standalone executable
-2) views.py: Simulation's behavioral code, contains View Class
-3) managerv2.py: contains gripper information and the reporting of results, contains Manager class
-4) controllersv2.py: gripper controllers
-5) utils.py: general utility functions
-
-## Simulation Hyperparameters (within standalone executable)
-- num_w: Number of Workstations to run the simulation with (gripper, object pair)
-- test_time: total test time for each grasp.
-- fall_threshold: Verbosity fall threshold to consider the grasped as passed (doesn't affect output file)
-- slip_threshold: Verbosity slip threshold to consider the grasped as passed (doesn't affect output file)
-
-## Complete command to run v2_standalone.py 
- ./python.sh /home/felipe/Documents/isaac_sim_grasping/v2_standalone.py --json_dir=/home/felipe/Documents/GoogleScannedObjects_10Grippers-selected/obj8 --gripper_dir=/home/felipe/Documents/isaac_sim_grasping/grippers --objects_dir=/home/felipe/Documents/GoogleScannedObjects_USD --output_dir=/home/felipe/Documents/GoogleScannedObjects_10Grippers-selected/obj8_filtered
+Note: To run the simulation without warning add the following parameters to the command: 
+ --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 
 # Adding Grippers
 Import the grippers to Isaac Sim using the GUI and save them as .usd in the gripper directory exactly the same way as the other grippers. The .usd grippers must be tested and made ready for use within the simulation. To do so the user_examples folder was added to the repository. You should copy it to "~/.local/share/ov/pkg/isaac_sim-2022.2.1/exts/omni.isaac.examples/omni/isaac/examples" that way it can be loaded and used to test .usd files faster with the GUI. To load in the GUI go to the Isaac Examples tab >  ScratchPad > Testing.
@@ -55,7 +62,7 @@ https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
 
 ### Run standalone without warnings 
 Add this arguments in command line:
- --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+
 
 ## Install Packages Using isaac sim python.sh
  ./python.sh -m pip install name_of_package_here
