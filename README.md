@@ -38,9 +38,9 @@ Note: To run the simulation without warnings add the following parameters to the
 7) grippers: gripper .usd files
 
 ### More Documentation
-- Add Grippers
-- Add Objects
-- Add Controllers
+- [Adding a new Gripper](docs/add_grippers.md)
+- [Adding a new Object](docs/add_objects.md)
+- [Create a new Controller](docs/create_new_controller.md)
 
 ### Helpful Links
 - Isaac Sim Manual: https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
