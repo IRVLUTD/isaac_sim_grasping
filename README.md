@@ -49,6 +49,19 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/4d1695831defc6b71d90b0ea6d7a1
 - DoF Data: vector containing the DoF information of the grasps. Note: the order of the DoF may change from software to software, a "translation" may be needed to ensure that the grasps are loaded correctly.
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/4d1695831defc6b71d90b0ea6d7a1d03f34c1346/manager.py#L30-L41
 
+#### Running with Head
+To run the simulation headless the "--headless" option must be omitted from the running command. This mode is generally used to visualize the correct behavior of the simulation, be sure to reduce the amount of workstations in the simulation; it may ease inspection. Furthermore, with Isaac Sim 2023.1.0 the standalones launch without any default lighting, you can easily turn it off after the simulation set up. 
+
+![](media/head.gif)
+
+#### Running Headless
+Alternatively, the simulation can be ran on headless mode, which would speed up testing considerably. 
+
+![](media/headless.gif)
+Both modes include a progression bar that offers realtime information about the simulation (the amount of grasps completed). Futhermore, if the "--print_results" option was selected when running the standalone after the grasps are completed, statistical information is offered about the grasps testes, i.e minimum and maximum fall time and slip time recorded.
+
+![](media/print_results.png)
+
 ### More Documentation
 - [Adding a new Gripper](docs/add_grippers.md)
 - [Adding a new Object](docs/add_objects.md)
