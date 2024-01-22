@@ -8,7 +8,7 @@ The simulation can use any gripper and object provided they are prepared correct
 
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/fetch_Nestle.gif)
 
-## Important Files/Folders description
+### Important Files/Folders description
 1) standalone.py: standalone executable
 2) views.py: Simulation's behavioral code.
 3) manager.py: contains grasp information and the reporting of results
