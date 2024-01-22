@@ -9,13 +9,13 @@ The simulation can use any gripper and object provided they are prepared correct
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/fetch_Nestle.gif)
 
 ### Important Files/Folders description
-1) standalone.py: standalone executable
+1) standalone.py: Standalone executable
 2) views.py: Simulation's behavioral code.
-3) manager.py: contains grasp information and the reporting of results
-4) controllers.py: Programmed gripper controllers to test with
-5) utils.py: general utility functions
+3) manager.py: Contains grasp information and the reporting of results
+4) controllers.py: Developed gripper controllers
+5) utils.py: General utility functions
 6) Helpful Scripts: Scripts found to be useful when developing simulations in Isaac Sim
-7) grippers: gripper .usd files
+7) grippers: Gripper .usd files
 
 
 ## Parameters and Inputs
