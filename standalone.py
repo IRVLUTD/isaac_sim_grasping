@@ -20,9 +20,9 @@ def make_parser():
     parser.add_argument('--controller', type=str,
                         help='Gripper Controller to use while testing, should match the controller dictionary in the Manager Class',
                         default='default')
-    parser.add_argument('--/log/level', type=str, help='isaac sim logging arguments', default='')
-    parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim logging arguments', default='')
-    parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='')
+    parser.add_argument('--/log/level', type=str, help='isaac sim logging arguments', default='', required=False)
+    parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim logging arguments', default='', required=False)
+    parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='', required=False)
     return parser
 
 #Parser
@@ -64,7 +64,7 @@ from omni.isaac.core.utils.transformations import pose_from_tf_matrix
 def import_gripper(work_path,usd_path, EF_axis):
         """ Imports Gripper to World
 
-        Args: 
+        Args:
             work_path: prim_path of workstation
             usd_path: path to .usd file of gripper
             EF_axis: End effector axis needed for proper positioning of gripper
