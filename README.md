@@ -4,6 +4,8 @@ Simulation based grasp filter. This repository contains a grasp filter developed
    
 ## Simulation Behavior
 The simulation can use any gripper and object provided they are prepared correctly (See the documentation to add grippers and objects). It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the time they took to fall is recorded and then saved to the output file. Any failed grasps will be recorded as a negative "fall time" value. Additionally, a "slip time" metric was implemented by calculating the moment the object begins to slip from the grasp of the gripper. Once the grasp test is completed, the workstation will reset and load a new grasp for testing. When all the grasps are finished, the output file is saved, the complete simulation will reset and a new file loaded.
+
+
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/fetch_Nestle.gif)
 
 
