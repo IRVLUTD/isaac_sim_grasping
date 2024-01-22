@@ -1,12 +1,10 @@
 # Adding Grippers
-Import the grippers to Isaac Sim using the GUI and save them as .usd in the gripper directory exactly the same way as the other grippers in [the gripper folder](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/grippers). The .usd grippers must be tested and made ready for use within the simulation. To make things faster we recommend the use of a GUI user example as instructed in the [Isaac Sim Manual](https://docs.omniverse.nvidia.com/isaacsim/latest/core_api_tutorials/tutorial_core_hello_world.html).
+Import the grippers to Isaac Sim using the GUI and save them as .usd in the gripper directory. It should be exactly the same way as the [other grippers](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/grippers). The .usd grippers must be tested and made ready for use within the simulation. To make things faster we recommend the use of a GUI user example as instructed in the [Isaac Sim Manual](https://docs.omniverse.nvidia.com/isaacsim/latest/core_api_tutorials/tutorial_core_hello_world.html).
 
 
 ## Steps to Add grippers:
-1) Prepare Gripper .usd (Import .urdf and makes sure it has its correct max efforts, max joint velocities, colliders, etc.). Go to Isaac Utils > Workflows > URDF Importer.
-
+1) Prepare Gripper .usd (Import .urdf and makes sure it has its correct attributes, i.e. max efforts, max joint velocities, colliders, etc.). For .urdf files go to Isaac Utils > Workflows > URDF Importer.
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG1.png)
-
 
 
 3) Add the corresponding entries to the manager._init_gripper_dicts() function in [manager.py](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/manager.py).
@@ -22,7 +20,6 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L118-L138
 - contact_ths: contacts needed to inialize grasp and activate gravity.
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L140-L152
-
 
 
 3) Visualize the simuilation of the gripper to make sure everything is working correctly (reduce the amount of workstations to make iterating easier).
