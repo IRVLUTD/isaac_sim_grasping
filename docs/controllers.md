@@ -32,7 +32,7 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/60cf1868e92ce86115bf098ea2ca2
 
 The simplest of both controllers is the position based controller denominated as "PositionController" and accessible in the simulation with the "position" keyword. The controller simply gets the "close_position" and transforms it to an ArticulationActions object for the use in Isaac Sim. The resulting behavior is the movement of the gripper DoF to the final "closing position" denoted by the close_mask and the DoF range.
 
-![]([media/PC.gif](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/PC.gif))
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/PC.gif)
 
 ### Force-based Controller
 
