@@ -16,5 +16,5 @@ Note: the directories used by Isaac Sim may become invalid when using objects tr
 
 Important: the standalone checks for the objects .usd files within a directory with a specific structure: 
 
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L167C4-L179
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L167-L179
 
