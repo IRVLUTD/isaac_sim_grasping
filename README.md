@@ -1,4 +1,5 @@
 # isaac_sim_grasping
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif)
 Graspit generated grasps filtered with simulations in Isaac Sim. Simulation standalone executable is the v2_standalone.py file, a command to run the simulation is shown below. The standalone takes in the directories of the .json files describing the GraspIt grasps, the directory for the gripper .usd files, the directory for the objects .usd files and the output where to save the simulation results. The simulation loads the grasps described within one .json file, loads the corresponding gripper-object pair and tries to grasp the object with the specified controller for the gripper (Manager class). The simulation then gets the corresponding slip and fall times of the objects when realizing the grasps. Failed grasps will be given a negative fall time (-1). The Simulation iterates through all .json files and skips any already existing in the output_dir. 
 
 ## Files used for simulation

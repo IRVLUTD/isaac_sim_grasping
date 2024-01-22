@@ -153,7 +153,7 @@ if __name__ == "__main__":
     test_time = args.test_time
     verbose = args.print_results
     controller = args.controller
-    physics_dt = 1/120
+    #physics_dt = 1/120
 
 
     #Debugging
@@ -211,7 +211,7 @@ if __name__ == "__main__":
         # Set desired physics Context options
         physicsContext = world.get_physics_context()
         world.reset()
-        physicsContext.set_physics_dt(physics_dt)
+        physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
         physicsContext.set_gravity(0)
         physicsContext.set_solver_type("PGS")
