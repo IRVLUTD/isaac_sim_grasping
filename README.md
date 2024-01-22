@@ -58,7 +58,7 @@ To visualize the simulation while running, the "--headless" option must be omitt
 Alternatively, the simulation can be ran on headless mode, which would speed up testing considerably. 
 
 ![](media/headless.gif)
-Both modes include a progression bar that offers realtime information about the simulation (the amount of grasps completed). Futhermore, if the "--print_results" option was selected when running the standalone after the grasps are completed, statistical information is offered about the grasps testes, i.e minimum and maximum fall time and slip time recorded.
+Both modes include a progression bar that offers realtime information about the simulation (the amount of grasps completed). Futhermore, if the "--print_results" option was selected, statistical information about the grasps is printed, i.e minimum and maximum fall time and slip time recorded.
 
 ![](media/print_results.png)
 
