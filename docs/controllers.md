@@ -21,9 +21,10 @@ Forward function:
 - current_dofs: DoF values of the robot.
 - close_position: Final DoF values that describe the closing position of the gripper. It is calculated within view.py view.post_reset() function.
 
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/60cf1868e92ce86115bf098ea2ca284fd31c417c/views.py#L92-L110
 
 ### Position-based Controller
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/2f8a1e4c157f845479608b8ecf255112bf00190f/controllers.py#L55-L86
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/60cf1868e92ce86115bf098ea2ca284fd31c417c/controllers.py#L54-L80
 
 The simplest of both controllers is the position based controller denominated as "PositionController" and accessible in the simulation with the "position" keyword. This controller 
 
