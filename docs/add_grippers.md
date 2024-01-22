@@ -9,7 +9,9 @@ Import the grippers to Isaac Sim using the GUI and save them as .usd in the grip
 
 
 
-3) Add the corresponding entries to the manager._init_gripper_dicts() function in [manager.py](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/manager.py). The dictionaries are as follows:
+3) Add the corresponding entries to the manager._init_gripper_dicts() function in [manager.py](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/manager.py).
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L71-L75
+The dictionaries are as follows:
 - EF_axis: Axis where the gripper end effector is pointing to.
 - dts: physics_dt to run the gripper's simulations (for faster simulations we can increase this values, but it is limited by the gripper's complexity, for high complexity a small dt is required). Test and visualize the dts before running filters.
 - close_dir: dofs and directions used to close the gripper
