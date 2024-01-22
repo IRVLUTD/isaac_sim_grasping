@@ -50,7 +50,7 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/4d1695831defc6b71d90b0ea6d7a1
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/4d1695831defc6b71d90b0ea6d7a1d03f34c1346/manager.py#L30-L41
 
 #### Running with Head
-To run the simulation headless the "--headless" option must be omitted from the running command. This mode is generally used to visualize the correct behavior of the simulation, be sure to reduce the amount of workstations in the simulation; it may ease inspection. Furthermore, with Isaac Sim 2023.1.0 the standalones launch without any default lighting, you can easily turn it off after the simulation set up. 
+To visualize the simulation while running, the "--headless" option must be omitted from the running command. This mode is generally used to visualize the correct behavior of the simulation, be sure to reduce the amount of workstations in the simulation; it may ease inspection. Furthermore, with Isaac Sim 2023.1.0 the standalones launch without any default lighting, you can easily turn it off after the simulation set up. 
 
 ![](media/head.gif)
 
