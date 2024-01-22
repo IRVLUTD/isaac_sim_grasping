@@ -26,13 +26,13 @@ A standalone executable (standalone.py file) for the simulation is within the re
 
 
 The standalone.py takes as input:
-- json_dir: grasp data directory (.json file)
-- gripper_dir: gripper directory (folder containing all the gripper .usd files)
-- objects_dir: object directory (folder containing all the object .usd files)
-- output_dir: output directory (directory to save the outputed .json file)
+- json_dir: Grasp data directory (.json file)
+- gripper_dir: Gripper directory (folder containing all the gripper .usd files)
+- objects_dir: Object directory (folder containing all the object .usd files)
+- output_dir: Output directory (directory to save the outputed .json file)
 - num_w: Number of Workstations to run the simulation with (gripper, object pair) (default: 150)
-- test_time: total test time for each grasp test (default:6).
-- controller: controller reference (within controllers.py)
+- test_time: Total test time for each grasp test (default:6).
+- controller: Controller reference (within controllers.py)
 - (Optional) print_results: Verbosity of standalone after finishing one .json file.
 - (Optional) headless: Run the simulation headless
 
