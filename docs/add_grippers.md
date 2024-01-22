@@ -4,10 +4,12 @@ Import the grippers to Isaac Sim using the GUI and save them as .usd in the grip
 
 ## Steps to Add grippers:
 1) Prepare Gripper .usd (Import .urdf and makes sure it has its correct attributes, i.e. max efforts, max joint velocities, colliders, etc.). For .urdf files go to Isaac Utils > Workflows > URDF Importer.
+
+
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG1.png)
 
 
-3) Add the corresponding entries to the manager._init_gripper_dicts() function in [manager.py](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/manager.py).
+2) Add the corresponding entries to the manager._init_gripper_dicts() function in [manager.py](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/manager.py).
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L71-L75
 The dictionaries are as follows:
 - EF_axis: Axis where the gripper end effector is pointing to.
@@ -23,4 +25,6 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129
 
 
 3) Visualize the simuilation of the gripper to make sure everything is working correctly (reduce the amount of workstations to make iterating easier).
+
+
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG2.png)
