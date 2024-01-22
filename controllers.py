@@ -52,7 +52,7 @@ class ForceController(BaseGripperController):
         return actions
 
 class PositionController(BaseGripperController):
-    """ Force Controller Version 0
+    """ Position Controller Version 0
 
     Args:
         close_mask: dofs directions to close grippers 
