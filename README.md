@@ -41,7 +41,7 @@ Note: To run the simulation without warnings add the following parameters to the
  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 
 ### Running the Simulation
-As of this version the simulation uses a specific .json structure an example is available at [sample.json](sample.json). Nonetheless, it can be easily adapted to use a different. The [manager.py](manager.py) file is the responsible for reading and transforming the relevant grasp information to the format used by the program. The information is:
+As of this version, the simulation uses a specific .json structure an example is available at [sample.json](sample.json). Nonetheless, it can be easily adapted to use a different. The [manager.py](manager.py) file is the responsible for reading and transforming the relevant grasp information to the format used by the program. The information is:
 - The gripper name: Must be exactly the name with which the gripper is saved within the gripper directory.
 - The object name: Must be exactly the name with which the object is saved within the object directory.
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/4d1695831defc6b71d90b0ea6d7a1d03f34c1346/manager.py#L26-L28
