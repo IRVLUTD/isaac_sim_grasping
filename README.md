@@ -70,7 +70,7 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/14585b9e2868345c8d28c72b3d974
 ### More Documentation
 - [Adding a new Gripper](docs/add_grippers.md)
 - [Adding a new Object](docs/add_objects.md)
-- [Available Gripper Controllers](docs/create_new_controller.md)
+- [Available Gripper Controllers](docs/controllers.md)
 
 ### Helpful Links
 - Isaac Sim Manual: https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
