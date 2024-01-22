@@ -29,6 +29,6 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129
 
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG2.png)
 
-Important: the code accepts reads the gripper .usd files within directories with a specific structure:
+Important: the code reads the gripper .usd files within directories with a specific structure:
 
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L154-L165
