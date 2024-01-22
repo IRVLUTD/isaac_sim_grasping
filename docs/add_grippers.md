@@ -24,7 +24,7 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L140-L152
 
 
-3) Visualize the simuilation of the gripper to make sure everything is working correctly (reduce the amount of workstations to make iterating easier).
+3) Visualize the simulation of the gripper to make sure everything is working correctly (reduce the amount of workstations to make iterating easier).
 
 
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG2.png)
