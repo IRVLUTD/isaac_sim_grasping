@@ -19,14 +19,23 @@ Forward function:
 - action: Isaac Sim convention (string describing if it is a closing or opening action)
 - time: current time since the test started.
 - current_dofs: DoF values of the robot.
-- close_position: Final DoF values that describe the closing position of the gripper. It is calculated within view.py view.post_reset() function.
+- close_position: Final DoF values that describe the closing position of the gripper. It is calculated within view.py view.post_reset() function using the close_mask.
 
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/60cf1868e92ce86115bf098ea2ca284fd31c417c/views.py#L92-L110
+
+Note: For new controllers the reference must be added to the controller_dict.
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/8fd80be3deeed952552cc2620223ed839cdc788a/controllers.py#L82-L89
+
 
 ### Position-based Controller
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/60cf1868e92ce86115bf098ea2ca284fd31c417c/controllers.py#L54-L80
 
-The simplest of both controllers is the position based controller denominated as "PositionController" and accessible in the simulation with the "position" keyword. This controller 
+The simplest of both controllers is the position based controller denominated as "PositionController" and accessible in the simulation with the "position" keyword. The controller simply gets the "close_position" and transforms it to an ArticulationActions object for the use in Isaac Sim. The resulting behavior is the movement of the gripper DoF to the final "closing position" denoted by the close_mask and the DoF range.
 
+![](media/PC.gif)
 
 ### Force-based Controller
+
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/8fd80be3deeed952552cc2620223ed839cdc788a/controllers.py#L10-L52
+
+The
