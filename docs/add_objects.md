@@ -12,4 +12,4 @@ Import object to Isaac Sim with the use of the GUI and save as .usd. Refer to th
 
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AO2.gif)
 
-Note: the directories used by Isaac Sim may become invalid when using objects transformed to .usds in other PCs, make sure to use relative directories instead of complete directories. 
+Note: the directories used by Isaac Sim may become invalid when using objects transformed to .usds in other PCs, make sure to use relative directories instead of complete directories. (i.e Albedo maps in .usd files)
