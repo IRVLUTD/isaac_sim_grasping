@@ -62,6 +62,11 @@ Both modes include a progression bar that offers realtime information about the 
 
 ![](media/print_results.png)
 
+### Output File
+The results of the tests are stored in a new .json file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time and slip time. Below is the corresponding manager.save_json function:
+
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/14585b9e2868345c8d28c72b3d9743ce9c4d91ae/manager.py#L298-L314
+
 ### More Documentation
 - [Adding a new Gripper](docs/add_grippers.md)
 - [Adding a new Object](docs/add_objects.md)
