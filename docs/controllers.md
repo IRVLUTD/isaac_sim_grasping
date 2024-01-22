@@ -38,4 +38,7 @@ The simplest of both controllers is the position based controller denominated as
 
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/8fd80be3deeed952552cc2620223ed839cdc788a/controllers.py#L10-L52
 
-The
+The force controller is denominated as "ForceController" and accessible in the simulation with the "force" keyword. The controller works by exerting forces in the driving DoFs of the gripper. The exerted forces are constantly decreasing from 100% of the max DoF effort (described in the robot .usd) to -100% of the max effort. In simple words, for the first half of the test the gripper is closing with a decreasing amount of force and for the last half the gripper will be opening with an increasing amount of effort. Note that for the proper exertion of the forces in the DoFs, they first need to be disabled by setting their max effort as 0 and then applying the ArticulationActions manually through the controller.
+
+![](media/FC.gif)
+
