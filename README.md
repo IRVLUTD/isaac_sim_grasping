@@ -32,7 +32,7 @@ Note: To run the simulation without warnings add the following parameters to the
  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 
 
-## Important Repository files/folders description
+## Important Files/Folders description
 1) standalone.py: standalone executable
 2) views.py: Simulation's behavioral code.
 3) manager.py: contains grasp information and the reporting of results
