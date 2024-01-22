@@ -25,5 +25,5 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129
 
 
 
-3) Visualize the filter with the gripper (reduce the amount of workstations to make iterating easier).
+3) Visualize the simuilation of the gripper to make sure everything is working correctly (reduce the amount of workstations to make iterating easier).
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG2.png)
