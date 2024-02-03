@@ -313,7 +313,7 @@ class Manager:
         self.new_json.to_json(output_path)
         return
 
-    def report_results(self,ft=2, st=1):
+    def report_results(self,ft=1, st=1):
         """ Verbosity for results of .json file filter
 
         Args:

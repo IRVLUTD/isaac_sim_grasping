@@ -27,7 +27,7 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.isaac.core.prims.rigid_prim import RigidPrim, RigidPrimView    
 from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.articulations import Articulation
-from omni.isaac.core.utils.prims import get_prim_at_path
+from omni.isaac.core.utils.prims import get_prim_at_path, find
 from omni.isaac.core.utils.stage import print_stage_prim_paths, traverse_stage
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matrix_from_pose, get_world_pose_from_relative
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     objects_directory = "/home/felipe/Documents/GoogleScannedObjects_USD"
 
     #Debugging
-    render = True
+    render = False
 
     #Load json files 
     objs = [pos_json for pos_json in os.listdir(objects_directory)]
@@ -46,27 +46,31 @@ if __name__ == "__main__":
     world = World()
     with tqdm(total=len(objs)) as pbar:
         for j in objs:      
-            path = os.path.join(objects_directory,j,j + '.usd')
+            path = os.path.join(objects_directory,j,'instanceable_meshes.usd')
             open_stage(path)
 
             object = get_prim_at_path(j)
             stage = world.stage
             it = traverse_stage()
+
             j = 0 
             for i in it:
                 if j == 0:
-                    stage.SetDefaultPrim(i)
+                    pass      
+                    #stage.SetDefaultPrim(i)
                 elif j ==1:
                     pass
                 j+=1
                 
+            
+
             #Reset World and create set first robot positions
             #world.reset()
             #viewer.grippers.initialize()
             #viewer.objects.initialize()
             
             #world.pause()
-            save_stage(path)
+            #save_stage(path)
             pbar.update(1)
 
     simulation_app.close() # close Isaac Sim

@@ -1,0 +1,6 @@
+Sawyer: https://support.rethinkrobotics.com/support/solutions/articles/80000976711-grippers-and-end-of-arm-tooling#ClickSmart-Gipper-Kits
+fetch_gripper: https://docs.fetchrobotics.com/
+franka_panda: https://www.mybotshop.de/Franka-Emika-Gripper-for-Panda
+Barret: https://support.barrett.com/wiki/Hand/280
+shadow_hand: https://shadow-robot-company-dexterous-hand.readthedocs-hosted.com/en/latest/user_guide/md_motor_unit.html
+jaco_robot: https://www.wevolver.com/specs/jaco

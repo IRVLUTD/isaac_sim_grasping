@@ -174,6 +174,7 @@ if __name__ == "__main__":
 
         #initialize World 
         world = World(set_defaults = False)
+        
 
         #Create initial Workstation Prim
         work_path = "/World/Workstation_0"

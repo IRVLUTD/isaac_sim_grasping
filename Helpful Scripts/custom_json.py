@@ -22,8 +22,9 @@ if __name__ == "__main__":
         else:
             df = pd.concat([df,tmp[:samples]],ignore_index= True)
     for i in range(20):
-        print(df.iloc[i]['gripper'])
+        print(df['pose'])
         print(df.iloc[i]['grasps'])
+
         pass
         
     
