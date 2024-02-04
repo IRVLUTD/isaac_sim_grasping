@@ -39,8 +39,7 @@ if __name__ == "__main__":
     #Debugging
     render = False
 
-    #Load json files 
-    objs = [pos_json for pos_json in os.listdir(objects_directory)]
+    #Load json files n os.listdir(objects_directory)]
     print(objs)
     
     world = World()

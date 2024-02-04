@@ -65,7 +65,7 @@ class Manager:
         self.test_type = None #!!!
         self.total_test_time = None #!!!
         self.fall_time = np.zeros(len(self.grasps))
-        self.slip_time = np.zeros(len(self.grasps))
+        self.slip_time = np.ones(len(self.grasps))*-1
         self.completed = np.zeros(len(self.grasps))
         self.reported_slips = np.zeros(len(self.grasps))
 
@@ -311,6 +311,7 @@ class Manager:
         new_json['object_id'] = self.object
         new_json["test_type"] = self.test_type
         new_json['test_duration'] = self.total_test_time
+        self.slip_time[self.slip_time==-1] = self.total_test_time #Didn't even slip
 
         #Lists
         new_json['pose'] = self.grasps.tolist()

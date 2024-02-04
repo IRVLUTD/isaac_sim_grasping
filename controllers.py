@@ -83,7 +83,7 @@ class PositionController(BaseGripperController):
 They are the references used in command line to determine the controller to use
 """
 controller_dict = {
-    'default': ForceController,
+    'default': PositionController,
     'force' : ForceController,
     'position': PositionController
 }
