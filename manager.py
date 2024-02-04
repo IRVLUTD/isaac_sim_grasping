@@ -36,8 +36,9 @@ class Manager:
         for i, r in self.json.iterrows(): 
             self.grasps.append(r['grasps']['pose'])
             self.dofs.append(r['grasps']['dofs'])
-        self.dofs = np.asarray(self.dofs)
-        self.grasps = np.asarray(self.grasps)
+        self.graspit_dofs = self.dofs
+        self.dofs = np.asarray(self.dofs) #graspit_dofs
+        self.grasps = np.asarray(self.grasps) #graspit_pose
         self.grasps[:,[3,4,5,6]]= self.grasps[:,[6,3,4,5]]
 
         # Check for usds Object's and Gripper's
@@ -61,8 +62,8 @@ class Manager:
 
         #Pointer and result vars
         self.job_pointer = 0 # Start to 0
-        self.test_type = np.asarray([None] * len(self.grasps))
-        self.total_test_time = np.zeros(len(self.grasps))
+        self.test_type = None #!!!
+        self.total_test_time = None #!!!
         self.fall_time = np.zeros(len(self.grasps))
         self.slip_time = np.zeros(len(self.grasps))
         self.completed = np.zeros(len(self.grasps))
@@ -89,14 +90,14 @@ class Manager:
 
         #Custom Physics dts (increase filtering speed)
         self.dts = {
-            "fetch_gripper": 1/30,
+            "fetch_gripper": 1/120,
             "franka_panda": 1/30,
             "sawyer": 1/40,
             "wsg_50": 1/30,
             "Barrett": 1/50,
             "robotiq_3finger": 1/50,
             "jaco_robot": 1/50,
-            "Allegro": 1/80,
+            "Allegro": 1/120,
             "shadow_hand": 1/80,
             "HumanHand": 1/80
         }
@@ -204,7 +205,7 @@ class Manager:
         return dofs, poses, job_IDs
     
     def translate_dofs(self, robot_idx):
-        """ Function to translate the GraspIt dofs to Isaac Sim dofs
+        """ Function to translate the GraspIt dofs to Isaac Sim dofs. It overwrites manager.dofs
         
         Args: 
             robot_idx: List of dofs indices names of the grippers given by Isaac Sim
@@ -254,7 +255,7 @@ class Manager:
             c +=1
 
         robot_pos = np.squeeze(tmp)
-        self.dofs = robot_pos
+        self.dofs = robot_pos #saves dofs conversion
 
         return robot_pos
 
@@ -275,8 +276,9 @@ class Manager:
             pass
         else:
             self.fall_time[job_ID] = value
-            self.test_type[job_ID] = test_type
-            self.total_test_time[job_ID] = test_time
+            if self.test_type == None:
+                self.test_type = test_type  
+                self.total_test_time = test_time
             self.completed[job_ID]= 1
 
         return
@@ -303,14 +305,21 @@ class Manager:
         
         """
         print("Saving File at: ",output_path)
-        self.new_json = pd.DataFrame()
-        self.new_json['pose'] = self.grasps.tolist()
-        self.new_json['dofs'] = self.dofs.tolist()
-        self.new_json["test_type"] = self.test_type
-        self.new_json["total_test_time"] = self.total_test_time
-        self.new_json["fall_time"] = self.fall_time
-        self.new_json["slip_time"] = self.slip_time
-        self.new_json.to_json(output_path)
+        new_json = {}
+        #Single elements
+        new_json['gripper'] = self.gripper
+        new_json['object_id'] = self.object
+        new_json["test_type"] = self.test_type
+        new_json['test_duration'] = self.total_test_time
+
+        #Lists
+        new_json['pose'] = self.grasps.tolist()
+        new_json['dofs'] = self.dofs.tolist()
+        new_json["fall_time"] = self.fall_time.tolist()
+        new_json["slip_time"] = self.slip_time.tolist()
+        new_json['graspit_dofs']= self.graspit_dofs
+        with open(output_path,'w') as outfile:
+            json.dump(new_json,outfile)
         return
 
     def report_results(self,ft=1, st=1):
@@ -322,7 +331,7 @@ class Manager:
         """
         print("Completed " + str(round(np.sum(self.completed),0))+ " out of " + str(len(self.completed)))
         passed = (self.fall_time > ft).sum()
-        print("Total Test Time: " +str(self.total_test_time[0]))
+        print("Total Test Time: " +str(self.total_test_time))
         print("Fall Tests Passed (th = " +str(ft)+ "): "+ str(passed))
         print("Mean: " +str(round(np.mean(self.fall_time[self.fall_time>0]),3)) + "-- Std: " +str(round(np.std(self.fall_time[self.fall_time>0]),3)) + "-- Variance: " +str(round(np.var(self.fall_time[self.fall_time>0]),3)))
         print("Max: "+ str(round(np.max(self.fall_time),3)) + " -- Min: " + str(round(np.min(self.fall_time[self.fall_time>0]),3)))

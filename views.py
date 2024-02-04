@@ -214,7 +214,7 @@ class View():
         self.objects.set_velocities([0,0,0,0,0,0],finish_ind) 
         self.objects.set_world_poses(self.init_positions[finish_ind], self.init_rotations[finish_ind],finish_ind)
 
-        # Get new dofs
+        # Update close positions to new dofs (already placed on gripper initialization dofs)
         for i in range(len(self.dof_props)):
             if (self.manager.close_mask[i]==0):
                 self.close_positions[:,i]=(self.dofs[:,i])

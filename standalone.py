@@ -3,11 +3,15 @@ import numpy as np
 from tqdm import tqdm
 import os
 import argparse
+import sys
+import time
 
 def make_parser():
     """ Input Parser """
     parser = argparse.ArgumentParser(description='Standalone script for grasp filtering.')
     parser.add_argument('--headless', type=bool, help='Running Program in headless mode',
+                        default=False, action = argparse.BooleanOptionalAction)
+    parser.add_argument('--force_reset', type=bool, help='Force Reset of Isaac Sim',
                         default=False, action = argparse.BooleanOptionalAction)
     parser.add_argument('--json_dir', type=str, help='Directory of Grasp Information', default='')
     parser.add_argument('--gripper_dir', type=str, help='Directory of Gripper urdf/usd', default='')
@@ -23,12 +27,14 @@ def make_parser():
     parser.add_argument('--/log/level', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='', required=False)
+    
     return parser
 
 #Parser
 parser = make_parser()
 args = parser.parse_args()
 head = args.headless
+force_reset = args.force_reset
 print(args.controller)
 
 #launch Isaac Sim before any other imports
@@ -53,13 +59,12 @@ from manager import Manager
 from views import View
 
 #Omni Libraries
-from omni.isaac.core.utils.stage import add_reference_to_stage
+from omni.isaac.core.utils.stage import add_reference_to_stage, open_stage, close_stage, save_stage
 from omni.isaac.core.prims.rigid_prim import RigidPrim 
 from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.articulations import Articulation
 from omni.isaac.core.utils.prims import get_prim_children, get_prim_path, delete_prim
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix
-
 
 def import_gripper(work_path,usd_path, EF_axis):
         """ Imports Gripper to World
@@ -155,6 +160,7 @@ if __name__ == "__main__":
     controller = args.controller
     #physics_dt = 1/120
 
+    world = World(set_defaults = False)
 
     #Debugging
     render = not head
@@ -171,11 +177,7 @@ if __name__ == "__main__":
 
         # Initialize Manager
         manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
-
-        #initialize World 
-        world = World(set_defaults = False)
         
-
         #Create initial Workstation Prim
         work_path = "/World/Workstation_0"
         work_prim = define_prim(work_path)
@@ -230,17 +232,34 @@ if __name__ == "__main__":
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
         
-        # Pause world
-        #world.pause()
+        # Stop world
+        if not force_reset:
+            #print('stopping')
+            #t = time.time()
+            #world.reset()
+            world.stop()
+            #t = time.time() -t
+            #print('stopped', t)
+
         #Save new json with results
         manager.save_json(out_path)
         if (verbose):
             manager.report_results()
-        print("Reseting Environment")
-        #Reset World
-        world.stop()
-        world.clear_physics_callbacks()
-        world.clear()
+        #print("Reseting Environment")
 
-        
+        #Reset World    
+        if not force_reset:
+            #print('erasing callback')   
+            world.clear_physics_callbacks()
+            #print('callback erased')
+            #t = time.time() 
+            #print('clearing')
+            world.clear()
+            #t = time.time() -t
+            #print('cleared', t )
+
+        if force_reset:
+            os.execl(sys.executable, sys.executable, *sys.argv)
+    
     simulation_app.close() # close Isaac Sim
+        
