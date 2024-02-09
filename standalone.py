@@ -43,6 +43,7 @@ config= {
     "headless": head,
     'max_bounces':0,
     'fast_shutdown': True,
+    'multi_gpu': True,
     'max_specular_transmission_bounces':0
 }
 simulation_app = SimulationApp(config) # we can also run as headless.
@@ -59,12 +60,13 @@ from manager import Manager
 from views import View
 
 #Omni Libraries
-from omni.isaac.core.utils.stage import add_reference_to_stage, open_stage, close_stage, save_stage
+from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
 from omni.isaac.core.prims.rigid_prim import RigidPrim 
 from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.articulations import Articulation
-from omni.isaac.core.utils.prims import get_prim_children, get_prim_path, delete_prim
+from omni.isaac.core.utils.prims import get_prim_children, get_prim_path, get_prim_at_path
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix
+
 
 def import_gripper(work_path,usd_path, EF_axis):
         """ Imports Gripper to World
@@ -124,14 +126,27 @@ def import_object(work_path, usd_path):
     add_reference_to_stage(usd_path=usd_path, prim_path=work_path+"/object")
     object_parent = world.scene.add(GeometryPrim(prim_path = work_path+"/object", name="object"))
     l = get_prim_children(object_parent.prim)
-    
+
+
+    prim = get_prim_at_path(work_path+"/object"+ '/base_link/collisions/mesh_0')
+    '''
+    MassAPI = UsdPhysics.MassAPI.Get(world.stage, prim.GetPath())
+    try: 
+        og_mass = MassAPI.GetMassAttr().Get()
+        if og_mass ==0:
+            og_mass = 1
+            print("Failure reading object mass, setting to default value of 1 kg.")
+    except:
+        og_mass = 1
+        print("Failure reading object mass, setting to default value of 1 kg.")
+
+    # Create Rigid Body attribute
+    og_mass = 1
+    '''
+
     object_prim = RigidPrim(prim_path= get_prim_path(l[0]))
-    mass= object_prim.get_mass()
-    if mass < 1e-3:
-        print("[WARNING/ERROR] Very low mass?")
-        # TODO: Reset using stored mass via oritented_bbox volume and density of 100 kg/m3?
-        # NOTE: Currently setting to a good default value of 0.05 kg (50 g) as objects are hollow
-        mass = 0.05
+
+    mass= 1 #Deprecated use of mass for gravity 
 
     return object_parent, mass
 
@@ -161,7 +176,7 @@ if __name__ == "__main__":
     #physics_dt = 1/120
 
     world = World(set_defaults = False)
-
+    
     #Debugging
     render = not head
 
@@ -178,6 +193,7 @@ if __name__ == "__main__":
         # Initialize Manager
         manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
         
+
         #Create initial Workstation Prim
         work_path = "/World/Workstation_0"
         work_prim = define_prim(work_path)
@@ -192,7 +208,7 @@ if __name__ == "__main__":
         object_parent, mass = import_object(work_path, manager.object_path)
         
         #Clone
-        cloner = GridCloner(spacing = 1)
+        cloner = GridCloner(spacing = 2)
         target_paths = []
         for i in range(num_w):
              target_paths.append(work_path[:-1]+str(i))
@@ -203,6 +219,7 @@ if __name__ == "__main__":
         # ISAAC SIM views initialization
         viewer = View(work_path,contact_names,num_w, manager,world, test_time, mass)
 
+        
         #Reset World and create set first robot positions
         world.reset()
 
@@ -212,13 +229,15 @@ if __name__ == "__main__":
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
 
         # Set desired physics Context options
-        physicsContext = world.get_physics_context()
         world.reset()
+        physicsContext = world.get_physics_context()
+        #physicsContext.set_solver_type("PGS")
         physicsContext.set_physics_dt(manager.physics_dt)
-        physicsContext.enable_gpu_dynamics(True)
-        physicsContext.set_gravity(0)
-        physicsContext.set_solver_type("PGS")
+        physicsContext.enable_stablization(True)
+        physicsContext.set_gravity(-10)
 
+        world.reset()
+        
         #Initialize views
         viewer.grippers.initialize(world.physics_sim_view)
         viewer.objects.initialize(world.physics_sim_view)
@@ -228,18 +247,11 @@ if __name__ == "__main__":
         #Run Sim
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
+                #print(mass)
                 world.step(render=render) # execute one physics step and one rendering step if not headless
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
-        
-        # Stop world
-        if not force_reset:
-            #print('stopping')
-            #t = time.time()
-            #world.reset()
-            world.stop()
-            #t = time.time() -t
-            #print('stopped', t)
+    
 
         #Save new json with results
         manager.save_json(out_path)
@@ -249,17 +261,17 @@ if __name__ == "__main__":
 
         #Reset World    
         if not force_reset:
-            #print('erasing callback')   
+            print('Reseting Environment')
+            t = time.time()
+            world.stop()
             world.clear_physics_callbacks()
-            #print('callback erased')
-            #t = time.time() 
-            #print('clearing')
             world.clear()
-            #t = time.time() -t
-            #print('cleared', t )
+            t = time.time() -t
+            print('Reseted, time in seconds: ', t)
 
         if force_reset:
             os.execl(sys.executable, sys.executable, *sys.argv)
+            pass
     
     simulation_app.close() # close Isaac Sim
         

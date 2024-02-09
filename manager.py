@@ -90,14 +90,14 @@ class Manager:
 
         #Custom Physics dts (increase filtering speed)
         self.dts = {
-            "fetch_gripper": 1/120,
-            "franka_panda": 1/30,
-            "sawyer": 1/40,
-            "wsg_50": 1/30,
-            "Barrett": 1/50,
-            "robotiq_3finger": 1/50,
-            "jaco_robot": 1/50,
-            "Allegro": 1/120,
+            "fetch_gripper": 1/60,
+            "franka_panda": 1/60,
+            "sawyer": 1/60,
+            "wsg_50": 1/60,
+            "Barrett": 1/60,
+            "robotiq_3finger": 1/60,
+            "jaco_robot": 1/60,
+            "Allegro": 1/80,
             "shadow_hand": 1/80,
             "HumanHand": 1/80
         }
@@ -111,7 +111,7 @@ class Manager:
             "Barrett": [0, 0, 1, 1, 1, 0, 0, 0],
             "jaco_robot": [1, 1, 1],
             "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-            "Allegro": [0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
             "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
@@ -311,7 +311,8 @@ class Manager:
         new_json['object_id'] = self.object
         new_json["test_type"] = self.test_type
         new_json['test_duration'] = self.total_test_time
-        self.slip_time[self.slip_time==-1] = self.total_test_time #Didn't even slip
+        tmp =np.logical_and(self.slip_time==-1,self.fall_time!=-1)
+        self.slip_time[tmp] = self.total_test_time #Didn't even slip
 
         #Lists
         new_json['pose'] = self.grasps.tolist()

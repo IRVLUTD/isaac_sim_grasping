@@ -11,7 +11,7 @@ from omni.isaac.core.utils.numpy.rotations import quats_to_rot_matrices
 from omni.isaac.core.prims.rigid_prim import RigidPrimView    
 from omni.isaac.core.articulations import  ArticulationView
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matrices_from_poses
-
+from omni.isaac.core.prims import XFormPrimView
 
 class View():
     """ISAAC SIM VIEWS Class 
@@ -34,7 +34,7 @@ class View():
                 track_contact_forces = True, 
                 prepare_contact_sensors = True, 
                 contact_filter_prim_paths_expr  = contact_names_expr, 
-                reset_xform_properties = False, 
+                reset_xform_properties = False,
                 disable_stablization = False))
         self.grippers = world.scene.add(
             ArticulationView(
@@ -54,6 +54,9 @@ class View():
         self.reported_slips = np.zeros((num_w,1))
         self.gravity = np.asarray([0,0,-9.81]) * mass 
         self.gravities = np.zeros((num_w,3))
+
+        self.objects.disable_gravities()
+
         self.manager = manager
         self.current_poses = []
         self.current_job_IDs=[]
@@ -87,6 +90,7 @@ class View():
         
         # Set object position and velocities
         self.objects.set_velocities([0,0,0,0,0,0]) 
+        #self.objects_parents.set_world_poses(self.init_positions, self.init_rotations)
         self.objects.set_world_poses(self.init_positions, self.init_rotations)
 
         # Get max efforts and dofs
@@ -98,14 +102,14 @@ class View():
         close_mask = self.manager.close_mask
         for i in range(len(self.dof_props)):
             if (close_mask[i]==0):
-                max_efforts[:,i] = 0
+                max_efforts[:,i] = self.dof_props[i][6]
                 self.close_positions[:,i]=(self.dofs[:,i])
-            elif (close_mask[i]==1):
+            elif (close_mask[i]>0):
                 max_efforts[:,i]= self.dof_props[i][6]
                 self.close_positions[:,i]=(self.dof_props[i][3])
-            elif (close_mask[i]==-1):
+            elif (close_mask[i]<0):
                 max_efforts[:,i]= -self.dof_props[i][6]
-                self.close_positions[:,i]=(self.dof_props[i][2])
+                self.close_positions[:,i]=(self.dof_props[i][2]) 
             else: 
                 raise ValueError("clos_dir arrays for grippers can only have 1,-1 and 0 values indicating closing direction")
 
@@ -127,7 +131,7 @@ class View():
             t_error = abs(te_batch(self.init_positions[active_ind], current_positions))
             
             # Object that fell
-            finish_ind = active_ind[t_error>0.3]
+            finish_ind = active_ind[t_error>0.6]
             if(len(finish_ind)>0):
                 self.test_finish(finish_ind)
                 
@@ -150,13 +154,16 @@ class View():
         tmp_active = np.squeeze(self.current_job_IDs>=0)
         g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0]
         if (len(g_ind)>0):
+            self.objects.enable_gravities(g_ind)
             self.gravities[g_ind] = self.gravity
-        self.objects.apply_forces(self.gravities)
+            #print("SETTED UP ", g_ind)
+        #self.objects.apply_forces(self.gravities)
 
         # Rigid Body Probing, mark grasps as ready
         rb_ind = np.argwhere(np.multiply(np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0]
         if (len(rb_ind)>0):
             self.objects.set_velocities([0,0,0,0,0,0],rb_ind) 
+            #self.objects_parents.set_world_poses(self.init_positions[rb_ind], self.init_rotations[rb_ind],rb_ind)
             self.objects.set_world_poses(self.init_positions[rb_ind], self.init_rotations[rb_ind],rb_ind)
             tmp = np.count_nonzero(np.sum(self.objects.get_contact_force_matrix(rb_ind),axis =2),axis=1)
             
@@ -180,7 +187,7 @@ class View():
             self.test_finish(time_ind)
 
         # Failed grasps; gripper never touched object
-        failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=0.5), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
+        failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=0.7), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
         if(len(failed_ind)>0): 
             self.current_times[failed_ind] = -1
             self.test_finish(failed_ind)
@@ -203,6 +210,7 @@ class View():
         self.grasp_set_up[finish_ind] = 0
         self.reported_slips[finish_ind] = 0
         self.gravities[finish_ind] = np.zeros((len(finish_ind),3))
+        self.objects.disable_gravities(finish_ind)
 
         # Reset Workstations
         self.grippers.set_joint_positions(self.dofs[finish_ind], finish_ind)
@@ -212,6 +220,7 @@ class View():
         for i in range(object_Ts.shape[0]):
             self.init_positions[finish_ind[i]], self.init_rotations[finish_ind[i]] = pose_from_tf_matrix(object_Ts[i].astype(float))
         self.objects.set_velocities([0,0,0,0,0,0],finish_ind) 
+        #self.objects_parents.set_world_poses(self.init_positions[finish_ind], self.init_rotations[finish_ind],finish_ind)
         self.objects.set_world_poses(self.init_positions[finish_ind], self.init_rotations[finish_ind],finish_ind)
 
         # Update close positions to new dofs (already placed on gripper initialization dofs)

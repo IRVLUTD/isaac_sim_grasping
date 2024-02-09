@@ -65,6 +65,8 @@ class PositionController(BaseGripperController):
         name = "Controller"
         super().__init__(name=name)
         self.type = 'position_controller_v0'
+        self.effort = max_efforts
+        self.close_mask = close_mask
         return 
 
     def close(self,time):
@@ -74,7 +76,15 @@ class PositionController(BaseGripperController):
         return 
 
     def forward(self, action, time, current_dofs, close_position):
-        actions = ArticulationActions(joint_positions = close_position)
+        pos = np.zeros_like(close_position)
+        for i in range(len(self.close_mask)):
+            if (self.close_mask[i]==0):
+                pos[:,i] =  close_position[:,i]
+            elif (self.close_mask[i]>0):
+                pos[:,i] = close_position[:,i] * self.close_mask[i]
+            elif (self.close_mask[i]<0):
+                pos[:,i] = close_position[:,i] * self.close_mask[i]
+        actions = ArticulationActions(joint_positions = pos)
         # A controller has to return an ArticulationAction
         self.last_actions = actions
         return actions
