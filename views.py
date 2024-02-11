@@ -57,7 +57,7 @@ class View():
         self.gravity = np.asarray([0,0,-9.81]) * mass 
         self.gravities = np.zeros((num_w,3))
 
-        self.objects.disable_gravities()
+        #self.objects.enable_gravities()
 
         self.manager = manager
         self.current_poses = []
@@ -158,9 +158,10 @@ class View():
         # Apply gravity to ready grasps
         tmp_active = np.squeeze(self.current_job_IDs>=0)
         g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0] # optimizable
-        if (len(g_ind)>0):
-            self.objects.enable_gravities(g_ind)
-            self.gravities[g_ind] = self.gravity
+        #if (len(g_ind)>0):
+            #self.objects.enable_gravities(g_ind)
+            #self.gravities[g_ind] = self.gravity
+            #print(g_ind)
             #print("SETTED UP ", g_ind)
         #self.objects.apply_forces(self.gravities)
 
@@ -219,7 +220,7 @@ class View():
         self.grasp_set_up[finish_ind] = 0
         self.reported_slips[finish_ind] = 0
         self.gravities[finish_ind] = np.zeros((len(finish_ind),3))
-        self.objects.disable_gravities(finish_ind)
+        #self.objects.disable_gravities(finish_ind)
 
         # Reset Workstations
         self.grippers.set_joint_positions(self.dofs[finish_ind], finish_ind)
