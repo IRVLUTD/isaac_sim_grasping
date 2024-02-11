@@ -18,7 +18,8 @@ def make_parser():
     parser.add_argument('--objects_dir', type=str, help='Directory of Object usd', default='')
     parser.add_argument('--output_dir', type=str, help='Output directroy for filterd grasps', default='')
     parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=150)
-    parser.add_argument('--test_time', type=int, help='Total time for each grasp test', default=6)
+    parser.add_argument('--device', type=int, help='Gpu to use', default=0)
+    parser.add_argument('--test_time', type=int, help='Total time for each grasp test', default=3)
     parser.add_argument('--print_results', type=bool, help='Enable printing of grasp statistics after filtering a document',
                          default=False, action = argparse.BooleanOptionalAction)
     parser.add_argument('--controller', type=str,
@@ -43,8 +44,8 @@ config= {
     "headless": head,
     'max_bounces':0,
     'fast_shutdown': True,
-    'multi_gpu': True,
-    'max_specular_transmission_bounces':0
+    'max_specular_transmission_bounces':0,
+    'device': args.device
 }
 simulation_app = SimulationApp(config) # we can also run as headless.
 
@@ -233,7 +234,8 @@ if __name__ == "__main__":
         physicsContext = world.get_physics_context()
         #physicsContext.set_solver_type("PGS")
         physicsContext.set_physics_dt(manager.physics_dt)
-        physicsContext.enable_stablization(True)
+        physicsContext.enable_gpu_dynamics(True)
+        #physicsContext.enable_stablization(True)
         physicsContext.set_gravity(-10)
 
         world.reset()

@@ -1,6 +1,8 @@
 #External Libraries
 import numpy as np
 import pandas as pd
+import time
+
 
 #Custom Classes and utils
 from utils import te_batch,re_batch
@@ -61,7 +63,7 @@ class View():
         self.current_poses = []
         self.current_job_IDs=[]
         self.dofs = []
-
+        self.t = time.time()
         #Add physics Step
         world.add_physics_callback("physics_steps", callback_fn=self.physics_step)
         
@@ -124,6 +126,8 @@ class View():
         step_size: time since last physics step. Depends on physics_dt
         """
         #Check  for active workstations
+        #print("Outside step", time.time()-self.t)
+        #self.t= time.time()
         active_ind = np.argwhere(self.current_job_IDs>=0) #ws indices
         if(len(active_ind)>0):
             # Calculate falls
@@ -134,7 +138,8 @@ class View():
             finish_ind = active_ind[t_error>0.6]
             if(len(finish_ind)>0):
                 self.test_finish(finish_ind)
-                
+            
+            
             # Calculate slips
             te_slip = np.squeeze(t_error>0.02)
             R_current = quats_to_rot_matrices(np.squeeze(current_rotations))
@@ -152,7 +157,7 @@ class View():
             
         # Apply gravity to ready grasps
         tmp_active = np.squeeze(self.current_job_IDs>=0)
-        g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0]
+        g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0] # optimizable
         if (len(g_ind)>0):
             self.objects.enable_gravities(g_ind)
             self.gravities[g_ind] = self.gravity
@@ -162,10 +167,11 @@ class View():
         # Rigid Body Probing, mark grasps as ready
         rb_ind = np.argwhere(np.multiply(np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0]
         if (len(rb_ind)>0):
-            self.objects.set_velocities([0,0,0,0,0,0],rb_ind) 
+            self.objects.set_velocities([0,0,0,0,0,0],rb_ind) #
             #self.objects_parents.set_world_poses(self.init_positions[rb_ind], self.init_rotations[rb_ind],rb_ind)
             self.objects.set_world_poses(self.init_positions[rb_ind], self.init_rotations[rb_ind],rb_ind)
             tmp = np.count_nonzero(np.sum(self.objects.get_contact_force_matrix(rb_ind),axis =2),axis=1)
+            
             
             #Update grasp_setup
             self.current_times[rb_ind[tmp>=self.manager.contact_th]]=0
@@ -191,6 +197,9 @@ class View():
         if(len(failed_ind)>0): 
             self.current_times[failed_ind] = -1
             self.test_finish(failed_ind)
+
+        #print("physics_step", time.time()-self.t)
+        #self.t= time.time()
         return
     
     def test_finish(self, finish_ind):
