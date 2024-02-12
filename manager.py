@@ -97,7 +97,7 @@ class Manager:
             "Barrett": 1/60,
             "robotiq_3finger": 1/50,
             "jaco_robot": 1/60,
-            "Allegro": 1/80,
+            "Allegro": 1/60,
             "shadow_hand": 1/80,
             "HumanHand": 1/80
         }
@@ -111,7 +111,7 @@ class Manager:
             "Barrett": [0, 0, 1, 1, 1, 0, 0, 0],
             "jaco_robot": [1, 1, 1],
             "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-            "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
             "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
