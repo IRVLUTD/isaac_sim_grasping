@@ -98,7 +98,7 @@ class Manager:
             "robotiq_3finger": 1/50,
             "jaco_robot": 1/60,
             "Allegro": 1/60,
-            "shadow_hand": 1/80,
+            "shadow_hand": 1/60,
             "HumanHand": 1/80
         }
 
@@ -113,7 +113,7 @@ class Manager:
             "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
             "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
             "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1]
         }
 
         #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
@@ -131,10 +131,10 @@ class Manager:
                         "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],
             "HumanHand": ["base_link","index1_joint","index2_joint","index3_joint", "mid1_joint","mid2_joint","mid3_joint", "pinky1_joint","pinky2_joint","pinky3_joint",
                            "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
-            "shadow_hand": ["base_link", "index_finger_knuckle", "index_finger_proximal", "index_finger_middle", "index_finger_distal",
-                            "little_finger_knuckle", "little_finger_proximal", "little_finger_middle", "little_finger_distal",
-                            "middle_finger_knuckle", "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
-                            "ring_finger_knuckle", "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
+            "shadow_hand": ["base_link", "index_finger_proximal", "index_finger_middle", "index_finger_distal",
+                             "little_finger_proximal", "little_finger_middle", "little_finger_distal",
+                             "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
+                             "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
                             "thumb_proximal", "thumb_middle", "thumb_distal"]
         }
         
