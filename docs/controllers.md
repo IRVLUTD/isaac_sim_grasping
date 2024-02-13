@@ -25,7 +25,7 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/60cf1868e92ce86115bf098ea2ca2
 
 Note: For new controllers the reference must be added to the controller_dict.
 
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/8fd80be3deeed952552cc2620223ed839cdc788a/controllers.py#L82-L89
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/de9680042957da38189c17e8ba558d7deb457d11/controllers.py#L95-L99
 
 
 ### Position-based Controller
