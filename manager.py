@@ -95,11 +95,11 @@ class Manager:
             "sawyer": 1/50,
             "wsg_50": 1/60,
             "Barrett": 1/60,
-            "robotiq_3finger": 1/50,
+            "robotiq_3finger": 1/60,
             "jaco_robot": 1/60,
-            "Allegro": 1/60,
-            "shadow_hand": 1/60,
-            "HumanHand": 1/80
+            "Allegro": 1/80,
+            "shadow_hand": 1/120,
+            "HumanHand": 1/120
         }
 
         # Direction for DoFs to close gripper
@@ -112,7 +112,7 @@ class Manager:
             "jaco_robot": [1, 1, 1],
             "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
             "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
-            "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 0.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1]
         }
 
