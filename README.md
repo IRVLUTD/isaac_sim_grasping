@@ -73,8 +73,8 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/d6dad3eb93452656b33373ee77b2c
 - [Available Gripper Controllers](docs/controllers.md)
 
 ### Helpful Links
-- Google Scanned Objecsts .usd files [here](https://utdallas.app.box.com/file/1439635902010)
-- GraspIt .json files [here](https://utdallas.app.box.com/folder/237030462412)
+- Google Scanned Objecsts .usd files [here](https://utdallas.box.com/s/xe2wtzk5mi00ja51s5pwnxznxc277taj)
+- GraspIt .json files [here](https://utdallas.box.com/s/zrq591a0dexmpj79dmd76hqwfc14bzvk)
 - Isaac Sim Manual: https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
 - Helpful code for python standalones (code snippet samples): https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
 - Installing Packages for use with isaac sim python.sh: https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_python.html
