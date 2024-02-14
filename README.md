@@ -73,6 +73,8 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/d6dad3eb93452656b33373ee77b2c
 - [Available Gripper Controllers](docs/controllers.md)
 
 ### Helpful Links
+- Google Scanned Objecsts .usd files [here] (https://utdallas.app.box.com/file/1439635902010)
+- GraspIt .json files [here] (https://utdallas.app.box.com/folder/237030462412)
 - Isaac Sim Manual: https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
 - Helpful code for python standalones (code snippet samples): https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
 - Installing Packages for use with isaac sim python.sh: https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_python.html
@@ -84,5 +86,4 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/d6dad3eb93452656b33373ee77b2c
 - Many Isaac Sim API functions were found to give the incorrect data when called, if errors arise when implementing new code beware of this.
 
 ### Known Issues
-- A segmentation fault rarely occurs performing the tests in multiple .json files. If the simulation is reseted the files should run correctly.
 - python @args error when running on remote PC: This is a known Isaac Sim error, for more information visit the Isaac Sim forums and/or documentation.
