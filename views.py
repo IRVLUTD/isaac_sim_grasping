@@ -102,6 +102,7 @@ class View():
         self.close_positions = np.zeros_like(self.dofs)
         max_efforts = np.zeros_like(self.dofs)
         close_mask = self.manager.close_mask
+        #print(self.dof_props)
         for i in range(len(self.dof_props)):
             if (close_mask[i]==0):
                 max_efforts[:,i] = self.dof_props[i][6]
@@ -179,10 +180,10 @@ class View():
             self.grasp_set_up[rb_ind[tmp>=self.manager.contact_th]]=1
 
         # Apply gripper actions
-        current_dofs = self.grippers.get_joint_positions()
+        
         set_up_timers = np.zeros_like(self.current_times)
         set_up_timers[g_ind]= self.current_times[g_ind]
-        actions = self.controller.forward('any', set_up_timers, current_dofs, self.close_positions)
+        actions = self.controller.forward(self.manager.gripper, set_up_timers, self.grippers, self.close_positions)
         self.grippers.apply_action(actions)
         
         # Update time

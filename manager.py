@@ -85,21 +85,23 @@ class Manager:
             "jaco_robot": -1,
             "Allegro": 1,
             "shadow_hand": -2,
-            "HumanHand": -2
+            "HumanHand": -2,
+            "h5_hand": -3
         }
 
         #Custom Physics dts (increase filtering speed)
         self.dts = {
             "fetch_gripper": 1/60,
             "franka_panda": 1/60,
-            "sawyer": 1/50,
+            "sawyer": 1/60,
             "wsg_50": 1/60,
             "Barrett": 1/60,
             "robotiq_3finger": 1/60,
             "jaco_robot": 1/60,
             "Allegro": 1/80,
             "shadow_hand": 1/120,
-            "HumanHand": 1/120
+            "HumanHand": 1/120,
+            "h5_hand": 1/120
         }
 
         # Direction for DoFs to close gripper
@@ -113,7 +115,8 @@ class Manager:
             "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
             "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
             "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 0.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1]
+            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1],
+            "h5_hand": [1,-1,0,0]
         }
 
         #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
@@ -135,7 +138,8 @@ class Manager:
                              "little_finger_proximal", "little_finger_middle", "little_finger_distal",
                              "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
                              "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
-                            "thumb_proximal", "thumb_middle", "thumb_distal"]
+                            "thumb_proximal", "thumb_middle", "thumb_distal"],
+            "h5_hand" : ["left_tip_link", "right_tip_link"]
         }
         
         #Amount of contacts required for the grasp to be considered as ready
@@ -149,7 +153,8 @@ class Manager:
             "robotiq_3finger": 1,
             "Allegro": 2,
             "HumanHand": 2,
-            "shadow_hand": 2
+            "shadow_hand": 2,
+            "h5_hand": 2
         }
 
     def _check_gripper_usd(self,gripper_path):
@@ -210,15 +215,17 @@ class Manager:
         Args: 
             robot_idx: List of dofs indices names of the grippers given by Isaac Sim
         """
-        json_idx = self.pickle_file_data[self.gripper][1]
 
         if self.gripper == "fetch_gripper":
+            json_idx = self.pickle_file_data[self.gripper][1]
             robot_pos = np.asarray([(self.dofs / 1000.0) * 10.0, (self.dofs / 1000.0) * 10.0])
             robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
         elif self.gripper == "franka_panda":
+            json_idx = self.pickle_file_data[self.gripper][1]
             robot_pos = np.asarray([self.dofs/ 1000,self.dofs/ 1000])
             robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
         elif self.gripper == "Barrett":
+            json_idx = self.pickle_file_data[self.gripper][1]
             robot_pos = np.asarray([ 
                 self.dofs[:,0],
                 self.dofs[:,1],
@@ -231,6 +238,7 @@ class Manager:
             ])
             robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
         elif self.gripper == "Allegro":
+            json_idx = self.pickle_file_data[self.gripper][1]
             robot_pos = self.dofs
             for i in range(len(json_idx)):
                     json_idx[i]= json_idx[i].replace(".","_")
@@ -240,9 +248,24 @@ class Manager:
             "jaco_robot",
             "shadow_hand",
         }:
+            json_idx = self.pickle_file_data[self.gripper][1]
             robot_pos = self.dofs
         elif self.gripper in {"wsg_50", "sawyer"}:
+            json_idx = self.pickle_file_data[self.gripper][1]
             robot_pos = self.dofs/1000.0
+        elif self.gripper == "h5_hand":
+            #print(self.dofs.shape)
+            tmp = np.zeros_like(self.dofs)
+            robot_pos = np.zeros((self.dofs.shape[0],4))
+            self.dofs[:,1] = -1 * self.dofs[:,1]
+            self.dofs = np.min(self.dofs,axis =1)
+            #print('dofs dim', self.dofs.shape)
+            tmp[:,0] = self.dofs
+            tmp[:,1] = -1*self.dofs
+            robot_pos[:,:2]= tmp
+            robot_pos[:,2:]= -1*tmp
+            json_idx = robot_idx
+            #print("robot_pos", robot_pos)
         else:
             raise(LookupError("No dof translation for gripper"))
 

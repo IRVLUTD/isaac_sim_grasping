@@ -75,18 +75,28 @@ class PositionController(BaseGripperController):
     def open(self,time):
         return 
 
-    def forward(self, action, time, current_dofs, close_position):
+    def forward(self, action, time, grippers, close_position):
+        current_dofs = grippers.get_joint_positions()
         pos = np.zeros_like(close_position)
         for i in range(len(self.close_mask)):
             if (self.close_mask[i]==0):
                 pos[:,i] =  close_position[:,i]
-            elif (self.close_mask[i]>0):
-                pos[:,i] = close_position[:,i] * self.close_mask[i]
-            elif (self.close_mask[i]<0):
-                pos[:,i] = close_position[:,i] * self.close_mask[i]
+            else:
+                pos[:,i] = close_position[:,i] * abs(self.close_mask[i])
+
+
+        if action == "h5_hand":
+            pos[:,2]= -1*current_dofs[:,0]
+            pos[:,3]= -1*current_dofs[:,1]
+            tmp= pos[:,2:]
+
+            grippers.set_joint_positions(tmp, joint_indices = [2,3])
+
+
         actions = ArticulationActions(joint_positions = pos)
         # A controller has to return an ArticulationAction
         self.last_actions = actions
+        #print(pos)
         return actions
 
 """ LIST OF CONTROLLERS: 
