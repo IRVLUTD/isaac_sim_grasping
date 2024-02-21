@@ -38,7 +38,7 @@ from pxr import Gf, Sdf
 
 if __name__ == "__main__":
     # Directories
-    objects_directory = "/home/felipe/Documents/objects_auto"
+    objects_directory = "/home/felipe/Downloads/YCB_usds"
 
     #Debugging
     render = False
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     world = World()
     with tqdm(total=len(objs)) as pbar:
         for j in objs:      
-            print(omni.kit.commands.get_command_doc('AddPhysicsComponent'))
-            print(omni.kit.commands.get_command_doc('CreateAndBindMdlMaterialFromLibrary'))
+            #print(omni.kit.commands.get_command_doc('AddPhysicsComponent'))
+            #print(omni.kit.commands.get_command_doc('CreateAndBindMdlMaterialFromLibrary'))
             
             
             #Instanceable mesh
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                     print("SHADER")
                     omni.kit.commands.execute('ChangeProperty',
                         prop_path=str(i.GetPath())+".inputs:diffuse_texture",
-                        value='./materials/texture.png',
+                        value='./materials/texture_map.png',
                         prev=' ')
 
 
@@ -118,6 +118,7 @@ if __name__ == "__main__":
             for i in it:
                 print(i)
                 if c == 0:
+                    world.stage.SetDefaultPrim(i)
                     omni.kit.commands.execute('RemovePhysicsComponent',
                                 usd_prim=i,
                                 component='PhysicsArticulationRootAPI')

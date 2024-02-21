@@ -24,11 +24,10 @@ def make_parser():
                          default=False, action = argparse.BooleanOptionalAction)
     parser.add_argument('--controller', type=str,
                         help='Gripper Controller to use while testing, should match the controller dictionary in the Manager Class',
-                        default='default')
+                        default='transfer_default')
     parser.add_argument('--/log/level', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='', required=False)
-    
     return parser
 
 #Parser
@@ -58,7 +57,7 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
-from manager import Manager
+from t_manager import T_Manager
 from views import View
 
 #Omni Libraries
@@ -193,7 +192,7 @@ if __name__ == "__main__":
             continue
 
         # Initialize Manager
-        manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
+        manager = T_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
         
 
         #Create initial Workstation Prim
@@ -234,15 +233,9 @@ if __name__ == "__main__":
         world.reset()
         physicsContext = world.get_physics_context()
         #physicsContext.set_solver_type("PGS")
-        #print(physicsContext.get_gpu_collision_stack_size())
-        #print(physicsContext.get_gpu_max_rigid_contact_count())
         
-        #print(physicsContext.get_gpu_temp_buffer_capacity())
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
-        #physicsContext.enable_fabric(True)
-        #print(physicsContext.is_gpu_dynamics_enabled())
-        #print(physicsContext.device)
         physicsContext.enable_stablization(True)
         physicsContext.set_gravity(-10)
 

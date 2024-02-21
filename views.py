@@ -195,7 +195,7 @@ class View():
             self.test_finish(time_ind)
 
         # Failed grasps; gripper never touched object
-        failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=0.7), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
+        failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=0.5), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
         if(len(failed_ind)>0): 
             self.current_times[failed_ind] = -1
             self.test_finish(failed_ind)

@@ -6,8 +6,8 @@ parser = argparse.ArgumentParser(description='Prepare Google Scan-3D objects URD
     usage="\
     python google_prepare_urdf.py -f /PATH/TO/GOOGLE_DATA_FOLDER/ -m model_list.txt'")
 
-parser.add_argument('-m', '--models_file', type=str, required=True, default='model_list.txt', help="List of object names to export to URDF")
-parser.add_argument('-f', '--google_dir', type=str, required=True, default='/mnt/Data/GoogleScannedObjects/SampleObjects/', help='Path to GoogleScan3d Models Directory.')
+parser.add_argument('-m', '--models_file', type=str, required=True, default='/home/felipe/Downloads/models/model_list.txt', help="List of object names to export to URDF")
+parser.add_argument('-f', '--google_dir', type=str, required=True, default='/home/felipe/Downloads/models', help='Path to GoogleScan3d Models Directory.')
 
 
 def get_urdf_file(ycb_model: str, mesh_path: str, mass: float) -> str:
@@ -58,7 +58,7 @@ def main(args):
     DENSITY = 100
     for model in model_names:
         model_dir = os.path.join(args.google_dir, model) 
-        mesh_p =  os.path.join("meshes", "model.obj")
+        mesh_p =  os.path.join("textured_simple.obj")
         obj = trimesh.load(os.path.join(model_dir, mesh_p))
         _, extents = trimesh.bounds.oriented_bounds(obj)
         volume = reduce(lambda x, y: x*y, extents)

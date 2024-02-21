@@ -68,11 +68,11 @@ if __name__ == "__main__":
         usd_dir = os.path.join(args.output_dir, model)
         os.makedirs(usd_dir, exist_ok=True)
 
-        org_texture_p = os.path.join(model_p, "materials", "textures", "texture.png")
+        #org_texture_p = os.path.join(model_p, "materials", "textures", "texture_map.png")
         # This line is needed for the GoogleScannedObjects models dir, might not be needed for others!
-        symlink_new_texture_p = os.path.join(model_p, "meshes", "texture.png")
-        if not os.path.exists(symlink_new_texture_p):
-            os.symlink(org_texture_p, symlink_new_texture_p)
+        ##symlink_new_texture_p = os.path.join(model_p, "meshes", "texture.png")
+        #if not os.path.exists(symlink_new_texture_p):
+        #    os.symlink(org_texture_p, symlink_new_texture_p)
 
         usd_p = os.path.join(usd_dir, f"{model}.usd")
         urdf_p  = os.path.join(model_p, f"{model}.urdf")
