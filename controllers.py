@@ -128,10 +128,11 @@ class TransferPositionController(BaseGripperController):
     def forward(self, action, time, grippers, close_position):
         current_dofs = grippers.get_joint_positions()
         pos = np.zeros_like(close_position)
-
+        time = np.squeeze(time)
         uninit = np.argwhere(time==0)
         init = np.argwhere(time!=0)
-
+        self.touch_dofs[uninit]= current_dofs[uninit]  
+        
         #2 behaviors ready and not ready grasps (view.py gives 0 as time for each workstation that is not set up)
         for i in range(len(self.close_mask)):
             if (self.close_mask[i]== 0):
@@ -141,23 +142,15 @@ class TransferPositionController(BaseGripperController):
                     pos[init,i] =  self.touch_dofs[init,i]
                 if(len(uninit)>0):
                     pos[uninit,i] = close_position[uninit,i]
-                    self.touch_dofs[uninit]= current_dofs[uninit]  
+                    
             else:
                 pos[:,i] = close_position[:,i] * (abs(self.close_mask[i])-1)
-        
-        # update dofs  for untouched
-                  
 
         if action == "h5_hand":
             pos[:,2]= -1*current_dofs[:,0]
             pos[:,3]= -1*current_dofs[:,1]
             grippers.set_joint_positions(pos[:,2:], joint_indices = [2,3])
 
-        #print("close", close_position[0])
-        #print("pos", pos[0])
-        #print("current", current_dofs[0])
-        #print('mask', self.close_mask)
-        #input()
         actions = ArticulationActions(joint_positions = pos)
         # A controller has to return an ArticulationAction
         self.last_actions = actions

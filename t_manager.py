@@ -114,9 +114,9 @@ class T_Manager:
             "jaco_robot": [2, 2, 2],
             "robotiq_3finger": [0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0], #[0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0]
             "h5_hand": [2,-2,0,0],
-            "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
-            "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 0.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1]
+            "Allegro": [0, 1.5, 0, 0, 2, 0, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0], #
+            "HumanHand":[0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0 , 0, 0, 0 , 0],
+            "shadow_hand": [0 , 0, 0, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 2, 0, 2]
         }
 
         #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
@@ -237,7 +237,24 @@ class T_Manager:
             robot_pos = robot_pos * np.asarray([0, 0, 0])
         elif self.gripper == "robotiq_3finger":
             robot_pos = robot_pos * np.asarray([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-        else:
+        elif self.gripper == "Allegro":
+            robot_pos = robot_pos * np.asarray([0, 0, 0, 0, np.radians(-11), np.radians(67), np.radians(-11),
+                                                 np.radians(-11), np.radians(-10), 0, np.radians(-9),
+                                                 np.radians(-10), np.radians(10), np.radians(10), np.radians(10), 
+                                                 np.radians(10)])
+        elif self.gripper == "HumanHand":
+            robot_pos = robot_pos * np.asarray([np.radians(10), 0, np.radians(-15), np.radians(-5), np.radians(-10), 
+                                                np.radians(-10), np.radians(-10), np.radians(-10), np.radians(-10),
+                                                    np.radians(-50), np.radians(-10), np.radians(-10),
+                                                      np.radians(-10), np.radians(-10), np.radians(-10),
+                                                        np.radians(20), np.radians(20), np.radians(20),
+                                                          np.radians(20), np.radians(20)])
+        elif self.gripper == "shadow_hand":
+            robot_pos = robot_pos * np.asarray([np.radians(-10), np.radians(15), np.radians(-5), 0, np.radians(-45),
+                                                 0, np.radians(-5), 0, 0, np.radians(69), 0, 0, 0, 0, 0,np.radians(20), 0, 
+                                                      np.radians(20), np.radians(20), np.radians(-20),
+                                                        np.radians(20), np.radians(20)])
+        else:            
             raise(LookupError("No dof translation for gripper"))
 
 
