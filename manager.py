@@ -146,15 +146,15 @@ class Manager:
         self.contact_ths = { 
             "fetch_gripper" : 1,
             "franka_panda": 1, 
-            "sawyer": 2,
+            "sawyer": 1,
             "wsg_50": 1, 
             "Barrett": 1,
-            "jaco_robot": 2,
+            "jaco_robot": 1,
             "robotiq_3finger": 1,
-            "Allegro": 2,
-            "HumanHand": 2,
-            "shadow_hand": 2,
-            "h5_hand": 2
+            "Allegro": 1,
+            "HumanHand": 1,
+            "shadow_hand": 1,
+            "h5_hand": 1
         }
 
     def _check_gripper_usd(self,gripper_path):
