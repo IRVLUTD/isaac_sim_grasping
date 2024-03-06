@@ -57,8 +57,8 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
-from t_manager import T_Manager
-from views import View
+from m_manager import M_Manager
+from m_views import View
 
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             continue
 
         # Initialize Manager
-        manager = T_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
+        manager = M_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
         
 
         #Create initial Workstation Prim
@@ -248,6 +248,8 @@ if __name__ == "__main__":
 
             
         #Run Sim
+        #world.pause()
+        x=0
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
                 #print(mass)

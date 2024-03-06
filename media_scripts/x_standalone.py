@@ -58,7 +58,7 @@ from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
 from t_manager import T_Manager
-from views import View
+from m_views import View
 
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
@@ -237,7 +237,7 @@ if __name__ == "__main__":
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
         physicsContext.enable_stablization(True)
-        physicsContext.set_gravity(-10)
+        physicsContext.set_gravity(0)
 
         world.reset()
         
@@ -251,9 +251,7 @@ if __name__ == "__main__":
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
                 #print(mass)
-                
                 world.step(render=render) # execute one physics step and one rendering step if not headless
-                world.pause()
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
     
