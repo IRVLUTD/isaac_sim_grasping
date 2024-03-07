@@ -119,6 +119,7 @@ class View():
         # Initialize controller
         self.controller= self.manager.controller(close_mask, self.test_time, max_efforts, self.grippers)
         self.test_type = self.controller.type
+        self.new_dofs = np.zeros_like(self.dofs)
         return
     
     def physics_step(self,step_size):
@@ -142,19 +143,19 @@ class View():
             
             
             # Calculate slips
-            te_slip = np.squeeze(t_error>0.02)
-            R_current = quats_to_rot_matrices(np.squeeze(current_rotations))
-            R_init = quats_to_rot_matrices(np.squeeze(self.init_rotations[active_ind]))
-            re_slip = re_batch(R_current, R_init) > 5
-            slip = np.logical_or(te_slip, re_slip)
-            tmp = np.squeeze(self.reported_slips[active_ind] == 0 )
-            s_ind = np.squeeze(active_ind[np.multiply(slip,tmp)])
+            #te_slip = np.squeeze(t_error>0.02)
+            #R_current = quats_to_rot_matrices(np.squeeze(current_rotations))
+            #R_init = quats_to_rot_matrices(np.squeeze(self.init_rotations[active_ind]))
+            #re_slip = re_batch(R_current, R_init) > 5
+            #slip = np.logical_or(te_slip, re_slip)
+            #tmp = np.squeeze(self.reported_slips[active_ind] == 0 )
+            #s_ind = np.squeeze(active_ind[np.multiply(slip,tmp)])
 
             #Objects that slipped
-            s_ind=np.atleast_1d(s_ind)
-            if(len(s_ind)>0):
-                self.manager.report_slip(self.current_job_IDs[s_ind],self.current_times[s_ind])
-                self.reported_slips[s_ind] = 1
+            #s_ind=np.atleast_1d(s_ind)
+            #if(len(s_ind)>0):
+            #    self.manager.report_slip(self.current_job_IDs[s_ind],self.current_times[s_ind])
+            #    self.reported_slips[s_ind] = 1
             
         # Apply gravity to ready grasps
         tmp_active = np.squeeze(self.current_job_IDs>=0)
@@ -178,6 +179,7 @@ class View():
             #Update grasp_setup
             self.current_times[rb_ind[tmp>=self.manager.contact_th]]=0
             self.grasp_set_up[rb_ind[tmp>=self.manager.contact_th]]=1
+            self.new_dofs[rb_ind[tmp>=self.manager.contact_th]] = self.grippers.get_joint_positions(indices= rb_ind[tmp>=self.manager.contact_th])
 
         # Apply gripper actions
         
@@ -213,7 +215,7 @@ class View():
         finish_ind=np.atleast_1d(np.squeeze(finish_ind))
 
         #Report Fall
-        self.manager.report_fall(self.current_job_IDs[finish_ind], self.current_times[finish_ind],self.test_type,self.test_time)
+        self.manager.report_fall(self.current_job_IDs[finish_ind], self.current_times[finish_ind],self.test_type,self.test_time, self.new_dofs[finish_ind])
         
         # Get new jobs
         self.dofs[finish_ind], self.current_poses[finish_ind], self.current_job_IDs[finish_ind] =self.get_jobs(len(finish_ind))
@@ -221,6 +223,7 @@ class View():
         self.grasp_set_up[finish_ind] = 0
         self.reported_slips[finish_ind] = 0
         self.gravities[finish_ind] = np.zeros((len(finish_ind),3))
+        self.new_dofs[finish_ind] = np.zeros_like(self.dofs[finish_ind])
         #self.objects.disable_gravities(finish_ind)
 
         # Reset Workstations

@@ -234,17 +234,10 @@ if __name__ == "__main__":
         world.reset()
         physicsContext = world.get_physics_context()
         #physicsContext.set_solver_type("PGS")
-        #print(physicsContext.get_gpu_collision_stack_size())
-        #print(physicsContext.get_gpu_max_rigid_contact_count())
-        
-        #print(physicsContext.get_gpu_temp_buffer_capacity())
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
-        #physicsContext.enable_fabric(True)
-        #print(physicsContext.is_gpu_dynamics_enabled())
-        #print(physicsContext.device)
         physicsContext.enable_stablization(True)
-        physicsContext.set_gravity(-10)
+        physicsContext.set_gravity(-9.81)
 
         world.reset()
         

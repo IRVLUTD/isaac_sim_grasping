@@ -4,6 +4,7 @@ import os
 from controllers import controller_dict
 import utils
 import json
+import time
 
 class Manager:
     """ Grasp Data Manager:
@@ -40,6 +41,7 @@ class Manager:
         self.dofs = np.asarray(self.dofs) #graspit_dofs
         self.grasps = np.asarray(self.grasps) #graspit_pose
         self.grasps[:,[3,4,5,6]]= self.grasps[:,[6,3,4,5]]
+        
 
         # Check for usds Object's and Gripper's
         self._check_gripper_usd(grippers_path)
@@ -59,6 +61,7 @@ class Manager:
         self.physics_dt = self.dts[self.gripper]
         self.c_names = self.contact_names[self.gripper]
         self.EF_axis = self.EF_axes[self.gripper]
+        self.init_time = time.time()
 
         #Pointer and result vars
         self.job_pointer = 0 # Start to 0
@@ -91,7 +94,7 @@ class Manager:
 
         #Custom Physics dts (increase filtering speed)
         self.dts = {
-            "fetch_gripper": 1/180,
+            "fetch_gripper": 1/120,
             "franka_panda": 1/120,
             "sawyer": 1/60,
             "wsg_50": 1/60,
@@ -279,10 +282,10 @@ class Manager:
 
         robot_pos = np.squeeze(tmp)
         self.dofs = robot_pos #saves dofs conversion
-
+        self.final_dofs = np.zeros_like(self.dofs)
         return robot_pos
 
-    def report_fall(self, job_ID, value,test_type, test_time):
+    def report_fall(self, job_ID, value,test_type, test_time, new_dofs):
         """ Reports falls of objects in grasp tests
         
         Args:
@@ -299,6 +302,8 @@ class Manager:
             pass
         else:
             self.fall_time[job_ID] = value
+            self.final_dofs[job_ID] = new_dofs
+            #print(new_dofs)
             if self.test_type == None:
                 self.test_type = test_type  
                 self.total_test_time = test_time
@@ -343,6 +348,12 @@ class Manager:
         new_json["fall_time"] = self.fall_time.tolist()
         new_json["slip_time"] = self.slip_time.tolist()
         new_json['graspit_dofs']= self.graspit_dofs
+        
+        #NEW
+        new_json['runtime'] = time.time()-self.init_time
+        new_json['physics_dt'] = self.physics_dt
+        new_json['final_dofs'] = self.final_dofs
+
         with open(output_path,'w') as outfile:
             json.dump(new_json,outfile)
         return
