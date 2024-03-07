@@ -96,14 +96,14 @@ class Manager:
         self.dts = {
             "fetch_gripper": 1/120,
             "franka_panda": 1/120,
-            "sawyer": 1/60,
-            "wsg_50": 1/60,
-            "Barrett": 1/60,
-            "robotiq_3finger": 1/60,
-            "jaco_robot": 1/60,
+            "sawyer": 1/120,
+            "wsg_50": 1/120,
+            "Barrett": 1/120,
+            "robotiq_3finger": 1/120,
+            "jaco_robot": 1/120,
             "Allegro": 1/120,
             "shadow_hand": 1/120,
-            "HumanHand": 1/120,
+            "HumanHand": 1/240,
             "h5_hand": 1/120
         }
 
