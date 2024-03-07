@@ -103,7 +103,7 @@ class Manager:
             "jaco_robot": 1/120,
             "Allegro": 1/120,
             "shadow_hand": 1/120,
-            "HumanHand": 1/240,
+            "HumanHand": 1/120,
             "h5_hand": 1/120
         }
 
