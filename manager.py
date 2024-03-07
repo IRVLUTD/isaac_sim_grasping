@@ -352,7 +352,7 @@ class Manager:
         #NEW
         new_json['runtime'] = time.time()-self.init_time
         new_json['physics_dt'] = self.physics_dt
-        new_json['final_dofs'] = self.final_dofs
+        new_json['final_dofs'] = self.final_dofs.tolist()
 
         with open(output_path,'w') as outfile:
             json.dump(new_json,outfile)
