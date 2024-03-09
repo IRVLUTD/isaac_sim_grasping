@@ -57,8 +57,8 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
-from m_manager import M_Manager
-from m_views import View
+from ht_manager import HT_Manager
+from h_views import H_View
 
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             continue
 
         # Initialize Manager
-        manager = M_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
+        manager = HT_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
         
 
         #Create initial Workstation Prim
@@ -218,7 +218,7 @@ if __name__ == "__main__":
                      root_path = "/World/Workstation_")
 
         # ISAAC SIM views initialization
-        viewer = View(work_path,contact_names,num_w, manager,world, test_time, mass)
+        viewer = H_View(work_path,contact_names,num_w, manager,world, test_time, mass)
 
         
         #Reset World and create set first robot positions
@@ -248,14 +248,12 @@ if __name__ == "__main__":
 
             
         #Run Sim
-        #world.pause()
-        x=0
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
                 #print(mass)
                 
                 world.step(render=render) # execute one physics step and one rendering step if not headless
-                world.pause()
+                #world.pause()
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
     

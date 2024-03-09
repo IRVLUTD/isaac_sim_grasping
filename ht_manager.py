@@ -4,8 +4,9 @@ import os
 from controllers import controller_dict
 import utils
 import json
+import time
 
-class M_Manager:
+class HT_Manager:
     """ Grasp Data Manager:
     Manages the information of all grippers, grasps and the reporting of results (Verbosity and saving)
     This class takes in a specific .json structure, if it is desired to change the .json format, this 
@@ -23,22 +24,19 @@ class M_Manager:
         # Loading files and urdfs
         self.world = world
         print("Loading File: ", grasps_path)
-        fd = open(grasps_path)
-        self.json = json.load(fd)
+        with open(grasps_path) as fd:
+            self.json = json.load(fd)
         self.gripper = self.json['gripper']
         self.object = self.json['object_id']
+        
 
         #Translate GraspIt DoFs Information
         self.pickle_file_data = utils.load_pickle(os.path.join(grippers_path, "gripper_pyb_info.pk"))
 
         # Extract grasps and reorder quaternions
         self.grasps = self.json['pose']
-        #print(self.grasps)
-        self.grasps = np.asarray(self.grasps) 
+        self.grasps = np.asarray(self.grasps)         
 
-        #self.grasps[:,[3,4,5,6]]= self.grasps[:,[6,3,4,5]]
-        #self.dofs = np.zeros_like(self.json['dofs'])
-        self.new_dofs =[]
         # Check for usds Object's and Gripper's
         self._check_gripper_usd(grippers_path)
         self._check_object_usd(objects_path)
@@ -57,15 +55,25 @@ class M_Manager:
         self.physics_dt = self.dts[self.gripper]
         self.c_names = self.contact_names[self.gripper]
         self.EF_axis = self.EF_axes[self.gripper]
+        self.init_time = time.time()
+
 
         #Pointer and result vars
         self.job_pointer = 0 # Start to 0
         self.test_type = None #!!!
         self.total_test_time = None #!!!
-        self.fall_time = np.zeros(len(self.grasps))
+        self.fall_time = np.asarray(self.json['fall_time'])
         self.slip_time = np.ones(len(self.grasps))*-1
         self.completed = np.zeros(len(self.grasps))
         self.reported_slips = np.zeros(len(self.grasps))
+
+        # Preprocessed transfers
+        if self.gripper not in ['sawyer', 'fetch_gripper', 'franka_panda', 'wsg_50']:
+            tmp = self.fall_time >=-1
+            self.completed[tmp]=1
+        
+
+
 
     def _init_gripper_dicts(self):
         """ GRIPPER INFORMATION INITIALIZATION
@@ -89,12 +97,12 @@ class M_Manager:
 
         #Custom Physics dts (increase filtering speed)
         self.dts = {
-            "fetch_gripper": 1/60,
-            "franka_panda": 1/60,
+            "fetch_gripper": 1/120,
+            "franka_panda": 1/120,
             "sawyer": 1/120,
             "wsg_50": 1/120,
             "Barrett": 1/120,
-            "robotiq_3finger": 1/50,
+            "robotiq_3finger": 1/120,
             "jaco_robot": 1/120,
             "Allegro": 1/120,
             "shadow_hand": 1/120,
@@ -146,12 +154,12 @@ class M_Manager:
         #Amount of contacts required for the grasp to be considered as ready
         self.contact_ths = { 
             "fetch_gripper" : 2,
-            "franka_panda": 1, 
+            "franka_panda": 2, 
             "sawyer": 2,
             "wsg_50": 2, 
             "Barrett": 2,
             "jaco_robot": 2,
-            "robotiq_3finger": 1,
+            "robotiq_3finger": 2,
             "Allegro": 2,
             "HumanHand": 2,
             "shadow_hand": 2,
@@ -195,14 +203,21 @@ class M_Manager:
         tmp = []
         poses = []
         dofs = []
-        for i in range(n):
+        i = 0 
+        while(i<n):
             if(self.job_pointer<self.n_jobs):
-                job_IDs.append(self.job_pointer)
-                tmp.append(self.job_pointer)
-                self.job_pointer +=1
+                if (self.completed[self.job_pointer]==0):
+                    job_IDs.append(self.job_pointer)
+                    tmp.append(self.job_pointer)
+                    self.job_pointer +=1
+                    i+=1
+                else:
+                    self.job_pointer +=1
+                    continue
             else:
                 tmp.append(0)
                 job_IDs.append(-1)
+                i+=1
 
         poses = np.asarray(self.grasps[tmp,:])
         dofs = np.asarray(self.dofs[tmp,:])
@@ -260,10 +275,10 @@ class M_Manager:
 
 
         self.dofs = robot_pos
-        self.new_dofs = np.zeros_like(self.dofs)
+        self.final_dofs = np.zeros_like(self.dofs)
         return robot_pos
 
-    def report_fall(self, job_ID, value,test_type, test_time,touch_dofs):
+    def report_fall(self, job_ID, value,test_type, test_time, new_dofs):
         """ Reports falls of objects in grasp tests
         
         Args:
@@ -275,17 +290,16 @@ class M_Manager:
 
         job_ID = np.squeeze(job_ID).astype(int)
         value = np.squeeze(value)
-        dofs = np.squeeze(touch_dofs)
 
         if(self.completed[job_ID].any()):
             pass
         else:
             self.fall_time[job_ID] = value
+            self.final_dofs[job_ID] = new_dofs
             if self.test_type == None:
                 self.test_type = test_type  
                 self.total_test_time = test_time
             self.completed[job_ID]= 1
-            self.new_dofs[job_ID] = dofs
 
         return
     
@@ -321,11 +335,15 @@ class M_Manager:
         self.slip_time[tmp] = self.total_test_time #Didn't even slip
 
         #Lists
-        new_json['dofs'] = self.new_dofs.tolist()
         new_json['pose'] = self.grasps.tolist()
         new_json["fall_time"] = self.fall_time.tolist()
         new_json["slip_time"] = self.slip_time.tolist()
-        #new_json["og_gripper"] = self.json["og_gripper"]
+        new_json["og_gripper"] = self.json["og_gripper"]
+
+        #NEW
+        new_json['physics_dt'] = self.physics_dt
+        new_json['runtime'] = time.time()-self.init_time
+        new_json['final_dofs'] = self.final_dofs.tolist()
 
         with open(output_path,'w') as outfile:
             json.dump(new_json,outfile)
