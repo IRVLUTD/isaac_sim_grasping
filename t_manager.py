@@ -66,6 +66,9 @@ class T_Manager:
         self.completed = np.zeros(len(self.grasps))
         self.reported_slips = np.zeros(len(self.grasps))
 
+        
+        
+
     def _init_gripper_dicts(self):
         """ GRIPPER INFORMATION INITIALIZATION
         Every gripper should have its information added here

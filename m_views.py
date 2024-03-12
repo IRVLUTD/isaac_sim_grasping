@@ -65,7 +65,7 @@ class View():
         self.dofs = []
         self.t = time.time()
         #Add physics Step
-        world.add_physics_callback("physics_steps", callback_fn=self.physics_step)
+        #world.add_physics_callback("physics_steps", callback_fn=self.physics_step)
         
     def get_jobs(self,n):
         """Request jobs from manager class

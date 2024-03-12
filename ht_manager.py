@@ -71,7 +71,10 @@ class HT_Manager:
         if self.gripper not in ['sawyer', 'fetch_gripper', 'franka_panda', 'wsg_50']:
             tmp = self.fall_time >=-1
             self.completed[tmp]=1
-        
+        #tmp = np.array(self.json['og_gripper']) !='sawyer'
+        #self.completed[tmp] =1
+        #tmp = np.array(self.json['og_gripper']) =='sawyer'
+        #print(self.grasps[tmp])
 
 
 
