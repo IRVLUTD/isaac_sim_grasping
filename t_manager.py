@@ -29,9 +29,6 @@ class T_Manager:
         self.gripper = self.json['gripper']
         self.object = self.json['object_id']
 
-        #Translate GraspIt DoFs Information
-        self.pickle_file_data = utils.load_pickle(os.path.join(grippers_path, "gripper_pyb_info.pk"))
-
         # Extract grasps and reorder quaternions
         self.grasps = self.json['pose']
         self.grasps = np.asarray(self.grasps)         
@@ -65,9 +62,7 @@ class T_Manager:
         self.slip_time = np.ones(len(self.grasps))*-1
         self.completed = np.zeros(len(self.grasps))
         self.reported_slips = np.zeros(len(self.grasps))
-
-        
-        
+        self.final_dofs = np.zeros((len(self.fall_time),len(self.close_mask)))
 
     def _init_gripper_dicts(self):
         """ GRIPPER INFORMATION INITIALIZATION
@@ -312,7 +307,7 @@ class T_Manager:
         
         """
         print("Saving File at: ",output_path)
-        new_json = {}
+        new_json = self.json
         #Single elements
         new_json['gripper'] = self.gripper
         new_json['object_id'] = self.object
@@ -325,12 +320,11 @@ class T_Manager:
         new_json['pose'] = self.grasps.tolist()
         new_json["fall_time"] = self.fall_time.tolist()
         new_json["slip_time"] = self.slip_time.tolist()
-        new_json["og_gripper"] = self.json["og_gripper"]
 
         #NEW
         new_json['physics_dt'] = self.physics_dt
         new_json['runtime'] = time.time()-self.init_time
-        new_json['final_dofs'] = self.final_dofs
+        new_json['final_dofs'] = self.final_dofs.tolist()
 
         with open(output_path,'w') as outfile:
             json.dump(new_json,outfile)

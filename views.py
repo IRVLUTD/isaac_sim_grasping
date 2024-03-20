@@ -141,31 +141,9 @@ class View():
             if(len(finish_ind)>0):
                 self.test_finish(finish_ind)
             
-            
-            # Calculate slips
-            #te_slip = np.squeeze(t_error>0.02)
-            #R_current = quats_to_rot_matrices(np.squeeze(current_rotations))
-            #R_init = quats_to_rot_matrices(np.squeeze(self.init_rotations[active_ind]))
-            #re_slip = re_batch(R_current, R_init) > 5
-            #slip = np.logical_or(te_slip, re_slip)
-            #tmp = np.squeeze(self.reported_slips[active_ind] == 0 )
-            #s_ind = np.squeeze(active_ind[np.multiply(slip,tmp)])
-
-            #Objects that slipped
-            #s_ind=np.atleast_1d(s_ind)
-            #if(len(s_ind)>0):
-            #    self.manager.report_slip(self.current_job_IDs[s_ind],self.current_times[s_ind])
-            #    self.reported_slips[s_ind] = 1
-            
         # Apply gravity to ready grasps
         tmp_active = np.squeeze(self.current_job_IDs>=0)
         g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0] # optimizable
-        #if (len(g_ind)>0):
-            #self.objects.enable_gravities(g_ind)
-            #self.gravities[g_ind] = self.gravity
-            #print(g_ind)
-            #print("SETTED UP ", g_ind)
-        #self.objects.apply_forces(self.gravities)
 
         # Rigid Body Probing, mark grasps as ready
         rb_ind = np.argwhere(np.multiply(np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0]
@@ -201,9 +179,6 @@ class View():
         if(len(failed_ind)>0): 
             self.current_times[failed_ind] = -1
             self.test_finish(failed_ind)
-
-        #print("physics_step", time.time()-self.t)
-        #self.t= time.time()
         return
     
     def test_finish(self, finish_ind):
@@ -222,9 +197,8 @@ class View():
         self.current_times[finish_ind] = 0
         self.grasp_set_up[finish_ind] = 0
         self.reported_slips[finish_ind] = 0
-        self.gravities[finish_ind] = np.zeros((len(finish_ind),3))
+        self.gravities[finish_ind] = np.zeros((len(finish_ind),3)) # deprecated
         self.new_dofs[finish_ind] = np.zeros_like(self.dofs[finish_ind])
-        #self.objects.disable_gravities(finish_ind)
 
         # Reset Workstations
         self.grippers.set_joint_positions(self.dofs[finish_ind], finish_ind)
@@ -234,7 +208,6 @@ class View():
         for i in range(object_Ts.shape[0]):
             self.init_positions[finish_ind[i]], self.init_rotations[finish_ind[i]] = pose_from_tf_matrix(object_Ts[i].astype(float))
         self.objects.set_velocities([0,0,0,0,0,0],finish_ind) 
-        #self.objects_parents.set_world_poses(self.init_positions[finish_ind], self.init_rotations[finish_ind],finish_ind)
         self.objects.set_world_poses(self.init_positions[finish_ind], self.init_rotations[finish_ind],finish_ind)
 
         # Update close positions to new dofs (already placed on gripper initialization dofs)

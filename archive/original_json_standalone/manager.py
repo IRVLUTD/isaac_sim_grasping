@@ -4,9 +4,8 @@ import os
 from controllers import controller_dict
 import utils
 import json
-import time
 
-class HT_Manager:
+class Manager:
     """ Grasp Data Manager:
     Manages the information of all grippers, grasps and the reporting of results (Verbosity and saving)
     This class takes in a specific .json structure, if it is desired to change the .json format, this 
@@ -24,18 +23,23 @@ class HT_Manager:
         # Loading files and urdfs
         self.world = world
         print("Loading File: ", grasps_path)
-        with open(grasps_path) as fd:
-            self.json = json.load(fd)
-        self.gripper = self.json['gripper']
-        self.object = self.json['object_id']
-        
+        self.json = pd.read_json(grasps_path)
+        self.gripper = self.json.iloc[0]['gripper']
+        self.object = self.json.iloc[0]['object_id']
 
         #Translate GraspIt DoFs Information
         self.pickle_file_data = utils.load_pickle(os.path.join(grippers_path, "gripper_pyb_info.pk"))
 
         # Extract grasps and reorder quaternions
-        self.grasps = self.json['pose']
-        self.grasps = np.asarray(self.grasps)         
+        self.grasps = []
+        self.dofs = []
+        for i, r in self.json.iterrows(): 
+            self.grasps.append(r['grasps']['pose'])
+            self.dofs.append(r['grasps']['dofs'])
+        self.graspit_dofs = self.dofs
+        self.dofs = np.asarray(self.dofs) #graspit_dofs
+        self.grasps = np.asarray(self.grasps) #graspit_pose
+        self.grasps[:,[3,4,5,6]]= self.grasps[:,[6,3,4,5]]
 
         # Check for usds Object's and Gripper's
         self._check_gripper_usd(grippers_path)
@@ -55,28 +59,15 @@ class HT_Manager:
         self.physics_dt = self.dts[self.gripper]
         self.c_names = self.contact_names[self.gripper]
         self.EF_axis = self.EF_axes[self.gripper]
-        self.init_time = time.time()
-
 
         #Pointer and result vars
         self.job_pointer = 0 # Start to 0
         self.test_type = None #!!!
         self.total_test_time = None #!!!
-        self.fall_time = np.asarray(self.json['fall_time'])
+        self.fall_time = np.zeros(len(self.grasps))
         self.slip_time = np.ones(len(self.grasps))*-1
         self.completed = np.zeros(len(self.grasps))
         self.reported_slips = np.zeros(len(self.grasps))
-
-        # Preprocessed transfers
-        if self.gripper not in ['sawyer', 'fetch_gripper', 'franka_panda', 'wsg_50','h5_hand']:
-            tmp = self.fall_time >=-1
-            self.completed[tmp]=1
-        #tmp = np.array(self.json['og_gripper']) !='sawyer'
-        #self.completed[tmp] =1
-        #tmp = np.array(self.json['og_gripper']) =='sawyer'
-        #print(self.grasps[tmp])
-
-
 
     def _init_gripper_dicts(self):
         """ GRIPPER INFORMATION INITIALIZATION
@@ -100,49 +91,46 @@ class HT_Manager:
 
         #Custom Physics dts (increase filtering speed)
         self.dts = {
-            "fetch_gripper": 1/120,
-            "franka_panda": 1/120,
-            "sawyer": 1/120,
-            "wsg_50": 1/120,
-            "Barrett": 1/120,
-            "robotiq_3finger": 1/120,
-            "jaco_robot": 1/120,
-            "Allegro": 1/120,
+            "fetch_gripper": 1/60,
+            "franka_panda": 1/60,
+            "sawyer": 1/60,
+            "wsg_50": 1/60,
+            "Barrett": 1/60,
+            "robotiq_3finger": 1/60,
+            "jaco_robot": 1/60,
+            "Allegro": 1/80,
             "shadow_hand": 1/120,
             "HumanHand": 1/120,
             "h5_hand": 1/120
         }
 
-        #Array like structure for DoFs to close gripper for 0 the dof won't move 
-        # 1 dof will move only to set up grasp
-        # >1 dof will move to set up grasp and to exert force on object
-        # Sign determines direction
+        # Direction for DoFs to close gripper
         self.close_dir= {
-            "fetch_gripper" : [2,2],
-            "franka_panda": [-2, -2], # NOTE, franka_panda gripper by default is closed, so need to open before, Opendir = [1, 1]
-            "sawyer": [2, 2],
-            "wsg_50": [2, -2], # NOTE, wsg_50 gripper by default is closed, so need to open before, Opendir = [-1, 1]
-            "Barrett": [0, 0, 2, 2, 2, 0, 0, 0],
-            "jaco_robot": [2, 2, 2],
-            "robotiq_3finger": [0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0], #[0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0]
-            "h5_hand": [2,-2,0,0],
-            "Allegro": [0, 1.5, 0, 0, 2, 0, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0], #
-            "HumanHand":[0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0 , 0, 0, 0 , 0],
-            "shadow_hand": [0 , 0, 0, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 2, 0, 2]
+            "fetch_gripper" : [1,1],
+            "franka_panda": [-1, -1], # NOTE, franka_panda gripper by default is closed, so need to open before, Opendir = [1, 1]
+            "sawyer": [1, 1],
+            "wsg_50": [1, -1], # NOTE, wsg_50 gripper by default is closed, so need to open before, Opendir = [-1, 1]
+            "Barrett": [0, 0, 1, 1, 1, 0, 0, 0],
+            "jaco_robot": [1, 1, 1],
+            "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+            "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+            "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 0.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1],
+            "h5_hand": [1,-1,0,0]
         }
 
         #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
         self.contact_names= { 
             "fetch_gripper" : ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
             "franka_panda": ["panda_hand", "panda_leftfinger", "panda_rightfinger"], 
-            "sawyer": ["leftfinger", "rightfinger"],
+            "sawyer": [ "leftfinger", "rightfinger"],
             "wsg_50": ["gripper_left", "gripper_right"], 
             "Barrett": ["a_link2_joint","a_link3_joint","b_link2_joint","b_link3_joint","c_link2_joint_0","c_link3_joint"],
             "jaco_robot": ["jaco_8_finger_index", "jaco_8_finger_thumb", "jaco_8_finger_pinkie"],
             "robotiq_3finger": ["RIQ_link_1_joint_a", "RIQ_link_1_joint_b", "RIQ_link_1_joint_c",
                              "RIQ_link_2_joint_a", "RIQ_link_2_joint_b", "RIQ_link_2_joint_c",
                              "RIQ_link_3_joint_a", "RIQ_link_3_joint_b", "RIQ_link_3_joint_c"],
-            "Allegro": ["link_0_0", "link_2_0","link_3_0", "link_4_0", "link_5_0","link_6_0","link_7_0","link_8_0","link_9_0","link_10_0",
+            "Allegro": [ "link_0_0", "link_2_0","link_3_0", "link_4_0", "link_5_0","link_6_0","link_7_0","link_8_0","link_9_0","link_10_0",
                         "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],
             "HumanHand": ["index1_joint","index2_joint","index3_joint", "mid1_joint","mid2_joint","mid3_joint", "pinky1_joint","pinky2_joint","pinky3_joint",
                            "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
@@ -156,17 +144,17 @@ class HT_Manager:
         
         #Amount of contacts required for the grasp to be considered as ready
         self.contact_ths = { 
-            "fetch_gripper" : 2,
-            "franka_panda": 2, 
-            "sawyer": 2,
-            "wsg_50": 2, 
-            "Barrett": 2,
-            "jaco_robot": 2,
-            "robotiq_3finger": 2,
-            "Allegro": 2,
-            "HumanHand": 2,
-            "shadow_hand": 2,
-            "h5_hand": 2
+            "fetch_gripper" : 1,
+            "franka_panda": 1, 
+            "sawyer": 1,
+            "wsg_50": 1, 
+            "Barrett": 1,
+            "jaco_robot": 1,
+            "robotiq_3finger": 1,
+            "Allegro": 1,
+            "HumanHand": 1,
+            "shadow_hand": 1,
+            "h5_hand": 1
         }
 
     def _check_gripper_usd(self,gripper_path):
@@ -206,27 +194,18 @@ class HT_Manager:
         tmp = []
         poses = []
         dofs = []
-        i = 0 
-        while(i<n):
+        for i in range(n):
             if(self.job_pointer<self.n_jobs):
-                if (self.completed[self.job_pointer]==0):
-                    job_IDs.append(self.job_pointer)
-                    tmp.append(self.job_pointer)
-                    self.job_pointer +=1
-                    i+=1
-                else:
-                    self.job_pointer +=1
-                    continue
+                job_IDs.append(self.job_pointer)
+                tmp.append(self.job_pointer)
+                self.job_pointer +=1
             else:
                 tmp.append(0)
                 job_IDs.append(-1)
-                i+=1
 
         poses = np.asarray(self.grasps[tmp,:])
         dofs = np.asarray(self.dofs[tmp,:])
         job_IDs = np.asarray(job_IDs)
-        #Verbosity
-        #print("JOBS GIVEN: ", np.asarray(self.json['og_gripper'])[tmp])
         #print('Jobs given ', job_IDs)
         return dofs, poses, job_IDs
     
@@ -237,51 +216,73 @@ class HT_Manager:
             robot_idx: List of dofs indices names of the grippers given by Isaac Sim
         """
 
-        robot_pos= np.ones((self.n_jobs,len(robot_idx)))
-
-        # Open grippers
-        if self.gripper== "fetch_gripper":
-            robot_pos = robot_pos *np.asarray([-0.025, -0.025])
+        if self.gripper == "fetch_gripper":
+            json_idx = self.pickle_file_data[self.gripper][1]
+            robot_pos = np.asarray([(self.dofs / 1000.0) * 10.0, (self.dofs / 1000.0) * 10.0])
+            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
         elif self.gripper == "franka_panda":
-            robot_pos = robot_pos * np.asarray([0.04, 0.04])
-        elif self.gripper == "wsg_50":
-            robot_pos = robot_pos * np.asarray([-0.055, 0.055])
-        elif self.gripper == "sawyer":
-            robot_pos = robot_pos * np.asarray([0, 0])
-        elif self.gripper == "h5_hand":
-            robot_pos = robot_pos * np.asarray([np.radians(-79), np.radians(79),np.radians(79),np.radians(-79)])
+            json_idx = self.pickle_file_data[self.gripper][1]
+            robot_pos = np.asarray([self.dofs/ 1000,self.dofs/ 1000])
+            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
         elif self.gripper == "Barrett":
-            robot_pos = robot_pos * np.asarray([np.radians(30),np.radians(30),0,0,0,0,0,0])
-        elif self.gripper == "jaco_robot":
-            robot_pos = robot_pos * np.asarray([0, 0, 0])
-        elif self.gripper == "robotiq_3finger":
-            robot_pos = robot_pos * np.asarray([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            json_idx = self.pickle_file_data[self.gripper][1]
+            robot_pos = np.asarray([ 
+                self.dofs[:,0],
+                self.dofs[:,1],
+                self.dofs[:,1] / 3.0,
+                self.dofs[:,0],
+                self.dofs[:,2],
+                self.dofs[:,2] / 3.0,
+                self.dofs[:,3],
+                self.dofs[:,3] / 3.0,
+            ])
+            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
         elif self.gripper == "Allegro":
-            robot_pos = robot_pos * np.asarray([0, 0, 0, 0, np.radians(-11), np.radians(67), np.radians(-11),
-                                                 np.radians(-11), np.radians(-10), 0, np.radians(-9),
-                                                 np.radians(-10), np.radians(10), np.radians(10), np.radians(10), 
-                                                 np.radians(10)])
-        elif self.gripper == "HumanHand":
-            robot_pos = robot_pos * np.asarray([np.radians(10), 0, np.radians(-15), np.radians(-5), np.radians(-10), 
-                                                np.radians(-10), np.radians(-10), np.radians(-10), np.radians(-10),
-                                                    np.radians(-50), np.radians(-10), np.radians(-10),
-                                                      np.radians(-10), np.radians(-10), np.radians(-10),
-                                                        np.radians(20), np.radians(20), np.radians(20),
-                                                          np.radians(20), np.radians(20)])
-        elif self.gripper == "shadow_hand":
-            robot_pos = robot_pos * np.asarray([np.radians(-10), np.radians(15), np.radians(-5), 0, np.radians(-45),
-                                                 0, np.radians(-5), 0, 0, np.radians(69), 0, 0, 0, 0, 0,np.radians(20), 0, 
-                                                      np.radians(20), np.radians(20), np.radians(-20),
-                                                        np.radians(20), np.radians(20)])
-        else:            
+            json_idx = self.pickle_file_data[self.gripper][1]
+            robot_pos = self.dofs
+            for i in range(len(json_idx)):
+                    json_idx[i]= json_idx[i].replace(".","_")
+        elif self.gripper in {
+            "HumanHand", 
+            "robotiq_3finger",
+            "jaco_robot",
+            "shadow_hand",
+        }:
+            json_idx = self.pickle_file_data[self.gripper][1]
+            robot_pos = self.dofs
+        elif self.gripper in {"wsg_50", "sawyer"}:
+            json_idx = self.pickle_file_data[self.gripper][1]
+            robot_pos = self.dofs/1000.0
+        elif self.gripper == "h5_hand":
+            #print(self.dofs.shape)
+            tmp = np.zeros_like(self.dofs)
+            robot_pos = np.zeros((self.dofs.shape[0],4))
+            self.dofs[:,1] = -1 * self.dofs[:,1]
+            self.dofs = np.min(self.dofs,axis =1)
+            #print('dofs dim', self.dofs.shape)
+            tmp[:,0] = self.dofs
+            tmp[:,1] = -1*self.dofs
+            robot_pos[:,:2]= tmp
+            robot_pos[:,2:]= -1*tmp
+            json_idx = robot_idx
+            #print("robot_pos", robot_pos)
+        else:
             raise(LookupError("No dof translation for gripper"))
 
+        dof_dict = {json_idx[i]: robot_pos[:,i] for i in range(robot_pos.shape[1])}
+        tmp = np.zeros_like(robot_pos)
+        c = 0
 
-        self.dofs = robot_pos
-        self.final_dofs = np.zeros_like(self.dofs)
+        for i in robot_idx:
+            tmp[:,c] = dof_dict[i] 
+            c +=1
+
+        robot_pos = np.squeeze(tmp)
+        self.dofs = robot_pos #saves dofs conversion
+
         return robot_pos
 
-    def report_fall(self, job_ID, value,test_type, test_time, new_dofs):
+    def report_fall(self, job_ID, value,test_type, test_time):
         """ Reports falls of objects in grasp tests
         
         Args:
@@ -298,7 +299,6 @@ class HT_Manager:
             pass
         else:
             self.fall_time[job_ID] = value
-            self.final_dofs[job_ID] = new_dofs
             if self.test_type == None:
                 self.test_type = test_type  
                 self.total_test_time = test_time
@@ -339,15 +339,10 @@ class HT_Manager:
 
         #Lists
         new_json['pose'] = self.grasps.tolist()
+        new_json['dofs'] = self.dofs.tolist()
         new_json["fall_time"] = self.fall_time.tolist()
         new_json["slip_time"] = self.slip_time.tolist()
-        new_json["og_gripper"] = self.json["og_gripper"]
-
-        #NEW
-        new_json['physics_dt'] = self.physics_dt
-        new_json['runtime'] = time.time()-self.init_time
-        new_json['final_dofs'] = self.final_dofs.tolist()
-
+        new_json['graspit_dofs']= self.graspit_dofs
         with open(output_path,'w') as outfile:
             json.dump(new_json,outfile)
         return

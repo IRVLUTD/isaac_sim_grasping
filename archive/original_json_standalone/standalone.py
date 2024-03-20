@@ -24,10 +24,11 @@ def make_parser():
                          default=False, action = argparse.BooleanOptionalAction)
     parser.add_argument('--controller', type=str,
                         help='Gripper Controller to use while testing, should match the controller dictionary in the Manager Class',
-                        default='transfer_default')
+                        default='default')
     parser.add_argument('--/log/level', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='', required=False)
+    
     return parser
 
 #Parser
@@ -57,8 +58,8 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
-from m_manager import M_Manager
-from m_views import View
+from manager import Manager
+from views import View
 
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
@@ -192,7 +193,7 @@ if __name__ == "__main__":
             continue
 
         # Initialize Manager
-        manager = M_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
+        manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
         
 
         #Create initial Workstation Prim
@@ -233,9 +234,15 @@ if __name__ == "__main__":
         world.reset()
         physicsContext = world.get_physics_context()
         #physicsContext.set_solver_type("PGS")
+        #print(physicsContext.get_gpu_collision_stack_size())
+        #print(physicsContext.get_gpu_max_rigid_contact_count())
         
+        #print(physicsContext.get_gpu_temp_buffer_capacity())
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
+        #physicsContext.enable_fabric(True)
+        #print(physicsContext.is_gpu_dynamics_enabled())
+        #print(physicsContext.device)
         physicsContext.enable_stablization(True)
         physicsContext.set_gravity(-10)
 
@@ -248,14 +255,10 @@ if __name__ == "__main__":
 
             
         #Run Sim
-        #world.pause()
-        x=0
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
                 #print(mass)
-                
                 world.step(render=render) # execute one physics step and one rendering step if not headless
-                #world.pause()
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
     

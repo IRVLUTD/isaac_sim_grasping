@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import os
 from controllers import controller_dict
 import utils
@@ -24,24 +23,16 @@ class Manager:
         # Loading files and urdfs
         self.world = world
         print("Loading File: ", grasps_path)
-        self.json = pd.read_json(grasps_path)
-        self.gripper = self.json.iloc[0]['gripper']
-        self.object = self.json.iloc[0]['object_id']
+        with open(grasps_path) as fd:
+            self.json = json.load(fd)
+        self.gripper = self.json['gripper']
+        self.object = self.json['object_id']
 
-        #Translate GraspIt DoFs Information
-        self.pickle_file_data = utils.load_pickle(os.path.join(grippers_path, "gripper_pyb_info.pk"))
-
-        # Extract grasps and reorder quaternions
-        self.grasps = []
-        self.dofs = []
-        for i, r in self.json.iterrows(): 
-            self.grasps.append(r['grasps']['pose'])
-            self.dofs.append(r['grasps']['dofs'])
-        self.graspit_dofs = self.dofs
+        # Extract grasps 
+        self.grasps = self.json['pose']        
+        self.dofs = self.json['dofs']
         self.dofs = np.asarray(self.dofs) #graspit_dofs
         self.grasps = np.asarray(self.grasps) #graspit_pose
-        self.grasps[:,[3,4,5,6]]= self.grasps[:,[6,3,4,5]]
-        
 
         # Check for usds Object's and Gripper's
         self._check_gripper_usd(grippers_path)
@@ -71,6 +62,7 @@ class Manager:
         self.slip_time = np.ones(len(self.grasps))*-1
         self.completed = np.zeros(len(self.grasps))
         self.reported_slips = np.zeros(len(self.grasps))
+        self.final_dofs = np.zeros_like(self.dofs)
 
     def _init_gripper_dicts(self):
         """ GRIPPER INFORMATION INITIALIZATION
@@ -211,79 +203,6 @@ class Manager:
         job_IDs = np.asarray(job_IDs)
         #print('Jobs given ', job_IDs)
         return dofs, poses, job_IDs
-    
-    def translate_dofs(self, robot_idx):
-        """ Function to translate the GraspIt dofs to Isaac Sim dofs. It overwrites manager.dofs
-        
-        Args: 
-            robot_idx: List of dofs indices names of the grippers given by Isaac Sim
-        """
-
-        if self.gripper == "fetch_gripper":
-            json_idx = self.pickle_file_data[self.gripper][1]
-            robot_pos = np.asarray([(self.dofs / 1000.0) * 10.0, (self.dofs / 1000.0) * 10.0])
-            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
-        elif self.gripper == "franka_panda":
-            json_idx = self.pickle_file_data[self.gripper][1]
-            robot_pos = np.asarray([self.dofs/ 1000,self.dofs/ 1000])
-            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
-        elif self.gripper == "Barrett":
-            json_idx = self.pickle_file_data[self.gripper][1]
-            robot_pos = np.asarray([ 
-                self.dofs[:,0],
-                self.dofs[:,1],
-                self.dofs[:,1] / 3.0,
-                self.dofs[:,0],
-                self.dofs[:,2],
-                self.dofs[:,2] / 3.0,
-                self.dofs[:,3],
-                self.dofs[:,3] / 3.0,
-            ])
-            robot_pos = np.reshape(robot_pos,(robot_pos.shape[1],robot_pos.shape[0]))
-        elif self.gripper == "Allegro":
-            json_idx = self.pickle_file_data[self.gripper][1]
-            robot_pos = self.dofs
-            for i in range(len(json_idx)):
-                    json_idx[i]= json_idx[i].replace(".","_")
-        elif self.gripper in {
-            "HumanHand", 
-            "robotiq_3finger",
-            "jaco_robot",
-            "shadow_hand",
-        }:
-            json_idx = self.pickle_file_data[self.gripper][1]
-            robot_pos = self.dofs
-        elif self.gripper in {"wsg_50", "sawyer"}:
-            json_idx = self.pickle_file_data[self.gripper][1]
-            robot_pos = self.dofs/1000.0
-        elif self.gripper == "h5_hand":
-            #print(self.dofs.shape)
-            tmp = np.zeros_like(self.dofs)
-            robot_pos = np.zeros((self.dofs.shape[0],4))
-            self.dofs[:,1] = -1 * self.dofs[:,1]
-            self.dofs = np.min(self.dofs,axis =1)
-            #print('dofs dim', self.dofs.shape)
-            tmp[:,0] = self.dofs
-            tmp[:,1] = -1*self.dofs
-            robot_pos[:,:2]= tmp
-            robot_pos[:,2:]= -1*tmp
-            json_idx = robot_idx
-            #print("robot_pos", robot_pos)
-        else:
-            raise(LookupError("No dof translation for gripper"))
-
-        dof_dict = {json_idx[i]: robot_pos[:,i] for i in range(robot_pos.shape[1])}
-        tmp = np.zeros_like(robot_pos)
-        c = 0
-
-        for i in robot_idx:
-            tmp[:,c] = dof_dict[i] 
-            c +=1
-
-        robot_pos = np.squeeze(tmp)
-        self.dofs = robot_pos #saves dofs conversion
-        self.final_dofs = np.zeros_like(self.dofs)
-        return robot_pos
 
     def report_fall(self, job_ID, value,test_type, test_time, new_dofs):
         """ Reports falls of objects in grasp tests
@@ -303,12 +222,11 @@ class Manager:
         else:
             self.fall_time[job_ID] = value
             self.final_dofs[job_ID] = new_dofs
-            #print(new_dofs)
+            
             if self.test_type == None:
                 self.test_type = test_type  
                 self.total_test_time = test_time
             self.completed[job_ID]= 1
-
         return
     
     def report_slip(self, job_ID, value):
@@ -333,8 +251,9 @@ class Manager:
         
         """
         print("Saving File at: ",output_path)
-        new_json = {}
+        new_json = self.json
         #Single elements
+        new_json['standalone'] = "standalone"
         new_json['gripper'] = self.gripper
         new_json['object_id'] = self.object
         new_json["test_type"] = self.test_type
@@ -347,7 +266,6 @@ class Manager:
         new_json['dofs'] = self.dofs.tolist()
         new_json["fall_time"] = self.fall_time.tolist()
         new_json["slip_time"] = self.slip_time.tolist()
-        new_json['graspit_dofs']= self.graspit_dofs
         
         #NEW
         new_json['runtime'] = time.time()-self.init_time

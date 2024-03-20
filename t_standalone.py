@@ -209,7 +209,7 @@ if __name__ == "__main__":
         object_parent, mass = import_object(work_path, manager.object_path)
         
         #Clone
-        cloner = GridCloner(spacing = 2)
+        cloner = GridCloner(spacing = 1)
         target_paths = []
         for i in range(num_w):
              target_paths.append(work_path[:-1]+str(i))
@@ -246,7 +246,7 @@ if __name__ == "__main__":
         viewer.objects.initialize(world.physics_sim_view)
         viewer.post_reset()
 
-            
+        world.pause()    
         #Run Sim
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):

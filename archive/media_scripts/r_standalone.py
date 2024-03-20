@@ -17,7 +17,7 @@ def make_parser():
     parser.add_argument('--gripper_dir', type=str, help='Directory of Gripper urdf/usd', default='')
     parser.add_argument('--objects_dir', type=str, help='Directory of Object usd', default='')
     parser.add_argument('--output_dir', type=str, help='Output directroy for filterd grasps', default='')
-    parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=150)
+    parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=15)
     parser.add_argument('--device', type=int, help='Gpu to use', default=0)
     parser.add_argument('--test_time', type=int, help='Total time for each grasp test', default=3)
     parser.add_argument('--print_results', type=bool, help='Enable printing of grasp statistics after filtering a document',
@@ -53,12 +53,12 @@ simulation_app = SimulationApp(config) # we can also run as headless.
 #World Imports
 from omni.isaac.core import World
 from omni.isaac.core.utils.prims import define_prim
-from omni.isaac.cloner import GridCloner    # import Cloner interface
+from omni.isaac.cloner import GridCloner, Cloner    # import Cloner interface
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
-from ht_manager import HT_Manager
-from h_views import H_View
+from r_manager import M_Manager
+from r_views import View
 
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
@@ -177,106 +177,114 @@ if __name__ == "__main__":
     #physics_dt = 1/120
 
     world = World(set_defaults = False)
+
+    
     
     #Debugging
     render = not head
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
-
+    g_pos = {
+        "fetch_gripper" : 1,
+        "franka_panda": 2, 
+        "sawyer": 4,
+        "wsg_50": 5, 
+        "Barrett": 6,
+        "jaco_robot": 7,
+        "robotiq_3finger": 8,
+        "Allegro": 9,
+        "HumanHand": 11,
+        "shadow_hand": 10,
+        "h5_hand": 3
+    }
+    
+    path = "/home/felipe/Documents/f2/g"
+    g1 = 0
     for j in json_files:
-        #path to output .json file
-        out_path = os.path.join(output_directory,j)
+        l=-1
+        u=0
+        for i in range(5):
+            #path to output .json file
+            out_path = os.path.join(output_directory,j)
 
-        if(os.path.exists(out_path)): #Skip completed
-            continue
 
-        # Initialize Manager
-        manager = HT_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
-        
 
-        #Create initial Workstation Prim
-        work_path = "/World/Workstation_0"
-        work_prim = define_prim(work_path)
+            # Initialize Manager
+            manager = M_Manager(os.path.join(json_directory,j), grippers_directory,
+                                 objects_directory,u,l, controller)   
+            
+            #g = g_pos[manager.gripper]
+            w_positions = [[x*0.5,g1*0.4,0] for x in range(num_w)]
 
-        #Contact names for collisions
-        contact_names = []
-        for i in manager.c_names:
-            contact_names.append(work_path[:-1]+"*"+"/gripper/" +  i)
+            #Create initial Workstation Prim
+            work_path = "/World/Workstation_0"
+            work_prim = define_prim(work_path)
 
-        #Initialize Workstation
-        robot, T_EF = import_gripper(work_path, manager.gripper_path,manager.EF_axis)
-        object_parent, mass = import_object(work_path, manager.object_path)
-        
-        #Clone
-        cloner = GridCloner(spacing = 2)
-        target_paths = []
-        for i in range(num_w):
-             target_paths.append(work_path[:-1]+str(i))
-        cloner.clone(source_prim_path = "/World/Workstation_0", prim_paths = target_paths,
-                     copy_from_source = True, replicate_physics = True, base_env_path = "/World",
-                     root_path = "/World/Workstation_")
+            #Contact names for collisions
+            contact_names = []
+            for i in manager.c_names:
+                contact_names.append(work_path[:-1]+"*"+"/gripper/" +  i)
 
-        # ISAAC SIM views initialization
-        viewer = H_View(work_path,contact_names,num_w, manager,world, test_time, mass)
+            #Initialize Workstation
+            robot, T_EF = import_gripper(work_path, manager.gripper_path,manager.EF_axis)
+            object_parent, mass = import_object(work_path, manager.object_path)
+            world.stage.SetDefaultPrim(get_prim_at_path("/World"))
+            #Clone
+            cloner = Cloner()
+            target_paths = []
+            for i in range(num_w):
+                target_paths.append(work_path[:-1]+str(i))
+            cloner.clone(source_prim_path = "/World/Workstation_0", prim_paths = target_paths,
+                        copy_from_source = True, replicate_physics = True, base_env_path = "/World",
+                        root_path = "/World/Workstation_",positions = w_positions)
 
-        
-        #Reset World and create set first robot positions
-        world.reset()
-
-        # Translate DoFs and get new jobs (must be done after reset)
-        print(robot.dof_names)
-        manager.translate_dofs(robot.dof_names)
-        viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
-
-        # Set desired physics Context options
-        world.reset()
-        physicsContext = world.get_physics_context()
-        #physicsContext.set_solver_type("PGS")
-        
-        physicsContext.set_physics_dt(manager.physics_dt)
-        physicsContext.enable_gpu_dynamics(True)
-        physicsContext.enable_stablization(True)
-        physicsContext.set_gravity(-10)
-
-        world.reset()
-        
-        #Initialize views
-        viewer.grippers.initialize(world.physics_sim_view)
-        viewer.objects.initialize(world.physics_sim_view)
-        viewer.post_reset()
+            # ISAAC SIM views initialization
+            viewer = View(work_path,contact_names,num_w, manager,world, test_time, mass)
 
             
-        #Run Sim
-        with tqdm(total=len(manager.completed)) as pbar:
-            while not all(manager.completed):
-                #print(mass)
+            #Reset World and create set first robot positions
+            world.reset()
+
+            # Translate DoFs and get new jobs (must be done after reset)
+            print(robot.dof_names)
+            manager.translate_dofs(robot.dof_names)
+            viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
+
+            # Set desired physics Context options
+            world.reset()
+            physicsContext = world.get_physics_context()
+            #physicsContext.set_solver_type("PGS")
+            
+            physicsContext.set_physics_dt(manager.physics_dt)
+            physicsContext.enable_gpu_dynamics(True)
+            physicsContext.enable_stablization(True)
+            physicsContext.set_gravity(-9.81)
+
+            world.reset()
+            
+            #Initialize views
+            viewer.grippers.initialize(world.physics_sim_view)
+            viewer.objects.initialize(world.physics_sim_view)
+            viewer.post_reset()
+
                 
-                world.step(render=render) # execute one physics step and one rendering step if not headless
-                #world.pause()
-                if pbar.n != np.sum(manager.completed): #Progress bar
-                    pbar.update(np.sum(manager.completed)-pbar.n)
-    
-
-        #Save new json with results
-        manager.save_json(out_path)
-        if (verbose):
-            manager.report_results()
-        #print("Reseting Environment")
-
-        #Reset World    
-        if not force_reset:
-            print('Reseting Environment')
-            t = time.time()
-            world.stop()
-            world.clear_physics_callbacks()
-            world.clear()
-            t = time.time() -t
-            print('Reseted, time in seconds: ', t)
-
-        if force_reset:
-            os.execl(sys.executable, sys.executable, *sys.argv)
-            pass
+            #Run Sim
+            #world.pause()
+            with tqdm(total=len(manager.completed)) as pbar:
+                    world.step(render=render) # execute one physics step and one rendering step if not headless
+                    save_stage(path+str(g1)+".usd")
+                    world.pause()
+            
+            g1+=1
+            #Reset World    
+            if not force_reset:
+                print('Reseting Environment')
+                world.stop()
+                world.clear_physics_callbacks()
+                world.clear()
+            u+=0.75
+            l+=0.75
     
     simulation_app.close() # close Isaac Sim
         

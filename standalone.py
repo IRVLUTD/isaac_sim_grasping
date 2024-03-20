@@ -225,9 +225,8 @@ if __name__ == "__main__":
         #Reset World and create set first robot positions
         world.reset()
 
-        # Translate DoFs and get new jobs (must be done after reset)
+        # Print Robot DoFs
         print(robot.dof_names)
-        manager.translate_dofs(robot.dof_names)
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
 
         # Set desired physics Context options

@@ -185,7 +185,7 @@ class View():
         set_up_timers[g_ind]= self.current_times[g_ind]
         actions = self.controller.forward(self.manager.gripper, set_up_timers, self.grippers, self.close_positions)
         self.touch_dofs = self.controller.touch_dofs
-        self.grippers.apply_action(actions)
+        #self.grippers.apply_action(actions)
         
         # Update time
         self.current_times += step_size
