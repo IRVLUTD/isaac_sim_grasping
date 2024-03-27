@@ -5,13 +5,13 @@ To test this hypothesis, we implemented the grasp transfer of successful grasps 
 
 We utilize an alignment between grippers to transfer grasps, which used a common notion of gripper pose (translation and orientation). The translation refers to the palm center of the gripper, and the orientation is with respect to a canonical pose of the gripper palm pointing in a fixed direction. Thus, any grasp pose from a gripper was transferred to another by using this pose alignment. We first transform a source gripper pose to its aligned pose, and then transform the aligned pose to the target gripper. 
 
-<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/f90c79a7d31b3d02773a72df13ec0cfee4cf9409/media/transfer_grasp.png' width='1000'>
+<img align="center" src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/f90c79a7d31b3d02773a72df13ec0cfee4cf9409/media/transfer_grasp.png' width='1000'>
 
 
 
 When transfering a grasp from a source gripper to a target gripper, the joint configuration of the source gripper cannot easily be mapped to the target gripper. To execute the new grasp, the target gripper is fully opened first and then closed using a new version of our position controller. The joint values at the moment of contact between the gripper and object are recorded, and the object fall-off time is simulated.
 
-<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif' width='750'>
+<img  align="center" src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif' width='750'>
 
 ## Parameters and Inputs
 The standalone executable for the tranferred grasp simulation is the transfer_st.py file; a command to run the simulation is shown below. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory. For this simulation Isaac Sim 2023.1.0 was used. Sample running command:
