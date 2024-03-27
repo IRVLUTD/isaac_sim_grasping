@@ -11,7 +11,7 @@ We utilize an alignment between grippers to transfer grasps, which used a common
 
 When transfering a grasp from a source gripper to a target gripper, the joint configuration of the source gripper cannot easily be mapped to the target gripper. To execute the new grasp, the target gripper is fully opened first and then closed using a new version of our position controller. The joint values at the moment of contact between the gripper and object are recorded, and the object fall-off time is simulated.
 
-<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif' width='1000'>
+<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif' width='750'>
 
 ## Parameters and Inputs
 The standalone executable for the tranferred grasp simulation is the transfer_st.py file; a command to run the simulation is shown below. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory. For this simulation Isaac Sim 2023.1.0 was used. Sample running command:
