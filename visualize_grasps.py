@@ -3,28 +3,23 @@ import numpy as np
 from tqdm import tqdm
 import os
 import argparse
-import sys
 import time
 
 def make_parser():
     """ Input Parser """
-    parser = argparse.ArgumentParser(description='Standalone script for grasp filtering.')
-    parser.add_argument('--headless', type=bool, help='Running Program in headless mode',
-                        default=False, action = argparse.BooleanOptionalAction)
-    parser.add_argument('--force_reset', type=bool, help='Force Reset of Isaac Sim',
-                        default=False, action = argparse.BooleanOptionalAction)
+    parser = argparse.ArgumentParser(description='Visualization script for filtered grasps.')
     parser.add_argument('--json_dir', type=str, help='Directory of Grasp Information', default='')
     parser.add_argument('--gripper_dir', type=str, help='Directory of Gripper urdf/usd', default='')
     parser.add_argument('--objects_dir', type=str, help='Directory of Object usd', default='')
-    parser.add_argument('--output_dir', type=str, help='Output directroy for filterd grasps', default='')
-    parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=150)
+    parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=15)
     parser.add_argument('--device', type=int, help='Gpu to use', default=0)
-    parser.add_argument('--test_time', type=int, help='Total time for each grasp test', default=3)
-    parser.add_argument('--print_results', type=bool, help='Enable printing of grasp statistics after filtering a document',
-                         default=False, action = argparse.BooleanOptionalAction)
     parser.add_argument('--controller', type=str,
                         help='Gripper Controller to use while testing, should match the controller dictionary in the Manager Class',
                         default='default')
+    parser.add_argument('--transfer', type=bool, help='Indicate if file is a transfer file',
+                         default=False, action = argparse.BooleanOptionalAction)
+    parser.add_argument('--lb', type=int, help='Lower bound for visualization', default=None)
+    parser.add_argument('--ub', type=int, help='Upper bound for visualization', default=None)
     parser.add_argument('--/log/level', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim logging arguments', default='', required=False)
     parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='', required=False)
@@ -34,14 +29,12 @@ def make_parser():
 #Parser
 parser = make_parser()
 args = parser.parse_args()
-head = args.headless
-force_reset = args.force_reset
-print(args.controller)
+transfer = args.transfer
 
 #launch Isaac Sim before any other imports
 from omni.isaac.kit import SimulationApp
 config= {
-    "headless": head,
+    "headless": False,
     'max_bounces':0,
     'fast_shutdown': True,
     'max_specular_transmission_bounces':0,
@@ -58,8 +51,8 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
-from managers import Manager
-from views import View
+from views import V_View
+from managers import V_Manager
 
 #Omni Libraries
 from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
@@ -68,6 +61,8 @@ from omni.isaac.core.prims.geometry_prim import GeometryPrim
 from omni.isaac.core.articulations import Articulation
 from omni.isaac.core.utils.prims import get_prim_children, get_prim_path, get_prim_at_path
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix
+import omni.isaac.core.utils.prims as prim_utils
+
 
 
 def import_gripper(work_path,usd_path, EF_axis):
@@ -159,7 +154,6 @@ if __name__ == "__main__":
     json_directory = args.json_dir
     grippers_directory = args.gripper_dir
     objects_directory = args.objects_dir
-    output_directory = args.output_dir
     
     if not os.path.exists(json_directory):
         raise ValueError("Json directory not given correctly")
@@ -167,35 +161,29 @@ if __name__ == "__main__":
         raise ValueError("Grippers directory not given correctly")
     elif not os.path.exists(objects_directory):
         raise ValueError("Objects directory not given correctly")
-    elif not os.path.exists(output_directory): 
-        raise ValueError("Output directory not given correctly")
 
     # Testing Hyperparameters
     num_w = args.num_w
-    test_time = args.test_time
-    verbose = args.print_results
-    controller = args.controller
-    #physics_dt = 1/120
+    lb = args.lb
+    ub = args.ub
+
+    if (transfer and args.controller == 'default'):
+        controller = 'transfer_default'
+    else:
+        controller = args.controller
 
     world = World(set_defaults = False)
     
     #Debugging
-    render = not head
+    render = True
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
 
     for j in json_files:
-        #path to output .json file
-        out_path = os.path.join(output_directory,j)
-
-        if(os.path.exists(out_path)): #Skip completed
-            continue
-
         # Initialize Manager
-        manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
+        manager = V_Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller, transfer, ub = ub, lb = lb)
         
-
         #Create initial Workstation Prim
         work_path = "/World/Workstation_0"
         work_prim = define_prim(work_path)
@@ -217,9 +205,17 @@ if __name__ == "__main__":
         cloner.clone(source_prim_path = "/World/Workstation_0", prim_paths = target_paths,
                      copy_from_source = True, replicate_physics = True, base_env_path = "/World",
                      root_path = "/World/Workstation_")
+        
+        light_1 = prim_utils.create_prim(
+            "/World/Light_1",
+            "DomeLight",
+            attributes={
+                "inputs:intensity": 1000
+            }
+        )
 
         # ISAAC SIM views initialization
-        viewer = View(work_path,contact_names,num_w, manager,world, test_time, mass)
+        viewer = V_View(work_path,contact_names,num_w, manager,world, mass)
 
         
         #Reset World and create set first robot positions
@@ -232,11 +228,10 @@ if __name__ == "__main__":
         # Set desired physics Context options
         world.reset()
         physicsContext = world.get_physics_context()
-        #physicsContext.set_solver_type("PGS")
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
         physicsContext.enable_stablization(True)
-        physicsContext.set_gravity(-9.81)
+        physicsContext.set_gravity(0)
 
         world.reset()
         
@@ -248,34 +243,19 @@ if __name__ == "__main__":
         #world.pause()
         #Run Sim
         with tqdm(total=len(manager.completed)) as pbar:
+            #world.pause()
             while not all(manager.completed):
-                #print(mass)
-                
                 world.step(render=render) # execute one physics step and one rendering step if not headless
-                #world.pause()
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
-    
 
-        #Save new json with results
-        manager.save_json(out_path)
-        if (verbose):
-            manager.report_results()
-        #print("Reseting Environment")
-
-        #Reset World    
-        if not force_reset:
-            print('Reseting Environment')
-            t = time.time()
-            world.stop()
-            world.clear_physics_callbacks()
-            world.clear()
-            t = time.time() -t
-            print('Reseted, time in seconds: ', t)
-
-        if force_reset:
-            os.execl(sys.executable, sys.executable, *sys.argv)
-            pass
+        print('Reseting Environment')
+        t = time.time()
+        world.stop()
+        world.clear_physics_callbacks()
+        world.clear()
+        t = time.time() -t
+        print('Reseted, time in seconds: ', t)
     
     simulation_app.close() # close Isaac Sim
         

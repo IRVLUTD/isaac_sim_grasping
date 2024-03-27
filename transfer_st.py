@@ -57,7 +57,7 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
 # Custom Classes
-from t_manager import T_Manager
+from managers import T_Manager
 from views import View
 
 #Omni Libraries
