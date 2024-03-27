@@ -6,13 +6,13 @@ To test this hypothesis, we implemented the grasp transfer of successful grasps 
 We utilize an alignment between grippers to transfer grasps, which used a common notion of gripper pose (translation and orientation). The translation refers to the palm center of the gripper, and the orientation is with respect to a canonical pose of the gripper palm pointing in a fixed direction. Thus, any grasp pose from a gripper was transferred to another by using this pose alignment. We first transform a source gripper pose to its aligned pose, and then transform the aligned pose to the target gripper. 
 
 <p align="center">
-<img  src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/f90c79a7d31b3d02773a72df13ec0cfee4cf9409/media/transfer_grasp.png' width='1000'>
+<img  src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/f90c79a7d31b3d02773a72df13ec0cfee4cf9409/media/transfer_grasp.png' width='750'>
 </p>
 
 When transfering a grasp from a source gripper to a target gripper, the joint configuration of the source gripper cannot easily be mapped to the target gripper. To execute the new grasp, the target gripper is fully opened first and then closed using a new version of our position controller. The joint values at the moment of contact between the gripper and object are recorded, and the object fall-off time is simulated.
 
 <p align="center">
-<img  align="center" src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif' width='750'>
+<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif' width='750'>
 </p>
 
 ## Parameters and Inputs
@@ -37,5 +37,8 @@ The standalone.py takes as input:
 Note: 
 - To run the simulation without warnings add the following parameters to the command: 
  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
-  
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/1b3484870d14923391dae18605cba453193ed566/media/transfer_far.gif)
+
+
+<p align="center">
+<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/1b3484870d14923391dae18605cba453193ed566/media/transfer_far.gif' width='750'>
+</p>
