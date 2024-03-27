@@ -10,8 +10,8 @@ The simulation can use any gripper and object provided they are prepared correct
 
 ### Important Files/Folders description
 1) standalone.py: Standalone executable
-2) transfer_st.py: Transfered grasps executable
-3) visualize_grasps.py: Visualized filtered grasps
+2) transfer_st.py: Transfered grasps standalone executable
+3) visualize_grasps.py: Standalone executable to visualize filtered grasps
 4) views.py: Simulation's behavioral code
 5) managers.py: Contains grasp information and the reporting of results for all the standalones
 6) controllers.py: Developed gripper controllers
