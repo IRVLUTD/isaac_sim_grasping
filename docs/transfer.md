@@ -10,7 +10,7 @@ We utilize an alignment between grippers to transfer grasps, which used a common
 
 When transfering a grasp from a source gripper to a target gripper, the joint configuration of the source gripper cannot easily be mapped to the target gripper. To execute the new grasp, the target gripper is fully opened first and then closed using a new version of our position controller. The joint values at the moment of contact between the gripper and object are recorded, and the object fall-off time is simulated.
 
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif | width=100)
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif)
 
 
 ## Parameters and Inputs
@@ -36,4 +36,4 @@ Note:
 - To run the simulation without warnings add the following parameters to the command: 
  --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
   
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/transfer_close.gif)
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/1b3484870d14923391dae18605cba453193ed566/media/transfer_far.gif)
