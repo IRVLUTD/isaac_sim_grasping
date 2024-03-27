@@ -30,7 +30,7 @@ The standalone.py takes as input:
 - controller: Controller reference (within controllers.py)
 - (Optional) print_results: Verbosity of standalone after finishing one .json file.
 - (Optional) headless: Run the simulation headless
-
+- (Optional) force_reset: Reset the simulation forcefully by restarting Isaac Sim
 
 Note: 
 - To run the simulation without warnings add the following parameters to the command: 
