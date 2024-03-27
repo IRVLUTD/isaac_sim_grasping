@@ -77,8 +77,8 @@ Note: Slip time is yet to be implemented.
 - [Adding a new Gripper](docs/add_grippers.md)
 - [Adding a new Object](docs/add_objects.md)
 - [Available Gripper Controllers](docs/controllers.md)
-- [Transfered Grasps]
-- [Visualize Grasps]
+- [Transfered Grasps Standalone]
+- [Visualize Grasps Standalone]
 
 ### Helpful Links
 - Google Scanned Objecsts .usd files [here](https://utdallas.box.com/s/xe2wtzk5mi00ja51s5pwnxznxc277taj)
