@@ -127,7 +127,7 @@ Note: To run the simulation without warnings add the following parameters to the
 
 Sample run command:
 ```Shell
-./python.sh (repo directory)/standalone.py --json_dir=(.json files folder)--gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --controller=position --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+./python.sh (repo directory)/standalone.py --json_dir=(.json files folder) --gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --controller=position --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 ```
 <p align="center">
 <img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif'>
