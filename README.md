@@ -1,5 +1,5 @@
 # MultiGripperGrasp Toolkit
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif)
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/F1_isaac.png)
 Simulation based grasp filter. This repository contains a grasp filter developed using Isaac Sim, it provides the usage and visualization tools for the MultiGripperGrasp dataset.
 
 **MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands**
