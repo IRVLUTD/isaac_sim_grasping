@@ -86,7 +86,9 @@ Example command to run the visualization script:
 ``` Shell
 ./python.sh (repo directory)/visualize_grasps.py --json_dir=(dataset .json folder) --gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --num_w=10 --ub=3 --lb=0 --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 ```
-!!! Visualization GIF
+<p align="center">
+<img src='media/visualize.gif'>
+</p>
 
 ## Running the Simulation
 The simulation can use any gripper and object provided they are prepared correctly (See the documentation to add [grippers](docs/add_grippers.md) and [objects](docs/add_objects.md)). It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the time they took to fall is recorded and then saved to the output file. If any grasps is unable to touch the object, it will be recorded as a negative "fall time" value. Once the grasp test is completed, the workstation will reset and load a new grasp for testing. When all the grasps are finished, the output file is saved, the complete simulation will reset and a new file loaded. 
