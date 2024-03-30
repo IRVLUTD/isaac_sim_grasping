@@ -149,7 +149,7 @@ The grasp filter is able to evaluate the object fall-off time for a large amount
 We utilize an alignment between grippers to transfer grasps, which used a common notion of gripper pose (translation and orientation). The translation refers to the palm center of the gripper, and the orientation is with respect to a canonical pose of the gripper palm pointing in a fixed direction. Thus, any grasp pose from a gripper was transferred to another by using this pose alignment. We first transform a source gripper pose to its aligned pose, and then transform the aligned pose to the target gripper.
 
 <p align="center">
-<img  src='media/transfer_grasp.png' width='750'>
+<img  src='media/transfer_grasp.png' width='1000'>
 </p>
 
 
@@ -176,7 +176,7 @@ Sample run command:
 ```
 
 <p align="center">
-<img src='media/transfer_close.gif' width='750'>
+<img src='media/transfer_close.gif' width='1000'>
 </p>
 
 ### Reproducing Paper Results
