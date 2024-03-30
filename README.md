@@ -83,8 +83,8 @@ To visualize the dataset a [visualization standalone](visualize_grasps.py) is in
 - objects_dir: Object directory (folder containing all the object .usd files)
 - num_w: Number of Workstations to run simultaneously (gripper, object pair) (default: 15)
 - (Optional) ub: Upper bound to filter the grasps with (applied to fall time).
-- (Optional) lb: Lowe bound to filter the grasps with (applied to fall time).
-- (Optional) transfer: Use when wanting to visualize transfered grasps.
+- (Optional) lb: Lower bound to filter the grasps with (applied to fall time).
+- (Optional) transfer: Used for visualizing transfered grasps.
 - (Optional) device: Specifies which gpu device to run Isaac Sim with.
 
 Note: To run the simulation without warnings add the following parameters to the command: 
@@ -139,13 +139,15 @@ Sample run command:
 ```Shell
 ./python.sh (repo directory)/standalone.py --json_dir=(.json files folder)--gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --controller=position --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 ```
-
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif)
+<p align="center">
+<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif'>
+</p>
 
 ### Transferred Grasps
 The grasp filter is able to evaluate the object fall-off time for a large amount of generated grasps. The successful grasps of one gripper can represent successful grasps in others and increase the overall amount of successful grasps in the dataset. To test this hypothesis, we implemented the grasp transfer of successful grasps from one gripper to others and evaluated the transferred grasps using antoher Isaac Sim standalone ([transfer_st.py](transfer_st.py)).
 
 We utilize an alignment between grippers to transfer grasps, which used a common notion of gripper pose (translation and orientation). The translation refers to the palm center of the gripper, and the orientation is with respect to a canonical pose of the gripper palm pointing in a fixed direction. Thus, any grasp pose from a gripper was transferred to another by using this pose alignment. We first transform a source gripper pose to its aligned pose, and then transform the aligned pose to the target gripper.
+
 <p align="center">
 <img  src='media/transfer_grasp.png' width='750'>
 </p>
