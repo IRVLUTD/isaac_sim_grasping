@@ -101,7 +101,7 @@ Example command to run the visualization script:
 ## Running the Simulation
 The simulation can use any gripper and object provided they are prepared correctly (See the documentation to add grippers and objects). It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the time they took to fall is recorded and then saved to the output file. If any grasps is unable to touch the object, it will be recorded as a negative "fall time" value. Once the grasp test is completed, the workstation will reset and load a new grasp for testing. When all the grasps are finished, the output file is saved, the complete simulation will reset and a new file loaded. Additionally, 
 
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/fetch_Nestle.gif)
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/transfer_far.gif)
 
 ### Important Files/Folders description
 1) standalone.py: Graspit grasps standalone executable
@@ -139,7 +139,7 @@ Sample run command:
 ./python.sh (repo directory)/standalone.py --json_dir=(.json files folder)--gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --controller=position --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 ```
 
-!!! Grasp it Grasps Gifs
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif)
 
 ### Transferred Grasps
 The grasp filter is able to evaluate the object fall-off time for a large amount of generated grasps. The successful grasps of one gripper can represent successful grasps in others and increase the overall amount of successful grasps in the dataset. To test this hypothesis, we implemented the grasp transfer of successful grasps from one gripper to others and evaluated the transferred grasps using antoher Isaac Sim standalone ([transfer_st.py](transfer_st.py)).
