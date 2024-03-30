@@ -116,7 +116,7 @@ The simulation can use any gripper and object provided they are prepared correct
 
 
 ### Parameters and Inputs
-A standalone executable for the graspit grasps ([standalone.py](standalone.py)) and for transferred grasps ([transfer_st.py](transfer_st.py)) are included within the repository. A sample command to run the graspit grasps is shown below along with the available options. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory. Sample running command:
+A standalone executable for the graspit grasps ([standalone.py](standalone.py)) and for transferred grasps ([transfer_st.py](transfer_st.py)) are included within the repository. A sample command to run the graspit grasps is shown below along with the available options. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory.
 
 The standalone.py takes as input:
 - json_dir: Grasp data to filter directory (dataset .json folder)
