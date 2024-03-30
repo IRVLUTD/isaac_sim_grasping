@@ -14,7 +14,7 @@ from omni.isaac.core import World
 from omni.isaac.core.utils.prims import define_prim
 from omni.isaac.core.utils.prims import create_prim
 from omni.isaac.core.prims.geometry_prim import GeometryPrim
-from manager import Manager
+from managers import Manager
 from workstation import Workstation
 from omni.isaac.core.utils.prims import get_prim_at_path
 

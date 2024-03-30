@@ -210,7 +210,7 @@ if __name__ == "__main__":
         object_parent, mass = import_object(work_path, manager.object_path)
         
         #Clone
-        cloner = GridCloner(spacing = 1)
+        cloner = GridCloner(spacing = 2)
         target_paths = []
         for i in range(num_w):
              target_paths.append(work_path[:-1]+str(i))
@@ -225,18 +225,26 @@ if __name__ == "__main__":
         #Reset World and create set first robot positions
         world.reset()
 
-        # Print Robot DoFs
+        # Translate DoFs and get new jobs (must be done after reset)
         print(robot.dof_names)
+        manager.translate_dofs(robot.dof_names)
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
 
         # Set desired physics Context options
         world.reset()
         physicsContext = world.get_physics_context()
         #physicsContext.set_solver_type("PGS")
+        #print(physicsContext.get_gpu_collision_stack_size())
+        #print(physicsContext.get_gpu_max_rigid_contact_count())
+        
+        #print(physicsContext.get_gpu_temp_buffer_capacity())
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
+        #physicsContext.enable_fabric(True)
+        #print(physicsContext.is_gpu_dynamics_enabled())
+        #print(physicsContext.device)
         physicsContext.enable_stablization(True)
-        physicsContext.set_gravity(-9.81)
+        physicsContext.set_gravity(-10)
 
         world.reset()
         
@@ -245,14 +253,12 @@ if __name__ == "__main__":
         viewer.objects.initialize(world.physics_sim_view)
         viewer.post_reset()
 
-        #world.pause()
+            
         #Run Sim
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
                 #print(mass)
-                
                 world.step(render=render) # execute one physics step and one rendering step if not headless
-                #world.pause()
                 if pbar.n != np.sum(manager.completed): #Progress bar
                     pbar.update(np.sum(manager.completed)-pbar.n)
     

@@ -21,7 +21,7 @@ from omni.isaac.cloner import GridCloner    # import Cloner interface
 from pxr import Gf, Sdf, UsdPhysics
 
 # Custom Classes
-from manager import Manager
+from managers import Manager
 from workstation import Workstation
 from controllers import ForceController, PositionController
 
