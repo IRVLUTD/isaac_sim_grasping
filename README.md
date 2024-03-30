@@ -102,7 +102,7 @@ Example command to run the visualization script:
 The simulation can use any gripper and object provided they are prepared correctly (See the documentation to add grippers and objects). It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the time they took to fall is recorded and then saved to the output file. If any grasps is unable to touch the object, it will be recorded as a negative "fall time" value. Once the grasp test is completed, the workstation will reset and load a new grasp for testing. When all the grasps are finished, the output file is saved, the complete simulation will reset and a new file loaded. Additionally, 
 
 <p align="center">
-<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_far.gif' width='750'>
+<img src='media/transfer_far.gif' width='750'>
 </p>
 
 ### Important Files/Folders description
