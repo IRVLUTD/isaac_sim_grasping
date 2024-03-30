@@ -49,7 +49,7 @@ This code was tested with Isaac Sim 2023.1.0 on Linux.
     ```
 
 2. Install the Isaac Sim 2023.1.0 and cd to its python directory:
-   Follow the instructions in the [Isaac Sim Website](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) for propper installation.
+   Follow the instructions in the [Isaac Sim Website](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) for proper installation.
     Normally the python.sh is on the following directory:
     ```Shell
     cd ~/.local/share/ov/pkg/isaac_sim-2023.1.0
