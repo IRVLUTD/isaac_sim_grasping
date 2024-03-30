@@ -89,7 +89,7 @@ Example command to run the visualization script:
 !!! Visualization GIF
 
 ## Running the Simulation
-The simulation can use any gripper and object provided they are prepared correctly (See the documentation to add grippers and objects). It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the time they took to fall is recorded and then saved to the output file. If any grasps is unable to touch the object, it will be recorded as a negative "fall time" value. Once the grasp test is completed, the workstation will reset and load a new grasp for testing. When all the grasps are finished, the output file is saved, the complete simulation will reset and a new file loaded. 
+The simulation can use any gripper and object provided they are prepared correctly (See the documentation to add [grippers](docs/add_grippers.md) and [objects](docs/add_objects.md)). It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the time they took to fall is recorded and then saved to the output file. If any grasps is unable to touch the object, it will be recorded as a negative "fall time" value. Once the grasp test is completed, the workstation will reset and load a new grasp for testing. When all the grasps are finished, the output file is saved, the complete simulation will reset and a new file loaded. 
 <p align="center">
 <img src='media/transfer_far.gif'>
 </p>
@@ -182,7 +182,7 @@ Within the [managers.py](managers.py) you can find the hyperparameters used for 
 
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/f3a0685a1ed10741ff9768656f0de1dcf065f2f4/managers.py#L67-L153
 
-All the files provided within this repository and in the [[project site](https://irvlutd.github.io/MultiGripperGrasp)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. Below is the corresponding manager.save_json function:
+All the files provided within this repository and in the [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. Below is the corresponding manager.save_json function:
 
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/a7207a100e0940b5103bb407ad0676c5771c0a83/managers.py#L246-L277
 
