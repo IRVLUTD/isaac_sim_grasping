@@ -43,3 +43,4 @@ The force controller is denominated as "ForceController" and accessible in the s
 
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/FC.gif)
 
+### Position-based Controller for Trasnferred Grasps

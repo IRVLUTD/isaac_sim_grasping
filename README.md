@@ -160,7 +160,7 @@ The transfer_st.py takes as input:
 - output_dir: Output directory (directory to save the filtered grasps .json file)
 - num_w: Number of Workstations to run simultaneously (object-gripper pair) (default: 150)
 - test_time: Total test time for each grasp test (default:3).
-- controller: Controller reference (within [controllers.py](controllers.py))(default: trasnfer_default)
+- controller: Controller reference (within [controllers.py](controllers.py)) (default: transfer_default)
 - (Optional) print_results: Verbosity of standalone after finishing one .json file.
 - (Optional) device: GPU device to use for Isaac Sim (default: 0)
 - (Optional) headless: Run the simulation headless 
@@ -172,7 +172,7 @@ Note: To run the simulation without warnings add the following parameters to the
 
 Sample run command:
 ```Shell
-./python.sh (repo directory)/transfer_st.py --json_dir=(.json files folder)--gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+./python.sh (repo directory)/transfer_st.py --json_dir=(.json files folder) --gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
 ```
 
 <p align="center">
@@ -185,7 +185,6 @@ As of this version, the simulation uses a specific .json structure, nonetheless,
 - The object name: Must be exactly the name with which the object is saved within the object directory.
 - Grasp pose data: 7 dimensional vector containing the gripper and object relative pose. (0-2 denotes the postion, 3-6 denotes the quaternion). Must be changed to the Isaac Sim quaternion convention (w, x, y, z)
 - Joint Value Data: vector containing the Degree of Freedom (DoF) information of the grasps. Note: the order of the DoF may change from software to software, a "translation" may be needed to ensure that the grasps are loaded correctly.
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/4d1695831defc6b71d90b0ea6d7a1d03f34c1346/manager.py#L30-L41
 
 Within the [manager.py](manager.py) you can find the hyperparameters used for filtering the grasps of each gripper. In order to reproduce the paper results, one must run the filter with the same hyperparameters:
 - dts: physics time step size used to run the simulation.
@@ -193,9 +192,8 @@ Within the [manager.py](manager.py) you can find the hyperparameters used for fi
 - contact_names: Names of gripper meshes that will be probed for collision with the object.
 - contact_ths: contact thresholds that will signal the beggining of the grasp. 
 
-All the files provided within this repository and in the [[project site](https://irvlutd.github.io/MultiGripperGrasp)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder(output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. Below is the corresponding manager.save_json function:
-
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/d6dad3eb93452656b33373ee77b2ceac576388ca/manager.py#L300-L325
+All the files provided within this repository and in the [[project site](https://irvlutd.github.io/MultiGripperGrasp)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. Below is the corresponding manager.save_json function:
+https://github.com/IRVLUTD/isaac_sim_grasping/blob/a7207a100e0940b5103bb407ad0676c5771c0a83/managers.py#L246-L277
 
 ## More Documentation
 - [Adding a new Gripper](docs/add_grippers.md)
