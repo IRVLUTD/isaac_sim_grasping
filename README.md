@@ -176,7 +176,7 @@ Sample run command:
 ```
 
 <p align="center">
-<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/fe181394075363c715c04f819bbd214a93794e25/media/transfer_close.gif' width='750'>
+<img src='media/transfer_close.gif' width='750'>
 </p>
 
 ### Reproducing Paper Results
