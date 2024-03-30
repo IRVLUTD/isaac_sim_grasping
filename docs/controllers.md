@@ -49,4 +49,7 @@ https://github.com/IRVLUTD/isaac_sim_grasping/blob/4e965198fb43f0d1335c656c1b60c
 
 Our simulation was able to evaluate the object fall-off time for a large amount of generated grasps. The successful grasps of one gripper can represent successful grasps in others and increase the overall amount of successful grasps in the dataset. To test this hypothesis, we implemented the grasp transfer of successful grasps from one gripper to others and evaluated the transferred grasps using Isaac Sim. We first utilize the alignment between grippers to transfer grasps.  We transform a source gripper pose to its aligned pose, and then transform the aligned pose to the target gripper. To transfer a grasp from a source gripper to a target gripper, the joint configuration of the source gripper cannot easily be mapped to the target gripper. Therefore, we first set the joint configuration of the target gripper to the open configuration. Then the controller closes all fingers until it comes into contact with the object. After that, the controller set the root joints of the fingers to reach their closing position. The gripper performs a closing motion. The joint values at the moment of contact between the gripper and object are recorded, and the object fall-off time is simulated.
 
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/transfer_close.gif)
+<p align="center">
+<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/transfer_close.gif' width='1000'>
+</p>
+
