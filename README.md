@@ -68,9 +68,9 @@ This code was tested with Isaac Sim 2023.1.0 on Linux.
 ## Visualizing Dataset Samples
 To visualize the dataset a [visualization standalone](visualize_grasps.py) is included in the repository. The script must be ran with the Isaac Sim python.sh. The script requires the following parameters:
 
-- json_dir: Grasp data directory (dataset .json folder)
-- gripper_dir: Gripper directory (folder containing all the gripper .usd files)
-- objects_dir: Object directory (folder containing all the object .usd files)
+- json_dir: Grasp data directory (dataset .json folder). Note: the program does not read .json files within folders, therefore, a valid directory would be the Allegro folder within the dataset. 
+- gripper_dir: Gripper directory (folder containing all the gripper .usd folders)
+- objects_dir: Object directory (folder containing all the object .usd folders)
 - num_w: Number of Workstations to run simultaneously (gripper, object pair) (default: 15)
 - (Optional) ub: Upper bound to filter the grasps with (applied to fall time).
 - (Optional) lb: Lower bound to filter the grasps with (applied to fall time).
@@ -109,9 +109,9 @@ The simulation can use any gripper and object provided they are prepared correct
 A standalone executable for the graspit grasps ([standalone.py](standalone.py)) and for transferred grasps ([transfer_st.py](transfer_st.py)) are included within the repository. A sample command to run the graspit grasps is shown below along with the available options. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory.
 
 The standalone.py takes as input:
-- json_dir: Grasp data to filter directory (dataset .json folder)
-- gripper_dir: Gripper directory (folder containing all the gripper .usd files)
-- objects_dir: Object directory (folder containing all the object .usd files)
+- json_dir: Grasp data to filter directory (dataset .json folder). Note: the program does not read .json files within folders, therefore, a valid directory would be the Allegro folder within the dataset. 
+- gripper_dir: Gripper directory (folder containing all the gripper .usd folder)
+- objects_dir: Object directory (folder containing all the object .usd folder)
 - output_dir: Output directory (directory to save the filtered grasps .json file)
 - num_w: Number of Workstations to run simultaneously (object-gripper pair) (default: 150)
 - test_time: Total test time for each grasp test (default:3).
@@ -144,9 +144,9 @@ We utilize an alignment between grippers to transfer grasps, which used a common
 
 
 The transfer_st.py takes as input:
-- json_dir: Grasp data to filter directory (dataset .json folder)
-- gripper_dir: Gripper directory (folder containing all the gripper .usd files)
-- objects_dir: Object directory (folder containing all the object .usd files)
+- json_dir: Grasp data to filter directory (dataset .json file folder). Note: the program does not read .json files within folders, therefore, a valid directory would be the Allegro folder within the dataset. 
+- gripper_dir: Gripper directory (folder containing all the gripper .usd folders)
+- objects_dir: Object directory (folder containing all the object .usd folders)
 - output_dir: Output directory (directory to save the filtered grasps .json file)
 - num_w: Number of Workstations to run simultaneously (object-gripper pair) (default: 150)
 - test_time: Total test time for each grasp test (default:3).
