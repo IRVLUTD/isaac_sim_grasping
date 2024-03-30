@@ -6,7 +6,7 @@ Simulation based grasp filter. This repository contains a grasp filter developed
 
 Luis Felipe Casas Murrilo, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
 
-[[paper](https://arxiv.org/pdf/2403.09841.pdf)] [[video](https://www.youtube.com/watch?v=pm1K6wbc830)] [[arXiv](https://arxiv.org/abs/2403.09841)] [[project site](https://irvlutd.github.io/MultiGripperGrasp)]
+[[paper](https://arxiv.org/pdf/2403.09841.pdf)] [[video](https://www.youtube.com/watch?v=pm1K6wbc830)] [[arXiv](https://arxiv.org/abs/2403.09841)] [[project site](https://irvlutd.github.io/MultiGripperGrasp)] [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)]
 
 ### Citing MulitGripperGrasp Toolkit
 
@@ -61,18 +61,8 @@ This code was tested with Isaac Sim 2023.1.0 on Linux.
     ```
     Note: Only tqdm must be installed, all other libraries should come with the Isaac Sim version.
 
-4. Download the MultiGripperGrasp dataset and the object .usd models from the [project site](https://irvlutd.github.io/MultiGripperGrasp/). Links can also be found at the end of this document.
-    
-    The dataset .json files contain a dictionary with the following information:
-    
-    - 'gripper': Gripper ID
-    - 'object_ID': Object ID
-    - 'test_type': Controller used
-    - 'test_duration': Maximum test time per grasp
-    - 'pose': List of sample poses
-    - 'fall_time': Evaluated fall_time
-    - 'final_dofs': Final grasp joint values
-    - 'dofs': Initial joint values (from GraspIt grasps)
+4. Download the MultiGripperGrasp dataset and the object .usd models from the [dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data). Links can also be found at the end of this document.
+
 
 
 ## Visualizing Dataset Samples
