@@ -3,6 +3,7 @@
 Simulation based grasp filter. This repository contains a grasp filter developed using Isaac Sim, it provides the usage and visualization tools for the MultiGripperGrasp dataset.
 
 **MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands**
+
 Luis Felipe Casas Murrilo, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
 [[video](https://www.youtube.com/watch?v=pm1K6wbc830)][[arXiv](https://arxiv.org/abs/2403.09841)][[project site](https://irvlutd.github.io/MultiGripperGrasp)]
 
