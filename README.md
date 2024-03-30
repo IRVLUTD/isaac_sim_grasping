@@ -10,7 +10,7 @@ Luis Felipe Casas Murrilo, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
 
 ### Citing MulitGripperGrasp Toolkit
 
-Please cite DexYCB Toolkit if it helps your research:
+Please cite MulitGripperGrasp Toolkit if it helps your research:
 
     @misc{murrilo2024multigrippergrasp,
       title={MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands}, 
