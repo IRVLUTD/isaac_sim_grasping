@@ -6,7 +6,7 @@ Simulation based grasp filter. This repository contains a grasp filter developed
 
 Luis Felipe Casas Murrilo, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
 
-[[video](https://www.youtube.com/watch?v=pm1K6wbc830)][[arXiv](https://arxiv.org/abs/2403.09841)][[project site](https://irvlutd.github.io/MultiGripperGrasp)]
+[[paper](https://arxiv.org/pdf/2403.09841.pdf)] [[video](https://www.youtube.com/watch?v=pm1K6wbc830)] [[arXiv](https://arxiv.org/abs/2403.09841)] [[project site](https://irvlutd.github.io/MultiGripperGrasp)]
 
 ### Citing MulitGripperGrasp Toolkit
 
@@ -196,6 +196,7 @@ All the files provided within this repository and in the [[project site](https:/
 
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/a7207a100e0940b5103bb407ad0676c5771c0a83/managers.py#L246-L277
 
+Note: To reproduce the transferred grasp results the same must be done with the transfer manager class [T_manager](https://github.com/IRVLUTD/isaac_sim_grasping/blob/b6b72b51359c6d2c0fb128f2921097f3716aba0b/managers.py#L300). 
 
 ## More Documentation
 - [Adding a new Gripper](docs/add_grippers.md)
