@@ -61,7 +61,7 @@ This code was tested with Isaac Sim 2023.1.0 on Linux.
     ```
     Note: Only tqdm must be installed, all other libraries should come with the Isaac Sim version.
 
-4. Download the MultiGripperGrasp dataset and the object .usd models from the [project site](https://irvlutd.github.io/MultiGripperGrasp/).
+4. Download the MultiGripperGrasp dataset and the object .usd models from the [project site](https://irvlutd.github.io/MultiGripperGrasp/). Links can also be found at the end of this document.
     
     The dataset .json files contain a dictionary with the following information:
     
