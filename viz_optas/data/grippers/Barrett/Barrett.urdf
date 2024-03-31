@@ -1,0 +1,297 @@
+<?xml version='1.0' encoding='ASCII'?>
+<robot name="Barrett">
+  <link name="base_link"/>
+  <joint name="base_link_palm" type="fixed">
+    <origin rpy="0 0.00000000 0.00000000"/>
+    <parent link="base_link"/>
+    <child link="palm"/>
+  </joint>
+  <link name="palm">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/palm.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="1.00000000"/>
+      <inertia ixx="4.9826e-07" ixy="-2.6086e-11" ixz="-3.5314e-11" iyy="4.2775e-07" iyz="5.4730e-08" izz="4.2955e-07"/>
+      <origin xyz="0.00000267 -0.00384810 -0.04619306"/>
+    </inertial>
+  </link>
+
+
+  <link name="a_link1">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link1.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.20000000"/>
+      <inertia ixx="1.0839e-08" ixy="-5.8433e-09" ixz="-2.6510e-12" iyy="2.8604e-08" iyz="-2.8865e-13" izz="3.3596e-08"/>
+      <origin xyz="-0.01770848 -0.01532542 -0.00000084"/>
+    </inertial>
+  </link>
+  <link name="a_link2">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link2.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.10000000"/>
+      <inertia ixx="1.0839e-08" ixy="-5.8433e-09" ixz="-2.6510e-12" iyy="2.8604e-08" iyz="-2.8865e-13" izz="3.3596e-08"/>
+      <origin xyz="-0.01770848 -0.01532542 -0.00000084"/>
+    </inertial>
+  </link>
+  <link name="a_link3">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link3.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.10000000"/>
+      <inertia ixx="1.5808e-09" ixy="-3.7926e-10" ixz="1.6162e-12" iyy="7.9936e-09" iyz="-1.4246e-11" izz="7.4485e-09"/>
+      <origin xyz="-0.02984130 0.00230978 0.00002310"/>
+    </inertial>
+  </link>
+  <link name="a_link1_joint"/>
+  <joint name="a_palm_link1_joint" type="revolute">
+    <origin rpy="0.00000000 3.14159265 0.00000000" xyz="0.02500000 0.00000000 -0.00100000"/>
+    <parent link="palm"/>
+    <child link="a_link1_joint"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="50.00000000" lower="0.0" upper="3.14159265359" velocity="0.52333333"/>
+  </joint>
+  <link name="a_link1_dh"/>
+  <joint name="a_link1_joint_link1_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 1.57079633"/>
+    <parent link="a_link1_joint"/>
+    <child link="a_link1_dh"/>
+  </joint>
+  <joint name="a_link1_dh_link1" type="fixed">
+    <origin rpy="-1.57079633 0.00000000 0.00000000" xyz="0.05000000 0.00000000 0.00000000"/>
+    <parent link="a_link1_dh"/>
+    <child link="a_link1"/>
+  </joint>
+  <link name="a_link2_joint"/>
+  <joint name="a_link1_link2_joint" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="a_link1"/>
+    <child link="a_link2_joint"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="0.0" upper="2.51327412287" velocity="0.52333333"/>
+  </joint>
+  <link name="a_link2_dh"/>
+  <joint name="a_link2_joint_link2_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.08726646"/>
+    <parent link="a_link2_joint"/>
+    <child link="a_link2_dh"/>
+  </joint>
+  <joint name="a_link2_dh_link2" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.07000000 0.00000000 0.00000000"/>
+    <parent link="a_link2_dh"/>
+    <child link="a_link2"/>
+  </joint>
+  <link name="a_link3_joint"/>
+  <joint name="a_link2_link3_joint" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="a_link2"/>
+    <child link="a_link3_joint"/>
+    <axis xyz="0.00000000 0.00000000 0.33333333"/>
+    <limit effort="2.50000000" lower="0.0" upper="2.51327412287" velocity="0.52333333"/>
+  </joint>
+  <link name="a_link3_dh"/>
+  <joint name="a_link3_joint_link3_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.69813170"/>
+    <parent link="a_link3_joint"/>
+    <child link="a_link3_dh"/>
+  </joint>
+  <joint name="a_link3_dh_link3" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.05500000 0.00000000 0.00000000"/>
+    <parent link="a_link3_dh"/>
+    <child link="a_link3"/>
+  </joint>
+
+
+
+  <link name="b_link1">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link1.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.20000000"/>
+      <inertia ixx="1.0839e-08" ixy="-5.8433e-09" ixz="-2.6510e-12" iyy="2.8604e-08" iyz="-2.8865e-13" izz="3.3596e-08"/>
+      <origin xyz="-0.01770848 -0.01532542 -0.00000084"/>
+    </inertial>
+  </link>
+  <link name="b_link2">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link2.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.10000000"/>
+      <inertia ixx="1.0839e-08" ixy="-5.8433e-09" ixz="-2.6510e-12" iyy="2.8604e-08" iyz="-2.8865e-13" izz="3.3596e-08"/>
+      <origin xyz="-0.01770848 -0.01532542 -0.00000084"/>
+    </inertial>
+  </link>
+  <link name="b_link3">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link3.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.10000000"/>
+      <inertia ixx="1.5808e-09" ixy="-3.7926e-10" ixz="1.6162e-12" iyy="7.9936e-09" iyz="-1.4246e-11" izz="7.4485e-09"/>
+      <origin xyz="-0.02984130 0.00230978 0.00002310"/>
+    </inertial>
+  </link>
+  <link name="b_link1_joint"/>
+  <joint name="b_palm_link1_joint" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="-0.02500000 0.00000000 -0.00100000"/>
+    <parent link="palm"/>
+    <child link="b_link1_joint"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="50.00000000" lower="0.0" upper="3.14159265359" velocity="0.52333333"/>
+  </joint>
+  <link name="b_link1_dh"/>
+  <joint name="b_link1_joint_link1_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 1.57079633"/>
+    <parent link="b_link1_joint"/>
+    <child link="b_link1_dh"/>
+  </joint>
+  <joint name="b_link1_dh_link1" type="fixed">
+    <origin rpy="1.57079633 0.00000000 0.00000000" xyz="0.05000000 0.00000000 0.00000000"/>
+    <parent link="b_link1_dh"/>
+    <child link="b_link1"/>
+  </joint>
+  <link name="b_link2_joint"/>
+  <joint name="b_link1_link2_joint" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="b_link1"/>
+    <child link="b_link2_joint"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="0.0" upper="2.51327412287" velocity="0.52333333"/>
+  </joint>
+  <link name="b_link2_dh"/>
+  <joint name="b_link2_joint_link2_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.08726646"/>
+    <parent link="b_link2_joint"/>
+    <child link="b_link2_dh"/>
+  </joint>
+  <joint name="b_link2_dh_link2" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.07000000 0.00000000 0.00000000"/>
+    <parent link="b_link2_dh"/>
+    <child link="b_link2"/>
+  </joint>
+  <link name="b_link3_joint"/>
+  <joint name="b_link2_link3_joint" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="b_link2"/>
+    <child link="b_link3_joint"/>
+    <axis xyz="0.00000000 0.00000000 0.33333333"/>
+    <limit effort="2.50000000" lower="0.0" upper="2.51327412287" velocity="0.52333333"/>
+  </joint>
+  <link name="b_link3_dh"/>
+  <joint name="b_link3_joint_link3_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.69813170"/>
+    <parent link="b_link3_joint"/>
+    <child link="b_link3_dh"/>
+  </joint>
+  <joint name="b_link3_dh_link3" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.05500000 0.00000000 0.00000000"/>
+    <parent link="b_link3_dh"/>
+    <child link="b_link3"/>
+  </joint>
+
+
+
+  <link name="c_link2">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link2.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.10000000"/>
+      <inertia ixx="1.0839e-08" ixy="-5.8433e-09" ixz="-2.6510e-12" iyy="2.8604e-08" iyz="-2.8865e-13" izz="3.3596e-08"/>
+      <origin xyz="-0.01770848 -0.01532542 -0.00000084"/>
+    </inertial>
+  </link>
+
+  <link name="c_link3">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/link3.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.10000000"/>
+      <inertia ixx="1.5808e-09" ixy="-3.7926e-10" ixz="1.6162e-12" iyy="7.9936e-09" iyz="-1.4246e-11" izz="7.4485e-09"/>
+      <origin xyz="-0.02984130 0.00230978 0.00002310"/>
+    </inertial>
+  </link>
+
+  <link name="c_link2_joint"/>
+  
+  <!-- DUMMY LINK FOR THE CONSECUTIVE Z ROTATION -->
+  <link name="c_link2_joint_0"/> 
+
+  <joint name="c_palm_link2_joint_0" type="revolute">
+    <origin rpy="0.00000000 -1.57079633 0" xyz="0.00000000 -0.05000000 -0.00100000"/>
+    <parent link="palm"/>
+    <child link="c_link2_joint_0"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="5.00000000" lower="0.0" upper="2.51327412287" velocity="0.52333333"/>
+  </joint>
+  
+  <!-- DUMMY Fixed joint FOR THE CONSECUTIVE Z ROTATION -->  
+  <joint name="c_link2_joint_0_link2_joint" type="fixed">
+    <origin rpy="0.00000000 0 -1.57079633" xyz="0.00000000 0.00000000 0.0000000"/>
+    <parent link="c_link2_joint_0"/>
+    <child link="c_link2_joint"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+  </joint>  
+  
+  <link name="c_link2_dh"/>  
+  <joint name="c_link2_joint_link2_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.08726646"/>
+    <parent link="c_link2_joint"/>
+    <child link="c_link2_dh"/>
+  </joint>
+  
+  <joint name="c_link2_dh_link2" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.07000000 0.00000000 0.00000000"/>
+    <parent link="c_link2_dh"/>
+    <child link="c_link2"/>
+  </joint>
+  
+  <link name="c_link3_joint"/>
+  
+  <joint name="c_link2_link3_joint" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="c_link2"/>
+    <child link="c_link3_joint"/>
+    <axis xyz="0.00000000 0.00000000 0.33333333"/>
+    <limit effort="5.00000000" lower="0.0" upper="2.51327412287" velocity="0.52333333"/>
+  </joint>
+  <link name="c_link3_dh"/>
+  
+  <joint name="c_link3_joint_link3_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.69813170"/>
+    <parent link="c_link3_joint"/>
+    <child link="c_link3_dh"/>
+  </joint>
+  <joint name="c_link3_dh_link3" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.05500000 0.00000000 0.00000000"/>
+    <parent link="c_link3_dh"/>
+    <child link="c_link3"/>
+  </joint>
+  
+</robot>

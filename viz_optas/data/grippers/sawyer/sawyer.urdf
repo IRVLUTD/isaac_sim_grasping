@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<robot name="sawyer">
+    
+    <material name="Black">
+        <color rgba="0.2 0.2 0.2 1"/>
+    </material>
+
+    <material name="Red">
+        <color rgba="1.0 0.0 0.0 1"/>
+    </material>
+
+    <link name="base_link">
+        <visual>
+            <origin rpy="1.5707963 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="./meshes/base.stl"/> 
+            </geometry>
+            <material name="Red"/>
+        </visual>
+    </link>
+
+    <link name="leftfinger">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="./meshes/standard_narrow.stl"/>
+            </geometry>
+            <material name="Black"/>
+        </visual>
+    </link>
+
+    <link name="rightfinger">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="./meshes/standard_narrow.stl"/>
+            </geometry>
+            <material name="Black"/>
+        </visual>
+    </link>
+
+    <joint name="finger_joint1" type="prismatic">
+        <parent link="base_link"/>
+        <child link="leftfinger"/>
+        <origin rpy="0 0 0" xyz="0.003 -0.023 0.04552"/>
+        <axis xyz="0 1 0"/>
+        <limit effort="20" lower="0.0" upper="0.04" velocity="10"/>
+    </joint>
+
+    <joint name="finger_joint2" type="prismatic">
+        <parent link="base_link"/>
+        <child link="rightfinger"/>
+        <origin rpy="0 0 -3.1415926" xyz="0.003 0.023 0.04552"/>
+        <axis xyz="0 1 0"/>
+        <limit effort="20" lower="0.0" upper="0.04" velocity="10"/>
+    </joint>
+
+</robot>
