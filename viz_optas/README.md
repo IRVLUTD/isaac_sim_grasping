@@ -1,6 +1,6 @@
 # Grasp Visualization with `Optas`
 
-Some alternative source code for grasp vizualization withouth the Isaac Sim dependency. This might be helpful to quickly debug some grasp files and check for errors. Feel free to modify the source as needed to get a suitable figure.
+Some additional source code for grasp vizualization withouth the Isaac Sim dependency. The existing `optas` libarary is used to visualize the grasps and object models. This might be helpful to quickly debug some grasp files and check for errors. Feel free to modify the source as needed to get a suitable figure!
 
 ## Usage
 
