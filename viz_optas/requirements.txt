@@ -5,7 +5,8 @@ numpy_quaternion==2023.0.3
 open3d==0.18.0
 osqp==0.6.5
 PyYAML==6.0.1
-scipy==1.12.0
+scipy==1.09.0
 transforms3d==0.4.1
 urdf_parser_py==0.0.4
 vtk==9.3.0
+xacro==1.13.3
