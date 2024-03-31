@@ -1,0 +1,372 @@
+<?xml version='1.0' encoding='ASCII'?>
+<robot name="RobotIQ">
+
+  <!-- <link name="base_link"/>
+  <joint name="base_link_palm" type="fixed">
+    <origin rpy="1.57079633 0.00000000 0.00000000"/>
+    <parent link="base_link"/>
+    <child link="RIQ_palm"/>
+  </joint> -->
+
+  <link name="RIQ_palm">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_palm.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="1.8888e-06" ixy="-6.8051e-08" ixz="2.6162e-11" iyy="2.2838e-06" iyz="4.6103e-12" izz="1.7980e-06"/>
+      <origin xyz="0.00148646 0.00036187 -0.00000027"/>
+    </inertial>
+  </link>
+
+  <link name="RIQ_link_1_a">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_1.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="1.2809e-08" ixy="-1.7380e-09" ixz="2.1480e-18" iyy="4.8871e-08" iyz="2.8353e-14" izz="5.5198e-08"/>
+      <origin xyz="-0.03117418 -0.01007430 -0.00000000"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_2_a">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_2.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="4.7466e-09" ixy="-1.7201e-09" ixz="2.3271e-10" iyy="1.2474e-08" iyz="4.4520e-10" izz="1.4402e-08"/>
+      <origin xyz="-0.02523911 -0.00787653 -0.00949288"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_3_a">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_3.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="1.8909e-09" ixy="-8.3346e-10" ixz="-1.2117e-11" iyy="4.7646e-09" iyz="-2.5147e-13" izz="4.3774e-09"/>
+      <origin xyz="0.00875369 -0.00155050 -0.00005599"/>
+    </inertial>
+  </link>
+  
+  <link name="RIQ_link_1_joint_a"/>
+  <joint name="RIQ_palm_RIQ_link_1_joint_a" type="revolute">
+    <origin rpy="0.00000000 0.00000000 1.57079633" xyz="0.04447500 0.04135800 0.00000000"/>
+    <parent link="RIQ_palm"/>
+    <child link="RIQ_link_1_joint_a"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.0940732466825" upper="1.12765722971" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_1_dh_a"/>
+  <joint name="RIQ_link_1_joint_RIQ_link_1_dh_a" type="fixed">
+    <origin rpy="0.00000000 0.00000000 -0.51679199"/>
+    <parent link="RIQ_link_1_joint_a"/>
+    <child link="RIQ_link_1_dh_a"/>
+  </joint>
+  <joint name="RIQ_link_1_dh_RIQ_link_1_a" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.05715000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_1_dh_a"/>
+    <child link="RIQ_link_1_a"/>
+  </joint>
+
+
+  <link name="RIQ_link_2_joint_a"/>
+  <joint name="RIQ_link_1_RIQ_link_2_joint_a" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_1_a"/>
+    <child link="RIQ_link_2_joint_a"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="0.0" upper="1.57079632679" velocity="0.52333333"/>
+  </joint>
+  <joint name="RIQ_link_2_joint_RIQ_link_2_a" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.03894000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_2_joint_a"/>
+    <child link="RIQ_link_2_a"/>
+  </joint>
+  
+  <link name="RIQ_link_3_joint_a"/>
+  <joint name="RIQ_link_2_RIQ_link_3_joint_a" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_2_a"/>
+    <child link="RIQ_link_3_joint_a"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.953124304514" upper="0.75729836244" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_3_dh_a"/>
+  <joint name="RIQ_link_3_joint_RIQ_link_3_dh_a" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.51679199"/>
+    <parent link="RIQ_link_3_joint_a"/>
+    <child link="RIQ_link_3_dh_a"/>
+  </joint>
+  <joint name="RIQ_link_3_dh_RIQ_link_3_a" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_3_dh_a"/>
+    <child link="RIQ_link_3_a"/>
+  </joint>
+
+
+
+
+
+
+
+  <link name="RIQ_link_0_b">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_0.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="9.9777e-09" ixy="4.7690e-10" ixz="3.5505e-14" iyy="9.6371e-09" iyz="-1.0205e-13" izz="1.2820e-08"/>
+      <origin xyz="-0.01467719 0.00652751 0.00000011"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_1_b">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_1.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="1.2809e-08" ixy="-1.7380e-09" ixz="2.1480e-18" iyy="4.8871e-08" iyz="2.8353e-14" izz="5.5198e-08"/>
+      <origin xyz="-0.03117418 -0.01007430 -0.00000000"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_2_b">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_2.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="4.7466e-09" ixy="-1.7201e-09" ixz="2.3271e-10" iyy="1.2474e-08" iyz="4.4520e-10" izz="1.4402e-08"/>
+      <origin xyz="-0.02523911 -0.00787653 -0.00949288"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_3_b">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_3.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="1.8909e-09" ixy="-8.3346e-10" ixz="-1.2117e-11" iyy="4.7646e-09" iyz="-2.5147e-13" izz="4.3774e-09"/>
+      <origin xyz="0.00875369 -0.00155050 -0.00005599"/>
+    </inertial>
+  </link>
+
+  <link name="RIQ_link_0_joint_b"/>
+  <joint name="RIQ_palm_RIQ_link_0_joint_b" type="revolute">
+    <origin rpy="0.00000000 1.57079633 0.00000000" xyz="-0.04050700 0.01984400 0.03651300"/>
+    <parent link="RIQ_palm"/>
+    <child link="RIQ_link_0_joint_b"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.296705972839" upper="0.296705972839" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_0_dh_b"/>
+  <joint name="RIQ_link_0_joint_RIQ_link_0_dh_b" type="fixed">
+    <origin rpy="0.00000000 0.00000000 1.57079633"/>
+    <parent link="RIQ_link_0_joint_b"/>
+    <child link="RIQ_link_0_dh_b"/>
+  </joint>
+  <joint name="RIQ_link_0_dh_RIQ_link_0_b" type="fixed">
+    <origin rpy="1.57079633 0.00000000 0.00000000" xyz="0.02187700 0.00000000 -0.00397000"/>
+    <parent link="RIQ_link_0_dh_b"/>
+    <child link="RIQ_link_0_b"/>
+  </joint>
+
+  <link name="RIQ_link_1_joint_b"/>
+  <joint name="RIQ_link_0_RIQ_link_1_joint_b" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_0_b"/>
+    <child link="RIQ_link_1_joint_b"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.0940732466825" upper="1.12765722971" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_1_dh_b"/>
+  <joint name="RIQ_link_1_joint_RIQ_link_1_dh" type="fixed">
+    <origin rpy="0.00000000 0.00000000 -0.51679199"/>
+    <parent link="RIQ_link_1_joint_b"/>
+    <child link="RIQ_link_1_dh_b"/>
+  </joint>
+  <joint name="RIQ_link_1_dh_RIQ_link_1_b" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.05715000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_1_dh_b"/>
+    <child link="RIQ_link_1_b"/>
+  </joint>
+
+  <link name="RIQ_link_2_joint_b"/>
+  <joint name="RIQ_link_1_RIQ_link_2_joint_b" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_1_b"/>
+    <child link="RIQ_link_2_joint_b"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="0.0" upper="1.57079632679" velocity="0.52333333"/>
+  </joint>
+  <joint name="RIQ_link_2_joint_RIQ_link_2_b" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.03894000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_2_joint_b"/>
+    <child link="RIQ_link_2_b"/>
+  </joint>
+ 
+  <link name="RIQ_link_3_joint_b"/>
+  <joint name="RIQ_link_2_RIQ_link_3_joint_b" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_2_b"/>
+    <child link="RIQ_link_3_joint_b"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.953124304514" upper="0.75729836244" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_3_dh_b"/>
+  <joint name="RIQ_link_3_joint_RIQ_link_3_dh_b" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.51679199"/>
+    <parent link="RIQ_link_3_joint_b"/>
+    <child link="RIQ_link_3_dh_b"/>
+  </joint>
+  <joint name="RIQ_link_3_dh_RIQ_link_3_b" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_3_dh_b"/>
+    <child link="RIQ_link_3_b"/>
+  </joint>
+
+
+
+
+
+
+  <link name="RIQ_link_0_c">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_0.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="9.9777e-09" ixy="4.7690e-10" ixz="3.5505e-14" iyy="9.6371e-09" iyz="-1.0205e-13" izz="1.2820e-08"/>
+      <origin xyz="-0.01467719 0.00652751 0.00000011"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_1_c">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_1.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="1.2809e-08" ixy="-1.7380e-09" ixz="2.1480e-18" iyy="4.8871e-08" iyz="2.8353e-14" izz="5.5198e-08"/>
+      <origin xyz="-0.03117418 -0.01007430 -0.00000000"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_2_c">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_2.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="4.7466e-09" ixy="-1.7201e-09" ixz="2.3271e-10" iyy="1.2474e-08" iyz="4.4520e-10" izz="1.4402e-08"/>
+      <origin xyz="-0.02523911 -0.00787653 -0.00949288"/>
+    </inertial>
+  </link>
+  <link name="RIQ_link_3_c">
+    <visual>
+      <geometry>
+        <mesh filename="./meshes/RIQ_link_3.stl" scale="0.00100000 0.00100000 0.00100000"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <mass value="0.02000000"/>
+      <inertia ixx="1.8909e-09" ixy="-8.3346e-10" ixz="-1.2117e-11" iyy="4.7646e-09" iyz="-2.5147e-13" izz="4.3774e-09"/>
+      <origin xyz="0.00875369 -0.00155050 -0.00005599"/>
+    </inertial>
+  </link>
+
+  <link name="RIQ_link_0_joint_c"/>
+  <joint name="RIQ_palm_RIQ_link_0_joint" type="revolute">
+    <origin rpy="0.00000000 1.57079633 0.00000000" xyz="-0.04050700 0.01984400 -0.03651300"/>
+    <parent link="RIQ_palm"/>
+    <child link="RIQ_link_0_joint_c"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.296705972839" upper="0.296705972839" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_0_dh_c"/>
+  <joint name="RIQ_link_0_joint_RIQ_link_0_dh_c" type="fixed">
+    <origin rpy="0.00000000 0.00000000 1.57079633"/>
+    <parent link="RIQ_link_0_joint_c"/>
+    <child link="RIQ_link_0_dh_c"/>
+  </joint>
+  <joint name="RIQ_link_0_dh_RIQ_link_0_c" type="fixed">
+    <origin rpy="1.57079633 0.00000000 0.00000000" xyz="0.02187700 0.00000000 -0.00397000"/>
+    <parent link="RIQ_link_0_dh_c"/>
+    <child link="RIQ_link_0_c"/>
+  </joint>
+  
+  <link name="RIQ_link_1_joint_c"/>
+  <joint name="RIQ_link_0_RIQ_link_1_joint_c" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_0_c"/>
+    <child link="RIQ_link_1_joint_c"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.0940732466825" upper="1.12765722971" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_1_dh_c"/>
+  <joint name="RIQ_link_1_joint_RIQ_link_1_dh_c" type="fixed">
+    <origin rpy="0.00000000 0.00000000 -0.51679199"/>
+    <parent link="RIQ_link_1_joint_c"/>
+    <child link="RIQ_link_1_dh_c"/>
+  </joint>
+  <joint name="RIQ_link_1_dh_RIQ_link_1_c" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.05715000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_1_dh_c"/>
+    <child link="RIQ_link_1_c"/>
+  </joint>
+  
+  <link name="RIQ_link_2_joint_c"/>
+  <joint name="RIQ_link_1_RIQ_link_2_joint_c" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_1_c"/>
+    <child link="RIQ_link_2_joint_c"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="0.0" upper="1.57079632679" velocity="0.52333333"/>
+  </joint>
+  <joint name="RIQ_link_2_joint_RIQ_link_2_c" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.03894000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_2_joint_c"/>
+    <child link="RIQ_link_2_c"/>
+  </joint>
+  
+  <link name="RIQ_link_3_joint_c"/>
+  <joint name="RIQ_link_2_RIQ_link_3_joint_c" type="revolute">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_2_c"/>
+    <child link="RIQ_link_3_joint_c"/>
+    <axis xyz="0.00000000 0.00000000 1.00000000"/>
+    <limit effort="2.50000000" lower="-0.953124304514" upper="0.75729836244" velocity="0.52333333"/>
+  </joint>
+  <link name="RIQ_link_3_dh_c"/>
+  <joint name="RIQ_link_3_joint_RIQ_link_3_dh_c" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.51679199"/>
+    <parent link="RIQ_link_3_joint_c"/>
+    <child link="RIQ_link_3_dh_c"/>
+  </joint>
+  <joint name="RIQ_link_3_dh_RIQ_link_3_c" type="fixed">
+    <origin rpy="0.00000000 0.00000000 0.00000000" xyz="0.00000000 0.00000000 0.00000000"/>
+    <parent link="RIQ_link_3_dh_c"/>
+    <child link="RIQ_link_3_c"/>
+  </joint>
+</robot>
