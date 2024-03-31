@@ -16,13 +16,6 @@ def make_args():
         required=True,
     )
     parser.add_argument(
-        "-g",
-        "--graspit_grasp_dir",
-        type=str,
-        help="Original Graspit Grasp json datadir",
-        required=True,
-    )
-    parser.add_argument(
         "-f",
         "--filtered_grasp_dir",
         type=str,
@@ -36,13 +29,12 @@ def make_args():
 if __name__ == "__main__":
     args = make_args()
     model_dir = args.model_dir
-    graspit_grasp_dir = args.graspit_grasp_dir
     filtered_grasp_dir = args.filtered_grasp_dir
 
     num_grasps = 5
     num_grippers_first_row = 6
     grid_delta = 0.6
-    resolution = [1920, 1080]
+    resolution = [1280, 720]
 
     gripper_model_pairs = {
         "sawyer": "Remington_TStudio_Hair_Dryer",
@@ -74,7 +66,7 @@ if __name__ == "__main__":
 
     vizzer = Renderer(
         model_dir,
-        graspit_grasp_dir,
+        filtered_grasp_dir,
         filtered_grasp_dir,
         num_grasps,
         using_filtered=True,

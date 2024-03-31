@@ -71,6 +71,14 @@ def adjust_dofs(gripper, dofs):
         return dofs_to_use
 
 
+def convert_quat_xyzw_to_wxyz(quat):
+    return (quat[3], quat[0], quat[1], quat[2])
+
+
+def convert_quat_wxyz_to_xyzw(quat):
+    return (quat[1], quat[2], quat[3], quat[0])
+
+
 def rotX(rotx):
     RotX = np.array(
         [
@@ -128,6 +136,7 @@ def se3_inverse(RT):
 
 
 def ros_qt_to_rt(rot, trans):
+    # Expects rot to be in xyzw format
     qt = np.zeros((4,), dtype=np.float32)
     qt[0] = rot[3]
     qt[1] = rot[0]
@@ -189,37 +198,47 @@ def argsort(seq):
 
 
 def parse_grasps_filtered(
-    graspit_filename,
+    filtered_filename,
     num_grasps,
-    filtered_filename=None,
     sort_key="fall_time",
 ):
-    with open(graspit_filename, "r") as f:
-        data = json.load(f)
-    grasps = data["grasps"]
-
-    if filtered_filename is not None:
-        with open(filtered_filename, "r") as f:
-            filtered_grasps = json.load(f)
-        sorted_index = argsort(filtered_grasps[sort_key])
-    else:
-        sorted_index = range(len(grasps))  # i.e no ordering
+    with open(filtered_filename, "r") as f:
+        filtered_grasps = json.load(f)
+    sorted_index = argsort(filtered_grasps[sort_key])
     NUM = 2 * num_grasps  # for some randomization!
     dofs_grasp = []
     poses_grasp = np.zeros((num_grasps, 4, 4), dtype=np.float32)
     idxs_to_iterate = random.sample(sorted_index[:NUM], k=num_grasps)
     for i, idx in enumerate(idxs_to_iterate):
-        pose = grasps[idx]["pose"]
+        pose = filtered_grasps["pose"][idx]
         curr_dofs = filtered_grasps["graspit_dofs"][idx]
         dofs_grasp.append(curr_dofs)
-        rot = pose[3:]
+        rot = pose[3:]  # from filtered grasps json, a wxyz quaternion
         trans = pose[:3]
-        RT = ros_qt_to_rt(rot, trans)
+        RT = ros_qt_to_rt(convert_quat_wxyz_to_xyzw(rot), trans)
         poses_grasp[i, :, :] = RT
     return poses_grasp, np.asarray(dofs_grasp)
 
 
 def parse_grasps(filename):
+    # file should be a filtered grasps file!
+    with open(filename, "r") as f:
+        grasps = json.load(f)
+
+    n = len(grasps["pose"])
+    dofs_grasp = []
+    poses_grasp = np.zeros((n, 4, 4), dtype=np.float32)
+    for i in range(n):
+        pose = grasps[i]["pose"]
+        dofs_grasp.append(grasps["graspit_dofs"][i])
+        rot = pose[3:]
+        trans = pose[:3]
+        RT = ros_qt_to_rt(convert_quat_wxyz_to_xyzw(rot), trans)
+        poses_grasp[i, :, :] = RT
+    return poses_grasp, np.asarray(dofs_grasp)
+
+
+def parse_grasps_legacy(filename):
     with open(filename, "r") as f:
         data = json.load(f)
     grasps = data["grasps"]

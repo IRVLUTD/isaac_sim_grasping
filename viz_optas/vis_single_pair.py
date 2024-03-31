@@ -16,13 +16,6 @@ def make_args():
         required=True,
     )
     parser.add_argument(
-        "-g",
-        "--graspit_grasp_dir",
-        type=str,
-        help="Original Graspit Grasp json data directory",
-        required=True,
-    )
-    parser.add_argument(
         "-f",
         "--filtered_grasp_dir",
         type=str,
@@ -30,6 +23,7 @@ def make_args():
         required=True,
     )
     parser.add_argument(
+        "-g",
         "--gripper",
         type=str,
         help="Gripper name",
@@ -50,13 +44,12 @@ def make_args():
 if __name__ == "__main__":
     args = make_args()
     model_dir = args.model_dir
-    graspit_grasp_dir = args.graspit_grasp_dir
     filtered_grasp_dir = args.filtered_grasp_dir
     gripper = args.gripper
     model = args.model
     num_grasps = 5
     grid_delta = 0.5
-    resolution = [1920, 1080]
+    resolution = [1280, 720]
 
     num_rows = 1
     num_cols = num_grasps
@@ -69,7 +62,7 @@ if __name__ == "__main__":
 
     vizzer = Renderer(
         model_dir,
-        graspit_grasp_dir,
+        filtered_grasp_dir,
         filtered_grasp_dir,
         num_grasps,
         using_filtered=True,

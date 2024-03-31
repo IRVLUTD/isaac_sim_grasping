@@ -75,8 +75,6 @@ class Renderer:
             "025_mug",
             "035_power_drill",
             "037_scissors",
-            "040_large_marker",
-            # "051_large_clamp",
             "052_extra_large_clamp",
         }:
             obj_mesh_f = os.path.join(model_data_path, "textured_simple.obj")
@@ -100,15 +98,9 @@ class Renderer:
             filtered_grasp_file = self._get_filtered_grasps_file(
                 gripper_name, model_name
             )
-            # RT_grasps, dofs = parse_grasps_filtered(
-            #     filtered_grasp_file,
-            #     num_grasps,
-            #     sort_key="fall_time",
-            # )
             RT_grasps, dofs = parse_grasps_filtered(
-                graspit_grasp_file,
-                num_grasps,
                 filtered_grasp_file,
+                num_grasps,
                 sort_key="fall_time",
             )
         else:
