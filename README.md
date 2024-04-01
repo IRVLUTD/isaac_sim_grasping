@@ -203,6 +203,7 @@ Note: To reproduce the transferred grasp results the same must be done with the 
 - [Adding a new Gripper](docs/add_grippers.md)
 - [Adding a new Object](docs/add_objects.md)
 - [Available Gripper Controllers](docs/controllers.md)
+- [Graspit Grasp Generation Code](https://github.com/IRVLUTD/neuralgrasps-dataset-generation/tree/multigrippergrasp)
 
 ### Helpful Links
 - MultiGripperGrasp Shared Folder [here](https://utdallas.box.com/v/multi-gripper-grasp-data)
