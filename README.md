@@ -206,10 +206,10 @@ Note: To reproduce the transferred grasp results the same must be done with the 
 - [Graspit Grasp Generation Code](https://github.com/IRVLUTD/neuralgrasps-dataset-generation/tree/multigrippergrasp)
 
 ### Helpful Links
-- MultiGripperGrasp Shared Folder [here](https://utdallas.box.com/v/multi-gripper-grasp-data)
-- Google Scanned Objects and YCB objects .usd files [here](https://utdallas.box.com/s/bfc81l7ypaaa3s0niaz1miylbdgul7b7)
-- Filtered GraspIt Grasps Dataset [here](https://utdallas.box.com/shared/static/cvrr97gylkonno7hokmyn80k36u9ts7f.zip)
-- Transferred Grasps Dataset [here](https://utdallas.box.com/shared/static/vtanakqjqqet61s3doxu9196vg6tjxs9.zip)
+- MultiGripperGrasp Shared Folder [here](https://utdallas.box.com/v/multi-gripper-grasp-data). This folder has the following data along with a README for the dataset:
+  - Google Scanned Objects and YCB objects .usd files (`Object_Models` folder)
+  - Filtered GraspIt Grasps Dataset (.zip file)
+  - Transferred Grasps Dataset (.zip file)
 - Isaac Sim Manual: https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html
 - Helpful code for python standalones (code snippet samples): https://docs.omniverse.nvidia.com/isaacsim/latest/reference_python_snippets.html
 - Installing Packages for use with isaac sim python.sh: https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_python.html
