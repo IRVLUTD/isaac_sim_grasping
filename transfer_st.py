@@ -246,7 +246,7 @@ if __name__ == "__main__":
         viewer.objects.initialize(world.physics_sim_view)
         viewer.post_reset()
 
-        world.pause()    
+        #world.pause()    
         #Run Sim
         with tqdm(total=len(manager.completed)) as pbar:
             while not all(manager.completed):
