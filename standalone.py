@@ -6,6 +6,7 @@ import argparse
 import sys
 import time
 
+
 def make_parser():
     """ Input Parser """
     parser = argparse.ArgumentParser(description='Standalone script for grasp filtering.')

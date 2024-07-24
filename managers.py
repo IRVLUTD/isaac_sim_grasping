@@ -43,15 +43,15 @@ class Manager:
         print("Number of Grasps: " + str(self.n_jobs))
 
         # GRIPPER SPECIFIC DATA
-        self._init_gripper_dicts()
+        self._init_gripper_dicts(grippers_path)
         
         # Extract info from dictionaries external and internal
         self.controller = controller_dict[controller]
-        self.close_mask = self.close_dir[self.gripper]
-        self.contact_th = self.contact_ths[self.gripper]
-        self.physics_dt = self.dts[self.gripper]
-        self.c_names = self.contact_names[self.gripper]
-        self.EF_axis = self.EF_axes[self.gripper]
+        self.close_mask = self.gripper_dict["close_dir"]
+        self.contact_th = self.gripper_dict["contact_th"]
+        self.physics_dt = 1/self.gripper_dict["physics_frequency"]
+        self.c_names = self.gripper_dict["contact_names"]
+        self.EF_axis = self.gripper_dict["EF_axis"]
         self.init_time = time.time()
 
         #Pointer and result vars
@@ -64,93 +64,16 @@ class Manager:
         self.reported_slips = np.zeros(len(self.grasps))
         self.final_dofs = np.zeros_like(self.dofs)
 
-    def _init_gripper_dicts(self):
+
+    def _init_gripper_dicts(self,dict_dir):
         """ GRIPPER INFORMATION INITIALIZATION
-        Every gripper should have its information added here
+        Every gripper should have its information within the gripper_isaac_info.json file 
         
         """
-        #End effector axis (+/- 1,2,3) x,y, z respectively
-        self.EF_axes = {
-            "fetch_gripper": 1,
-            "franka_panda": 3,
-            "sawyer": 3,
-            "wsg_50": 3,
-            "Barrett": 3,
-            "robotiq_3finger": 2,
-            "jaco_robot": -1,
-            "Allegro": 1,
-            "shadow_hand": -2,
-            "HumanHand": -2,
-            "h5_hand": -3
-        }
-
-        #Custom Physics dts (increase filtering speed)
-        self.dts = {
-            "fetch_gripper": 1/120,
-            "franka_panda": 1/120,
-            "sawyer": 1/120,
-            "wsg_50": 1/120,
-            "Barrett": 1/120,
-            "robotiq_3finger": 1/120,
-            "jaco_robot": 1/120,
-            "Allegro": 1/120,
-            "shadow_hand": 1/120,
-            "HumanHand": 1/120,
-            "h5_hand": 1/120
-        }
-
-        # Direction for DoFs to close gripper
-        self.close_dir= {
-            "fetch_gripper" : [1,1],
-            "franka_panda": [-1, -1], # NOTE, franka_panda gripper by default is closed, so need to open before, Opendir = [1, 1]
-            "sawyer": [1, 1],
-            "wsg_50": [1, -1], # NOTE, wsg_50 gripper by default is closed, so need to open before, Opendir = [-1, 1]
-            "Barrett": [0, 0, 1, 1, 1, 0, 0, 0],
-            "jaco_robot": [1, 1, 1],
-            "robotiq_3finger": [0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-            "Allegro": [0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
-            "HumanHand": [0, 0, 0, 0, 0, 1, 1, 1, 1, 0.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            "shadow_hand": [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1],
-            "h5_hand": [1,-1,0,0]
-        }
-
-        #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
-        self.contact_names= { 
-            "fetch_gripper" : ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
-            "franka_panda": ["panda_hand", "panda_leftfinger", "panda_rightfinger"], 
-            "sawyer": [ "leftfinger", "rightfinger"],
-            "wsg_50": ["gripper_left", "gripper_right"], 
-            "Barrett": ["a_link2_joint","a_link3_joint","b_link2_joint","b_link3_joint","c_link2_joint_0","c_link3_joint"],
-            "jaco_robot": ["jaco_8_finger_index", "jaco_8_finger_thumb", "jaco_8_finger_pinkie"],
-            "robotiq_3finger": ["RIQ_link_1_joint_a", "RIQ_link_1_joint_b", "RIQ_link_1_joint_c",
-                             "RIQ_link_2_joint_a", "RIQ_link_2_joint_b", "RIQ_link_2_joint_c",
-                             "RIQ_link_3_joint_a", "RIQ_link_3_joint_b", "RIQ_link_3_joint_c"],
-            "Allegro": [ "link_0_0", "link_2_0","link_3_0", "link_4_0", "link_5_0","link_6_0","link_7_0","link_8_0","link_9_0","link_10_0",
-                        "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],
-            "HumanHand": ["index1_joint","index2_joint","index3_joint", "mid1_joint","mid2_joint","mid3_joint", "pinky1_joint","pinky2_joint","pinky3_joint",
-                           "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
-            "shadow_hand": [ "index_finger_proximal", "index_finger_middle", "index_finger_distal",
-                             "little_finger_proximal", "little_finger_middle", "little_finger_distal",
-                             "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
-                             "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
-                            "thumb_proximal", "thumb_middle", "thumb_distal"],
-            "h5_hand" : ["left_tip_link", "right_tip_link"]
-        }
-        
-        #Amount of contacts required for the grasp to be considered as ready
-        self.contact_ths = { 
-            "fetch_gripper" : 1,
-            "franka_panda": 1, 
-            "sawyer": 1,
-            "wsg_50": 1, 
-            "Barrett": 1,
-            "jaco_robot": 1,
-            "robotiq_3finger": 1,
-            "Allegro": 1,
-            "HumanHand": 1,
-            "shadow_hand": 1,
-            "h5_hand": 1
-        }
+        abs_dir = os.path.join(dict_dir,"gripper_isaac_info.json")
+        with open(abs_dir) as fd:
+            self.gripper_dict = json.load(fd)[self.gripper]
+        return
 
     def _check_gripper_usd(self,gripper_path):
         """ Check if the gripper usd exist
@@ -333,15 +256,15 @@ class T_Manager:
         print("Number of Grasps: " + str(self.n_jobs))
 
         # GRIPPER SPECIFIC DATA
-        self._init_gripper_dicts()
+        self._init_gripper_dicts(grippers_path)
         
         # Extract info from dictionaries external and internal
         self.controller = controller_dict[controller]
-        self.close_mask = self.close_dir[self.gripper]
-        self.contact_th = self.contact_ths[self.gripper]
-        self.physics_dt = self.dts[self.gripper]
-        self.c_names = self.contact_names[self.gripper]
-        self.EF_axis = self.EF_axes[self.gripper]
+        self.close_mask = self.gripper_dict["transfer_close_dir"]
+        self.contact_th = self.gripper_dict["transfer_contact_th"]
+        self.physics_dt = 1/self.gripper_dict["physics_frequency"]
+        self.c_names = self.gripper_dict["contact_names"]
+        self.EF_axis = self.gripper_dict["EF_axis"]
         self.init_time = time.time()
 
 
@@ -355,96 +278,14 @@ class T_Manager:
         self.reported_slips = np.zeros(len(self.grasps))
         self.final_dofs = np.zeros((len(self.fall_time),len(self.close_mask)))
 
-    def _init_gripper_dicts(self):
+    def _init_gripper_dicts(self,dict_dir):
         """ GRIPPER INFORMATION INITIALIZATION
-        Every gripper should have its information added here
+        Every gripper should have its information within the gripper_isaac_info.json file 
         
         """
-        #End effector axis (+/- 1,2,3) x,y, z respectively
-        self.EF_axes = {
-            "fetch_gripper": 1,
-            "franka_panda": 3,
-            "sawyer": 3,
-            "wsg_50": 3,
-            "Barrett": 3,
-            "robotiq_3finger": 2,
-            "jaco_robot": -1,
-            "Allegro": 1,
-            "shadow_hand": -2,
-            "HumanHand": -2,
-            "h5_hand": -3
-        }
-
-        #Custom Physics dts (increase filtering speed)
-        self.dts = {
-            "fetch_gripper": 1/120,
-            "franka_panda": 1/120,
-            "sawyer": 1/120,
-            "wsg_50": 1/120,
-            "Barrett": 1/120,
-            "robotiq_3finger": 1/120,
-            "jaco_robot": 1/120,
-            "Allegro": 1/120,
-            "shadow_hand": 1/120,
-            "HumanHand": 1/120,
-            "h5_hand": 1/120
-        }
-
-        #Array like structure for DoFs to close gripper for 0 the dof won't move 
-        # 1 dof will move only to set up grasp
-        # >1 dof will move to set up grasp and to exert force on object
-        # Sign determines direction
-        self.close_dir= {
-            "fetch_gripper" : [2,2],
-            "franka_panda": [-2, -2], # NOTE, franka_panda gripper by default is closed, so need to open before, Opendir = [1, 1]
-            "sawyer": [2, 2],
-            "wsg_50": [2, -2], # NOTE, wsg_50 gripper by default is closed, so need to open before, Opendir = [-1, 1]
-            "Barrett": [0, 0, 2, 2, 2, 0, 0, 0],
-            "jaco_robot": [2, 2, 2],
-            "robotiq_3finger": [0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0], #[0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0]
-            "h5_hand": [2,-2,0,0],
-            "Allegro": [0, 1.5, 0, 0, 2, 0, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0], #
-            "HumanHand":[0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0 , 0, 0, 0 , 0],
-            "shadow_hand": [0 , 0, 0, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 2, 0, 2]
-        }
-
-        #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
-        self.contact_names= { 
-            "fetch_gripper" : ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
-            "franka_panda": ["panda_hand", "panda_leftfinger", "panda_rightfinger"], 
-            "sawyer": ["leftfinger", "rightfinger"],
-            "wsg_50": ["gripper_left", "gripper_right"], 
-            "Barrett": ["a_link2_joint","a_link3_joint","b_link2_joint","b_link3_joint","c_link2_joint_0","c_link3_joint"],
-            "jaco_robot": ["jaco_8_finger_index", "jaco_8_finger_thumb", "jaco_8_finger_pinkie"],
-            "robotiq_3finger": ["RIQ_link_1_joint_a", "RIQ_link_1_joint_b", "RIQ_link_1_joint_c",
-                             "RIQ_link_2_joint_a", "RIQ_link_2_joint_b", "RIQ_link_2_joint_c",
-                             "RIQ_link_3_joint_a", "RIQ_link_3_joint_b", "RIQ_link_3_joint_c"],
-            "Allegro": ["link_0_0", "link_2_0","link_3_0", "link_4_0", "link_5_0","link_6_0","link_7_0","link_8_0","link_9_0","link_10_0",
-                        "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],
-            "HumanHand": ["index1_joint","index2_joint","index3_joint", "mid1_joint","mid2_joint","mid3_joint", "pinky1_joint","pinky2_joint","pinky3_joint",
-                           "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
-            "shadow_hand": [ "index_finger_proximal", "index_finger_middle", "index_finger_distal",
-                             "little_finger_proximal", "little_finger_middle", "little_finger_distal",
-                             "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
-                             "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
-                            "thumb_proximal", "thumb_middle", "thumb_distal"],
-            "h5_hand" : ["left_tip_link", "right_tip_link"]
-        }
-        
-        #Amount of contacts required for the grasp to be considered as ready
-        self.contact_ths = { 
-            "fetch_gripper" : 2,
-            "franka_panda": 2, 
-            "sawyer": 2,
-            "wsg_50": 2, 
-            "Barrett": 2,
-            "jaco_robot": 2,
-            "robotiq_3finger": 2,
-            "Allegro": 2,
-            "HumanHand": 2,
-            "shadow_hand": 2,
-            "h5_hand": 2
-        }
+        abs_dir = os.path.join(dict_dir,"gripper_isaac_info.json")
+        with open(abs_dir) as fd:
+            self.gripper_dict = json.load(fd)[self.gripper]
 
     def _check_gripper_usd(self,gripper_path):
         """ Check if the gripper usd exist
@@ -500,53 +341,18 @@ class T_Manager:
         #print('Jobs given ', job_IDs)
         return dofs, poses, job_IDs
     
-    def translate_dofs(self, robot_idx):
-        """ Function to translate the GraspIt dofs to Isaac Sim dofs. It overwrites manager.dofs
-        
+    def opened_dofs(self, robot_idx):
+        """ Sets starting DoFs of all grasps to the gripper opened position.
+
         Args: 
             robot_idx: List of dofs indices names of the grippers given by Isaac Sim
         """
 
         robot_pos= np.ones((self.n_jobs,len(robot_idx)))
 
-        # Open grippers
-        if self.gripper== "fetch_gripper":
-            robot_pos = robot_pos *np.asarray([-0.025, -0.025])
-        elif self.gripper == "franka_panda":
-            robot_pos = robot_pos * np.asarray([0.04, 0.04])
-        elif self.gripper == "wsg_50":
-            robot_pos = robot_pos * np.asarray([-0.055, 0.055])
-        elif self.gripper == "sawyer":
-            robot_pos = robot_pos * np.asarray([0, 0])
-        elif self.gripper == "h5_hand":
-            robot_pos = robot_pos * np.asarray([np.radians(-79), np.radians(79),np.radians(79),np.radians(-79)])
-        elif self.gripper == "Barrett":
-            robot_pos = robot_pos * np.asarray([np.radians(30),np.radians(30),0,0,0,0,0,0])
-        elif self.gripper == "jaco_robot":
-            robot_pos = robot_pos * np.asarray([0, 0, 0])
-        elif self.gripper == "robotiq_3finger":
-            robot_pos = robot_pos * np.asarray([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-        elif self.gripper == "Allegro":
-            robot_pos = robot_pos * np.asarray([0, 0, 0, 0, np.radians(-11), np.radians(67), np.radians(-11),
-                                                 np.radians(-11), np.radians(-10), 0, np.radians(-9),
-                                                 np.radians(-10), np.radians(10), np.radians(10), np.radians(10), 
-                                                 np.radians(10)])
-        elif self.gripper == "HumanHand":
-            robot_pos = robot_pos * np.asarray([np.radians(10), 0, np.radians(-15), np.radians(-5), np.radians(-10), 
-                                                np.radians(-10), np.radians(-10), np.radians(-10), np.radians(-10),
-                                                    np.radians(-50), np.radians(-10), np.radians(-10),
-                                                      np.radians(-10), np.radians(-10), np.radians(-10),
-                                                        np.radians(20), np.radians(20), np.radians(20),
-                                                          np.radians(20), np.radians(20)])
-        elif self.gripper == "shadow_hand":
-            robot_pos = robot_pos * np.asarray([np.radians(-10), np.radians(15), np.radians(-5), 0, np.radians(-45),
-                                                 0, np.radians(-5), 0, 0, np.radians(69), 0, 0, 0, 0, 0,np.radians(20), 0, 
-                                                      np.radians(20), np.radians(20), np.radians(-20),
-                                                        np.radians(20), np.radians(20)])
-        else:            
-            raise(LookupError("No dof translation for gripper"))
-
-
+        # Opened dof for gripper
+        robot_pos= robot_pos * np.asarray(self.gripper_dict["opened_dofs"])
+        
         self.dofs = robot_pos
         self.final_dofs = np.zeros_like(self.dofs)
         return robot_pos
@@ -697,18 +503,19 @@ class V_Manager:
         print("Number of Grasps: " + str(self.n_jobs))
 
         # GRIPPER SPECIFIC DATA
-        if transfer: 
-            self._init_gripper_dicts_transfer()
-        else:
-            self._init_gripper_dicts_og()
-        
+        self._init_gripper_dicts(grippers_path)
+
         # Extract info from dictionaries external and internal
+        if transfer: 
+            self.close_mask = self.gripper_dict["transfer_close_dir"]
+            self.contact_th = self.gripper_dict["transfer_contact_th"]  
+        else:
+            self.close_mask = self.gripper_dict["close_dir"]
+            self.contact_th = self.gripper_dict["contact_th"]  
         self.controller = controller_dict[controller]
-        self.close_mask = self.close_dir[self.gripper]
-        self.contact_th = self.contact_ths[self.gripper]
-        self.physics_dt = self.dts[self.gripper]
-        self.c_names = self.contact_names[self.gripper]
-        self.EF_axis = self.EF_axes[self.gripper]
+        self.physics_dt = 1/self.gripper_dict["physics_frequency"]
+        self.c_names = self.gripper_dict["contact_names"]
+        self.EF_axis = self.gripper_dict["EF_axis"]
         self.init_time = time.time()
 
 
@@ -723,187 +530,14 @@ class V_Manager:
         self.final_dofs = np.zeros((len(self.fall_time),len(self.close_mask)))
 
 
-    def _init_gripper_dicts_transfer(self):
+    def _init_gripper_dicts(self,dict_dir):
         """ GRIPPER INFORMATION INITIALIZATION
-        Every gripper should have its information added here
+        Every gripper should have its information within the gripper_isaac_info.json file 
         
         """
-        #End effector axis (+/- 1,2,3) x,y, z respectively
-        self.EF_axes = {
-            "fetch_gripper": 1,
-            "franka_panda": 3,
-            "sawyer": 3,
-            "wsg_50": 3,
-            "Barrett": 3,
-            "robotiq_3finger": 2,
-            "jaco_robot": -1,
-            "Allegro": 1,
-            "shadow_hand": -2,
-            "HumanHand": -2,
-            "h5_hand": -3
-        }
-
-        #Custom Physics dts (increase filtering speed)
-        self.dts = {
-            "fetch_gripper": 1/120,
-            "franka_panda": 1/120,
-            "sawyer": 1/120,
-            "wsg_50": 1/120,
-            "Barrett": 1/120,
-            "robotiq_3finger": 1/120,
-            "jaco_robot": 1/120,
-            "Allegro": 1/120,
-            "shadow_hand": 1/120,
-            "HumanHand": 1/120,
-            "h5_hand": 1/120
-        }
-
-        #Array like structure for DoFs to close gripper for 0 the dof won't move 
-        # 1 dof will move only to set up grasp
-        # >1 dof will move to set up grasp and to exert force on object
-        # Sign determines direction
-        self.close_dir= {
-            "fetch_gripper" : [2,2],
-            "franka_panda": [-2, -2], # NOTE, franka_panda gripper by default is closed, so need to open before, Opendir = [1, 1]
-            "sawyer": [2, 2],
-            "wsg_50": [2, -2], # NOTE, wsg_50 gripper by default is closed, so need to open before, Opendir = [-1, 1]
-            "Barrett": [0, 0, 2, 2, 2, 0, 0, 0],
-            "jaco_robot": [2, 2, 2],
-            "robotiq_3finger": [0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0], #[0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0]
-            "h5_hand": [2,-2,0,0],
-            "Allegro": [0, 1.5, 0, 0, 2, 0, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0], #
-            "HumanHand":[0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0 , 0, 0, 0 , 0],
-            "shadow_hand": [0 , 0, 0, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 2, 0, 2]
-        }
-
-        #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
-        self.contact_names= { 
-            "fetch_gripper" : ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
-            "franka_panda": ["panda_hand", "panda_leftfinger", "panda_rightfinger"], 
-            "sawyer": ["leftfinger", "rightfinger"],
-            "wsg_50": ["gripper_left", "gripper_right"], 
-            "Barrett": ["a_link2_joint","a_link3_joint","b_link2_joint","b_link3_joint","c_link2_joint_0","c_link3_joint"],
-            "jaco_robot": ["jaco_8_finger_index", "jaco_8_finger_thumb", "jaco_8_finger_pinkie"],
-            "robotiq_3finger": ["RIQ_link_1_joint_a", "RIQ_link_1_joint_b", "RIQ_link_1_joint_c",
-                             "RIQ_link_2_joint_a", "RIQ_link_2_joint_b", "RIQ_link_2_joint_c",
-                             "RIQ_link_3_joint_a", "RIQ_link_3_joint_b", "RIQ_link_3_joint_c"],
-            "Allegro": ["link_0_0", "link_2_0","link_3_0", "link_4_0", "link_5_0","link_6_0","link_7_0","link_8_0","link_9_0","link_10_0",
-                        "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],
-            "HumanHand": ["index1_joint","index2_joint","index3_joint", "mid1_joint","mid2_joint","mid3_joint", "pinky1_joint","pinky2_joint","pinky3_joint",
-                           "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
-            "shadow_hand": [ "index_finger_proximal", "index_finger_middle", "index_finger_distal",
-                             "little_finger_proximal", "little_finger_middle", "little_finger_distal",
-                             "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
-                             "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
-                            "thumb_proximal", "thumb_middle", "thumb_distal"],
-            "h5_hand" : ["left_tip_link", "right_tip_link"]
-        }
-        
-        #Amount of contacts required for the grasp to be considered as ready
-        self.contact_ths = { 
-            "fetch_gripper" : 2,
-            "franka_panda": 2, 
-            "sawyer": 2,
-            "wsg_50": 2, 
-            "Barrett": 2,
-            "jaco_robot": 2,
-            "robotiq_3finger": 2,
-            "Allegro": 2,
-            "HumanHand": 2,
-            "shadow_hand": 2,
-            "h5_hand": 2
-        }
-
-    def _init_gripper_dicts_og(self):
-        """ GRIPPER INFORMATION INITIALIZATION
-        Every gripper should have its information added here
-        
-        """
-        #End effector axis (+/- 1,2,3) x,y, z respectively
-        self.EF_axes = {
-            "fetch_gripper": 1,
-            "franka_panda": 3,
-            "sawyer": 3,
-            "wsg_50": 3,
-            "Barrett": 3,
-            "robotiq_3finger": 2,
-            "jaco_robot": -1,
-            "Allegro": 1,
-            "shadow_hand": -2,
-            "HumanHand": -2,
-            "h5_hand": -3
-        }
-
-        #Custom Physics dts (increase filtering speed)
-        self.dts = {
-            "fetch_gripper": 1/120,
-            "franka_panda": 1/120,
-            "sawyer": 1/120,
-            "wsg_50": 1/120,
-            "Barrett": 1/120,
-            "robotiq_3finger": 1/120,
-            "jaco_robot": 1/120,
-            "Allegro": 1/120,
-            "shadow_hand": 1/120,
-            "HumanHand": 1/120,
-            "h5_hand": 1/120
-        }
-
-        #Array like structure for DoFs to close gripper for 0 the dof won't move 
-        # 1 dof will move only to set up grasp
-        # >1 dof will move to set up grasp and to exert force on object
-        # Sign determines direction
-        self.close_dir= {
-            "fetch_gripper" : [2,2],
-            "franka_panda": [-2, -2], # NOTE, franka_panda gripper by default is closed, so need to open before, Opendir = [1, 1]
-            "sawyer": [2, 2],
-            "wsg_50": [2, -2], # NOTE, wsg_50 gripper by default is closed, so need to open before, Opendir = [-1, 1]
-            "Barrett": [0, 0, 2, 2, 2, 0, 0, 0],
-            "jaco_robot": [2, 2, 2],
-            "robotiq_3finger": [0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0], #[0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0]
-            "h5_hand": [2,-2,0,0],
-            "Allegro": [0, 1.5, 0, 0, 2, 0, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0], #
-            "HumanHand":[0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0 , 0, 0, 0 , 0],
-            "shadow_hand": [0 , 0, 0, 0, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 2, 0, 2]
-        }
-
-        #List of names of joints to check for collisions; it must be as specified in the .usd of the gripper
-        self.contact_names= { 
-            "fetch_gripper" : ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
-            "franka_panda": ["panda_hand", "panda_leftfinger", "panda_rightfinger"], 
-            "sawyer": ["leftfinger", "rightfinger"],
-            "wsg_50": ["gripper_left", "gripper_right"], 
-            "Barrett": ["a_link2_joint","a_link3_joint","b_link2_joint","b_link3_joint","c_link2_joint_0","c_link3_joint"],
-            "jaco_robot": ["jaco_8_finger_index", "jaco_8_finger_thumb", "jaco_8_finger_pinkie"],
-            "robotiq_3finger": ["RIQ_link_1_joint_a", "RIQ_link_1_joint_b", "RIQ_link_1_joint_c",
-                             "RIQ_link_2_joint_a", "RIQ_link_2_joint_b", "RIQ_link_2_joint_c",
-                             "RIQ_link_3_joint_a", "RIQ_link_3_joint_b", "RIQ_link_3_joint_c"],
-            "Allegro": ["link_0_0", "link_2_0","link_3_0", "link_4_0", "link_5_0","link_6_0","link_7_0","link_8_0","link_9_0","link_10_0",
-                        "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],
-            "HumanHand": ["index1_joint","index2_joint","index3_joint", "mid1_joint","mid2_joint","mid3_joint", "pinky1_joint","pinky2_joint","pinky3_joint",
-                           "ring1_joint","ring2_joint","ring3_joint", "thumb1_joint","thumb2_joint","thumb3_joint" ],
-            "shadow_hand": [ "index_finger_proximal", "index_finger_middle", "index_finger_distal",
-                             "little_finger_proximal", "little_finger_middle", "little_finger_distal",
-                             "middle_finger_proximal", "middle_finger_middle", "middle_finger_distal",
-                             "ring_finger_proximal", "ring_finger_middle", "ring_finger_distal",
-                            "thumb_proximal", "thumb_middle", "thumb_distal"],
-            "h5_hand" : ["left_tip_link", "right_tip_link"]
-        }
-        
-        #Amount of contacts required for the grasp to be considered as ready
-        self.contact_ths = { 
-            "fetch_gripper" : 2,
-            "franka_panda": 2, 
-            "sawyer": 2,
-            "wsg_50": 2, 
-            "Barrett": 2,
-            "jaco_robot": 2,
-            "robotiq_3finger": 2,
-            "Allegro": 2,
-            "HumanHand": 2,
-            "shadow_hand": 2,
-            "h5_hand": 2
-        }
+        abs_dir = os.path.join(dict_dir,"gripper_isaac_info.json")
+        with open(abs_dir) as fd:
+            self.gripper_dict = json.load(fd)[self.gripper]
 
     def _check_gripper_usd(self,gripper_path):
         """ Check if the gripper usd exist
