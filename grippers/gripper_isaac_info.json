@@ -8,7 +8,7 @@
     "transfer_close_dir": [2,2],
     "transfer_contact_th": 2,
     "opened_dofs": [-0.025,-0.025],
-    "trasnfer_reference_pose": [-0.135, 0, 0, 0.707106781186548, 0, -0.707106781186548, 0]
+    "transfer_reference_pose": [-0.135, 0, 0, 0.707106781186548, 0, -0.707106781186548, 0]
     }, 
 "franka_panda": {
     "EF_axis": 3, 
@@ -19,7 +19,7 @@
     "transfer_close_dir": [-2,-2],
     "transfer_contact_th": 2,
     "opened_dofs": [0.04, 0.04],
-    "trasnfer_reference_pose": [0, 0, -0.06, 1, 0, 0, 0]
+    "transfer_reference_pose": [0, 0, -0.06, 1, 0, 0, 0]
     }, 
 "sawyer": {
     "EF_axis": 3, 
@@ -30,7 +30,7 @@
     "transfer_close_dir": [2,2],
     "transfer_contact_th": 2,
     "opened_dofs": [0, 0],
-    "trasnfer_reference_pose": [0, 0, -0.05, 1, 0, 0, 0]
+    "transfer_reference_pose": [0, 0, -0.05, 1, 0, 0, 0]
     }, 
 "wsg_50": {
     "EF_axis": 3, 
@@ -41,7 +41,7 @@
     "transfer_close_dir": [2,-2],
     "transfer_contact_th": 2,
     "opened_dofs": [-0.055, 0.055],
-    "trasnfer_reference_pose": [ 0, 0, -0.072, 0.707106781186548, 0, 0, 0.707106781186548]
+    "transfer_reference_pose": [ 0, 0, -0.072, 0.707106781186548, 0, 0, 0.707106781186548]
     }, 
 "Barrett": {
     "EF_axis": 3, 
@@ -52,7 +52,7 @@
     "transfer_close_dir": [0, 0, 2, 2, 2, 0, 0, 0],
     "transfer_contact_th": 2,
     "opened_dofs": [0.523599,0.523599,0,0,0,0,0,0],
-    "trasnfer_reference_pose": [0, 0, 0, 1, 0, 0, 0]
+    "transfer_reference_pose": [0, 0, 0, 1, 0, 0, 0]
     }, 
 "jaco_robot": {
     "EF_axis": -1, 
@@ -63,7 +63,7 @@
     "transfer_close_dir": [2, 2, 2],
     "transfer_contact_th": 2,
     "opened_dofs": [0, 0, 0],
-    "trasnfer_reference_pose": [0.102, 0, 0, 0.707106781186548, -0, 0.707106781186548, 0]
+    "transfer_reference_pose": [0.102, 0, 0, 0.707106781186548, -0, 0.707106781186548, 0]
     }, 
 "robotiq_3finger": {
     "EF_axis": 2, 
@@ -76,7 +76,7 @@
     "transfer_close_dir": [0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0],
     "transfer_contact_th": 2,
     "opened_dofs": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    "trasnfer_reference_pose": [0, -0.05, 0, 0.5, 0.5, -0.5, -0.5]
+    "transfer_reference_pose": [0, -0.05, 0, 0.5, 0.5, -0.5, -0.5]
     }, 
 "Allegro": {
     "EF_axis": 1, 
@@ -89,7 +89,7 @@
     "transfer_contact_th": 2,
     "opened_dofs": [0, 0, 0, 0, -0.191986, 1.16937, -0.191986, -0.191986, -0.174533, 0,
                     -0.15708, -0.174533, 0.174533, 0.174533, 0.174533, 0.174533],
-    "trasnfer_reference_pose": [0, 0, 0.03, 0.5, -0.5, -0.5, -0.5]
+    "transfer_reference_pose": [0, 0, 0.03, 0.5, -0.5, -0.5, -0.5]
     }, 
 "HumanHand": {
     "EF_axis": -2, 
@@ -104,7 +104,7 @@
     "opened_dofs": [0.174533, 0, -0.261799, -0.0872665, -0.174533, -0.174533, -0.174533, -0.174533,
                     -0.174533, -0.872665, -0.174533, -0.174533, -0.174533, -0.174533, -0.174533,
                     0.349066, 0.349066, 0.349066, 0.349066, 0.349066],
-    "trasnfer_reference_pose": [0.1, 0.02, 0, 0.5, -0.5, 0.5, -0.5]
+    "transfer_reference_pose": [0.1, 0.02, 0, 0.5, -0.5, 0.5, -0.5]
     }, 
 "shadow_hand": {
     "EF_axis": -2, 
@@ -120,7 +120,7 @@
     "transfer_contact_th": 2,
     "opened_dofs": [-0.174533, 0.261799, -0.0872665, 0, -0.785398, 0, -0.0872665, 0, 0, 1.20428, 
                     0, 0, 0, 0, 0, 0.349066, 0, 0.349066, 0.349066, -0.349066, 0.349066, 0.349066],
-    "trasnfer_reference_pose": [0, 0, -0.05, 0.707106781186548, -0.707106781186548, 0, 0]
+    "transfer_reference_pose": [0, 0, -0.05, 0.707106781186548, -0.707106781186548, 0, 0]
     },
 "h5_hand": {
     "EF_axis": -3, 
@@ -131,6 +131,6 @@
     "transfer_close_dir": [2,-2,0,0],
     "transfer_contact_th": 2,
     "opened_dofs": [-1.37881, 1.37881,1.37881,-1.37881],
-    "trasnfer_reference_pose": [0, 0, 0.07, 0 , -0, 1, 0]
+    "transfer_reference_pose": [0, 0, 0.07, 0 , -0, 1, 0]
     }
 }

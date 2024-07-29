@@ -3,32 +3,35 @@ Import the grippers to Isaac Sim using the GUI and save them as .usd in the grip
 
 
 ## Steps to Add grippers:
-1) Prepare Gripper .usd (Import .urdf and makes sure it has its correct attributes, i.e. max efforts, max joint velocities, colliders, etc.). For .urdf files go to Isaac Utils > Workflows > URDF Importer.
+1) Prepare Gripper .usd (Import the gripper into Isaac Sim and make sure it has the correct attributes, i.e. max efforts, max joint velocities, colliders, etc.). For .urdf files go to Isaac Utils > Workflows > URDF Importer.
 
 
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG1.png)
 
+2) (Recommended) Use the Isaac Sim GUI to ensure the gripper moves as intended. 
+![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/SonyGripper.png)
 
-2) Add the corresponding entries to the manager._init_gripper_dicts() function in [manager.py](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/manager.py).
+
+3) Add the corresponding entries to the gripper information dictionaries  [gripper_isaac_info.json](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/grippers/gripper_isaac_info.json). The gripper ID must be unique and the corresponding .json grasp files must have the exact same ID.
 https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L71-L75
-The dictionaries are as follows:
-- EF_axis: Axis where the gripper end effector is pointing to.
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L76-L88
-- dts: physics_dt to run the gripper's simulations (for faster simulations we can decrease this values, but it is limited by the gripper's complexity, for high complexity grippers a small dt is required). Test and visualize the dts before running filters.
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L90-L102
-- close_dir: dofs and directions used to close the gripper
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L104-L116
-- contact_names: contact of gripper parts to filter collisions with (used for grasp set up probing) Must be exactly as specified by Isaac Sim. Use the already included [gripper .usd files](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/grippers) as reference.
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L118-L138
-- contact_ths: contacts needed to inialize grasp and activate gravity.
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L140-L152
+
+The entries are:
+- "EF_axis": Gripper end effector axis (+/- 1,2,3) x,y, z respectively.
+- "physics_frequency": Frequency in which the PhysiX engine will run when evaluating grasps.
+- "close_dir": List with directions for gripper DoFs to close (1,-1,0) sign denotes direction, set to 0 for the DoFs that shouldn't move.
+- "contact_names": List of joint names to check for contact collisions; they must be exactly as specified in the .usd of the gripper.
+- "contact_th": Amount of contacts required for the grasp to be considered as ready.
+- "transfer_close_dir": List encoding of DoF behavior when evaluating grasps, encoding:
+    - 0: the dof won't move.
+    - 1: dof will move only to set up grasp (sign denotes direction).
+    - &gt;1: dof will move to set up grasp and to exert force on object after the grasp is ready(sign denotes direction).
+- "transfer_contact_th": contact_th used on transferred grasps.
+- "opened_dofs": List of DoF values for the gripper's opened position.
+- "transfer_reference_pose": Reference Pose used for transferring grasps. The pose denotes a point on the gripper's palm. (x,y,z,qw,qx,qy,qz). For more information on how transfer grasps were calculated refer to [helpful_scripts folder.](https://github.com/IRVLUTD/isaac_sim_grasping/tree/d3a192e304ee7cdbeebd3c3ba1869e2d9cf5e057/helpful_scripts)
 
 
-3) Visualize the simulation of the gripper to make sure everything is working correctly (reduce the amount of workstations to make iterating easier).
+
+4) Visualize the simulation of the gripper to make sure everything is working correctly (reduce the amount of workstations to make iterating easier). Note: New gripper folders must contain the same relative path to their .usd as with the grippers in our repository; grippers/gripper_ID/gripper_ID/gripper_ID.usd
 
 
 ![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/AG2.png)
-
-Important: the code reads the gripper .usd files within directories with a specific structure:
-
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L154-L165
