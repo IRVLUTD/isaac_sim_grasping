@@ -13,7 +13,7 @@ Import the grippers to Isaac Sim using the GUI and save them as .usd in the grip
 
 
 3) Add the corresponding entries to the gripper information dictionaries  [gripper_isaac_info.json](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/grippers/gripper_isaac_info.json). The gripper ID must be unique and the corresponding .json grasp files must have the exact same ID.
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/6b43f3369395127aa0e532aed0129e3df6c7b422/manager.py#L71-L75
+
 
 The entries are:
 - "EF_axis": Gripper end effector axis (+/- 1,2,3) x,y, z respectively.
