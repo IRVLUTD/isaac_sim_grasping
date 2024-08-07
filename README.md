@@ -4,7 +4,7 @@ Simulation based grasp filter. This repository contains a grasp filter developed
 
 **MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands**
 
-Luis Felipe Casas Murillo, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
+Luis Felipe Casas, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
 
 [[paper](https://arxiv.org/pdf/2403.09841.pdf)] [[video](https://www.youtube.com/watch?v=pm1K6wbc830)] [[arXiv](https://arxiv.org/abs/2403.09841)] [[project site](https://irvlutd.github.io/MultiGripperGrasp)] [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)]
 
