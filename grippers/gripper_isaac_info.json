@@ -127,7 +127,7 @@
     "physics_frequency": 120,
     "close_dir": [1,-1,0,0],
     "contact_names": ["left_tip_link", "right_tip_link"],
-    "contact_ths":1,
+    "contact_th":1,
     "transfer_close_dir": [2,-2,0,0],
     "transfer_contact_th": 2,
     "opened_dofs": [-1.37881, 1.37881,1.37881,-1.37881],
