@@ -181,13 +181,7 @@ Sample run command:
 </p>
 
 ### Reproducing Paper Results
-As of this version, the simulation uses a specific .json structure. The [managers.py](managers.py) file is the responsible for reading and transforming the relevant grasp information contained within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) file to the format used by the program. The information is:
-- The gripper name: Must be exactly the name with which the gripper is saved within the gripper directory.
-- The object name: Must be exactly the name with which the object is saved within the object directory.
-- Grasp pose data: 7 dimensional vector containing the gripper and object relative pose. (0-2 denotes the postion, 3-6 denotes the quaternion). Must be changed to the Isaac Sim quaternion convention (w, x, y, z)
-- Joint Value Data: vector containing the Degree of Freedom (DoF) information of the grasps. 
-
-Within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) you can find the hyperparameters used for filtering the grasps of each gripper. In order to reproduce the paper results, one must run the filter with the same hyperparameters. All the files provided within this repository and in the [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. 
+As of this version, the simulation uses a specific .json structure. The [managers.py](managers.py) file is the responsible for reading and transforming the relevant grasp information contained within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) file to the format used by the program. Within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) you can find the parameters used for filtering the grasps of each gripper. In order to reproduce the paper results, one must run the filter with the same values. A detailed description of each field can be found within the [Adding a new Gripper](docs/add_grippers.md) page. All the files provided within this repository and in the [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. 
 
 Note: To reproduce the transferred grasp results the same must be done with the transfer hyperparameters in [gripper_isaac_info.json](grippers/gripper_isaac_info.json). 
 
