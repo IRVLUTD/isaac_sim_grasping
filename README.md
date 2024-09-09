@@ -187,11 +187,7 @@ As of this version, the simulation uses a specific .json structure. The [manager
 - Grasp pose data: 7 dimensional vector containing the gripper and object relative pose. (0-2 denotes the postion, 3-6 denotes the quaternion). Must be changed to the Isaac Sim quaternion convention (w, x, y, z)
 - Joint Value Data: vector containing the Degree of Freedom (DoF) information of the grasps. 
 
-https://github.com/IRVLUTD/isaac_sim_grasping/blob/f3a0685a1ed10741ff9768656f0de1dcf065f2f4/managers.py#L21-L46
-
-Within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) you can find the hyperparameters used for filtering the grasps of each gripper. In order to reproduce the paper results, one must run the filter with the same hyperparameters:
-
-All the files provided within this repository and in the [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. 
+Within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) you can find the hyperparameters used for filtering the grasps of each gripper. In order to reproduce the paper results, one must run the filter with the same hyperparameters. All the files provided within this repository and in the [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. 
 
 Note: To reproduce the transferred grasp results the same must be done with the transfer hyperparameters in [gripper_isaac_info.json](grippers/gripper_isaac_info.json). 
 
