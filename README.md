@@ -12,14 +12,15 @@ Luis Felipe Casas, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
 
 Please cite MulitGripperGrasp Toolkit if it helps your research:
 
-    @misc{murrilo2024multigrippergrasp,
+    @misc{casas2024multigrippergraspdatasetroboticgrasping,
       title={MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands}, 
-      author={Luis Felipe Casas Murrilo and Ninad Khargonkar and Balakrishnan Prabhakaran and Yu Xiang},
+      author={Luis Felipe Casas and Ninad Khargonkar and Balakrishnan Prabhakaran and Yu Xiang},
       year={2024},
       eprint={2403.09841},
       archivePrefix={arXiv},
-      primaryClass={cs.RO}
-    }
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2403.09841}, 
+}
 
 ### License
 
