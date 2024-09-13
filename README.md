@@ -20,7 +20,7 @@ Please cite MulitGripperGrasp Toolkit if it helps your research:
       archivePrefix={arXiv},
       primaryClass={cs.RO},
       url={https://arxiv.org/abs/2403.09841}, 
-}
+     }
 
 ### License
 
