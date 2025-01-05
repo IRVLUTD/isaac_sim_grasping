@@ -1,7 +1,6 @@
 import numpy as np
 import os
 from controllers import controller_dict
-import utils
 import json
 import time
 

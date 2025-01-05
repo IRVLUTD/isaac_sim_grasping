@@ -115,7 +115,7 @@ def import_gripper(work_path,usd_path, EF_axis):
         # Adding Robot usd
         add_reference_to_stage(usd_path=usd_path, prim_path=work_path+"/gripper")
         robot = world.scene.add(Articulation(prim_path = work_path+"/gripper", name="gripper",
-                            position = gripper_pose[0], orientation = gripper_pose[1], enable_dof_force_sensors = True))
+                            position = gripper_pose[0], orientation = gripper_pose[1]))
         robot.set_enabled_self_collisions(False)
         return robot, T_EF
 

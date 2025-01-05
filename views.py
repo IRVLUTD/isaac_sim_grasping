@@ -4,7 +4,7 @@ import time
 
 
 #Custom Classes and utils
-from utils import te_batch,re_batch
+from utils_local import te_batch,re_batch
 
 #Omni Libraries
 from omni.isaac.core.utils.numpy.rotations import quats_to_rot_matrices
@@ -13,6 +13,8 @@ from omni.isaac.core.prims.rigid_prim import RigidPrimView
 from omni.isaac.core.articulations import  ArticulationView
 from omni.isaac.core.utils.transformations import pose_from_tf_matrix, tf_matrices_from_poses
 from omni.isaac.core.prims import XFormPrimView
+from omni.isaac.dynamic_control import _dynamic_control
+
 
 class View():
     """ISAAC SIM VIEWS Class 
@@ -95,7 +97,7 @@ class View():
         self.objects.set_world_poses(self.init_positions, self.init_rotations)
 
         # Get max efforts and dofs
-        dc = self.world.dc_interface
+        dc = _dynamic_control.acquire_dynamic_control_interface()
         articulation = dc.get_articulation(self.work_path+"/gripper")
         self.dof_props = dc.get_articulation_dof_properties(articulation)
         self.close_positions = np.zeros_like(self.dofs)
@@ -174,7 +176,7 @@ class View():
             self.test_finish(time_ind)
 
         # Failed grasps; gripper never touched object
-        failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=0.5), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
+        failed_ind = np.argwhere((np.multiply(np.multiply(np.squeeze(self.current_times>=1), np.squeeze(self.grasp_set_up==0)),tmp_active)==1))[:,0]
         if(len(failed_ind)>0): 
             self.current_times[failed_ind] = -1
             self.test_finish(failed_ind)
@@ -298,7 +300,7 @@ class V_View():
         self.objects.set_world_poses(self.init_positions, self.init_rotations)
 
         # Get max efforts and dofs
-        dc = self.world.dc_interface
+        dc = _dynamic_control.acquire_dynamic_control_interface()
         articulation = dc.get_articulation(self.work_path+"/gripper")
         self.dof_props = dc.get_articulation_dof_properties(articulation)
         self.close_positions = np.zeros_like(self.dofs)
