@@ -158,6 +158,88 @@ class TransferPositionController(BaseGripperController):
 
 
 
+class PositionSphereController(BaseGripperController):
+    """ Position sphere controller
+    UGCS based controller for the movement of grippers using a unified geometric space.
+
+
+    Args:
+        close_mask: dofs directions to close grippers 
+        test_time: total test time
+        max_effors: max_effort for Gripper "driving dofs"
+        robots: ArticulationView for Robots in simulation
+    """
+
+    def __init__(self, close_mask, test_time, max_efforts, robots):
+        name = "Controller"
+        super().__init__(name=name)
+
+        # Initialize vectors on unit sphere
+        self.vectors = np.zeros((14,3))
+        self.vectors[0] = [1, 0, -100] # -100 is key for sphere pole 
+        self.vectors[1] = [1, 45, 0]
+        self.vectors[2] = [1, 45, 90]
+        self.vectors[3] = [1, 45, 180]
+        self.vectors[4] = [1, 45, 270]
+        self.vectors[5] = [1, 90, 0]
+        self.vectors[6] = [1, 90, 90]
+        self.vectors[7] = [1, 90, 180]
+        self.vectors[8] = [1, 90, 270]        
+        self.vectors[9] = [1, 135, 0]
+        self.vectors[10] = [1, 135, 90]
+        self.vectors[11] = [1, 135, 180]
+        self.vectors[12] = [1, 135, 270]
+        self.vectors[13] = [1, 180, -100] # -100 is key for sphere pole 
+
+        # Load gripper correspondences (3D points + spherical value in max sphere)
+        
+        # Use an external .json file
+        
+        
+        self.type = 'sphere_position_controller'
+        self.effort = max_efforts
+        self.close_mask = close_mask
+        self.touch_dofs = np.zeros_like(max_efforts)
+        return 
+
+    def close(self,time):
+        return 
+    
+    def open(self,time):
+        return 
+
+    def forward(self, action, time, grippers, close_position):
+        current_dofs = grippers.get_joint_positions()
+        pos = np.zeros_like(close_position)
+        time = np.squeeze(time)
+        uninit = np.argwhere(time==0)
+        init = np.argwhere(time!=0)
+        self.touch_dofs[uninit]= current_dofs[uninit]  
+        
+        #2 behaviors ready and not ready grasps (view.py gives 0 as time for each workstation that is not set up)
+        for i in range(len(self.close_mask)):
+            if (self.close_mask[i]== 0):
+                pos[:,i] = close_position[:,i]
+            elif ((abs(self.close_mask[i])-1)==0):
+                if(len(init)>0):
+                    pos[init,i] =  self.touch_dofs[init,i]
+                if(len(uninit)>0):
+                    pos[uninit,i] = close_position[uninit,i]
+                    
+            else:
+                pos[:,i] = close_position[:,i] * (abs(self.close_mask[i])-1)
+
+        if action == "h5_hand":
+            pos[:,2]= -1*current_dofs[:,0]
+            pos[:,3]= -1*current_dofs[:,1]
+            grippers.set_joint_positions(pos[:,2:], joint_indices = [2,3])
+
+        actions = ArticulationActions(joint_positions = pos)
+        # A controller has to return an ArticulationAction
+        self.last_actions = actions
+        return actions
+
+
 """ LIST OF CONTROLLERS: 
 They are the references used in command line to determine the controller to use
 """
