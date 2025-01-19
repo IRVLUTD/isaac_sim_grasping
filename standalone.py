@@ -6,17 +6,22 @@ import argparse
 import sys
 import time
 
+st_path = os.path.dirname(os.path.abspath(__file__))
 
 def make_parser():
     """ Input Parser """
     parser = argparse.ArgumentParser(description='Standalone script for grasp filtering.')
     parser.add_argument('--headless', type=bool, help='Running Program in headless mode',
                         default=False, action = argparse.BooleanOptionalAction)
+    parser.add_argument('--dof_given', type=bool, help='DoFs of grasps are given in .json files',
+                        default=False, action = argparse.BooleanOptionalAction)
+    parser.add_argument('--view_mode', type=bool, help='DoFs of grasps are given in .json files',
+                        default=False, action = argparse.BooleanOptionalAction)
     parser.add_argument('--force_reset', type=bool, help='Force Reset of Isaac Sim',
                         default=False, action = argparse.BooleanOptionalAction)
-    parser.add_argument('--json_dir', type=str, help='Directory of Grasp Information', default='')
-    parser.add_argument('--gripper_dir', type=str, help='Directory of Gripper urdf/usd', default='')
-    parser.add_argument('--objects_dir', type=str, help='Directory of Object usd', default='')
+    parser.add_argument('--json_dir', type=str, help='Directory of Grasp Information', default=os.path.join(st_path,'grasps'))
+    parser.add_argument('--gripper_dir', type=str, help='Directory of Gripper urdf/usd', default=os.path.join(st_path,'grippers'))
+    parser.add_argument('--objects_dir', type=str, help='Directory of Object usd', default=os.path.join(st_path,'objects'))
     parser.add_argument('--output_dir', type=str, help='Output directroy for filterd grasps', default='')
     parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=150)
     parser.add_argument('--device', type=int, help='Gpu to use', default=0)
@@ -26,50 +31,9 @@ def make_parser():
     parser.add_argument('--controller', type=str,
                         help='Gripper Controller to use while testing, should match the controller dictionary in the Manager Class',
                         default='default')
-    parser.add_argument('--/log/level', type=str, help='isaac sim logging arguments', default='', required=False)
-    parser.add_argument('--/log/fileLogLevel', type=str, help='isaac sim logging arguments', default='', required=False)
+    parser.add_argument('--test_type', type=str, help='Test type to perform', default='default')
     parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='', required=False)
-    
     return parser
-
-#Parser
-parser = make_parser()
-args = parser.parse_args()
-head = args.headless
-force_reset = args.force_reset
-print(args.controller)
-
-#launch Isaac Sim before any other imports
-from omni.isaac.kit import SimulationApp
-config= {
-    "headless": head,
-    'max_bounces':0,
-    'fast_shutdown': True,
-    'max_specular_transmission_bounces':0,
-    'physics_gpu': args.device,
-    'active_gpu': args.device
-    }
-simulation_app = SimulationApp(config) # we can also run as headless.
-
-
-#World Imports
-from omni.isaac.core import World
-from omni.isaac.core.utils.prims import define_prim
-from omni.isaac.cloner import GridCloner    # import Cloner interface
-from omni.isaac.core.utils.stage import add_reference_to_stage
-
-# Custom Classes
-from managers import Manager
-from views import View
-
-#Omni Libraries
-from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
-from omni.isaac.core.prims.rigid_prim import RigidPrim 
-from omni.isaac.core.prims.geometry_prim import GeometryPrim
-from omni.isaac.core.articulations import Articulation
-from omni.isaac.core.utils.prims import get_prim_children, get_prim_path, get_prim_at_path
-from omni.isaac.core.utils.transformations import pose_from_tf_matrix
-
 
 def import_gripper(work_path,usd_path, EF_axis):
         """ Imports Gripper to World
@@ -115,7 +79,7 @@ def import_gripper(work_path,usd_path, EF_axis):
         # Adding Robot usd
         add_reference_to_stage(usd_path=usd_path, prim_path=work_path+"/gripper")
         robot = world.scene.add(Articulation(prim_path = work_path+"/gripper", name="gripper",
-                            position = gripper_pose[0], orientation = gripper_pose[1], enable_dof_force_sensors = True))
+                            position = gripper_pose[0], orientation = gripper_pose[1]))
         robot.set_enabled_self_collisions(False)
         return robot, T_EF
 
@@ -155,7 +119,49 @@ def import_object(work_path, usd_path):
 
 
 if __name__ == "__main__":
-    
+    #Parser
+    parser = make_parser()
+    args = parser.parse_args()
+    head = args.headless
+    force_reset = args.force_reset
+    dof_flag = args.dof_given
+    num_w = args.num_w
+    test_time = args.test_time
+    verbose = args.print_results
+    controller = args.controller
+    test_type = args.test_type
+    view_mode = args.view_mode
+
+    #launch Isaac Sim before any other imports
+    from omni.isaac.kit import SimulationApp
+    config= {
+        "headless": head,
+        'max_bounces':0,
+        'fast_shutdown': True,
+        'max_specular_transmission_bounces':0,
+        'physics_gpu': args.device,
+        'active_gpu': args.device
+        }
+    simulation_app = SimulationApp(config) # we can also run as headless.
+
+    # Omniverse imports
+    from omni.isaac.core import World
+    from omni.isaac.core.utils.prims import define_prim
+    from omni.isaac.cloner import GridCloner    # import Cloner interface
+    from omni.isaac.core.utils.stage import add_reference_to_stage
+    from omni.isaac.core.utils.stage import add_reference_to_stage,open_stage, save_stage
+    from omni.isaac.core.prims.rigid_prim import RigidPrim 
+    from omni.isaac.core.prims.geometry_prim import GeometryPrim
+    from omni.isaac.core.articulations import Articulation
+    from omni.isaac.core.utils.prims import get_prim_children, get_prim_path, get_prim_at_path
+    from omni.isaac.core.utils.transformations import pose_from_tf_matrix
+
+
+    # Custom Classes
+    from managers import Manager
+    from views import View
+    from sim_utils import add_light
+
     # Directories
     json_directory = args.json_dir
     grippers_directory = args.gripper_dir
@@ -164,23 +170,17 @@ if __name__ == "__main__":
     
     if not os.path.exists(json_directory):
         raise ValueError("Json directory not given correctly")
-    elif not os.path.exists(grippers_directory):
+    if not os.path.exists(grippers_directory):
         raise ValueError("Grippers directory not given correctly")
-    elif not os.path.exists(objects_directory):
+    if not os.path.exists(objects_directory):
         raise ValueError("Objects directory not given correctly")
-    elif not os.path.exists(output_directory): 
-        raise ValueError("Output directory not given correctly")
-
-    # Testing Hyperparameters
-    num_w = args.num_w
-    test_time = args.test_time
-    verbose = args.print_results
-    controller = args.controller
-    #physics_dt = 1/120
+    if output_directory == '':
+        output_directory = os.path.join(st_path,"output")
+        print("No output directory provided, using default at: ", output_directory)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
 
     world = World(set_defaults = False)
-    
-    #Debugging
     render = not head
 
     #Load json files 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
             continue
 
         # Initialize Manager
-        manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, controller)   
+        manager = Manager(os.path.join(json_directory,j), grippers_directory, objects_directory, dof_flag)   
         
 
         #Create initial Workstation Prim
@@ -220,7 +220,9 @@ if __name__ == "__main__":
                      root_path = "/World/Workstation_")
 
         # ISAAC SIM views initialization
-        viewer = View(work_path,contact_names,num_w, manager,world, test_time, mass)
+        viewer = View(work_path, contact_names, num_w, manager,
+                      world, test_time, controller, test_type, 
+                      dof_flag, view_mode)
 
         
         #Reset World and create set first robot positions
@@ -229,6 +231,9 @@ if __name__ == "__main__":
         # Print Robot DoFs
         print(robot.dof_names)
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
+        
+        #Debug
+        add_light()
 
         # Set desired physics Context options
         world.reset()
@@ -237,14 +242,18 @@ if __name__ == "__main__":
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
         physicsContext.enable_stablization(True)
-        physicsContext.set_gravity(-9.81)
-
+        physicsContext.set_gravity(0)
         world.reset()
         
         #Initialize views
         viewer.grippers.initialize(world.physics_sim_view)
         viewer.objects.initialize(world.physics_sim_view)
         viewer.post_reset()
+
+        # Sim info added to manager
+        manager.test_type = viewer.test_type
+        manager.total_test_time = test_time
+        manager.controller = viewer.controller_type
 
         #world.pause()
         #Run Sim
@@ -259,7 +268,8 @@ if __name__ == "__main__":
     
 
         #Save new json with results
-        manager.save_json(out_path)
+        if not view_mode:
+            manager.save_json(out_path)
         if (verbose):
             manager.report_results()
         #print("Reseting Environment")

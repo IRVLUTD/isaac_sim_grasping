@@ -1,57 +1,11 @@
 # Every Controller must have same inputs
 from omni.isaac.core.controllers import BaseController, BaseGripperController
-from omni.isaac.core.utils.types import ArticulationActions
+from omni.isaac.core.utils.types import ArticulationActions, ArticulationAction
 import numpy as np
+import json
+import os
 
-#Dynamic control API
-from omni.isaac.dynamic_control import _dynamic_control
-dc = _dynamic_control.acquire_dynamic_control_interface()
-
-class ForceController(BaseGripperController):
-    """ Force Controller Version 0
-
-    Args:
-        close_mask: dofs directions to close grippers 
-        test_time: total test time
-        max_effors: max_effort for Gripper "driving dofs"
-        robots: ArticulationView for Robots in simulation
-    """
-    def __init__(self, close_mask, test_time, max_efforts,robots):
-        name = "Controller"
-        super().__init__(name=name)
-        self.close_mask = close_mask
-        self.type = 'force_control_v0'
-        self.total_time = test_time
-        ind = np.squeeze(np.argwhere(max_efforts[0]!=0))
-
-        robots.set_max_efforts(np.zeros_like(ind),joint_indices=ind.reshape((1,len(ind))))
-        self.max_efforts = max_efforts
-        return 
-
-    def close(self,time):
-        joint_command = ((self.total_time-2*time)/self.total_time)*self.max_efforts
-        #print(joint_command)
-        return joint_command
-    
-    def open(self,time):
-        return 
-
-    def forward(self, action, time, current_dofs, close_position):
-        command = self.close(time)
-
-        new_pos = np.zeros_like(close_position)
-        for i in range(len(self.close_mask)):
-            if self.close_mask[i] == 0:
-                new_pos[:,i] = close_position[:,i]
-            else:
-                new_pos[:,i] = current_dofs[:,i]
-        
-        actions = ArticulationActions(joint_positions = new_pos, joint_efforts=command)
-        # A controller has to return an ArticulationAction
-        self.last_actions = actions
-        return actions
-
-class PositionController(BaseGripperController):
+class PositionController(BaseController):
     """ Position Controller Version 0
 
     Args:
@@ -61,46 +15,63 @@ class PositionController(BaseGripperController):
         robots: ArticulationView for Robots in simulation
     """
 
-    def __init__(self, close_mask, test_time, max_efforts, robots):
-        name = "Controller"
+    def __init__(self, gripper_name, grippers, test_time):
+        name = "Controller" #Stage name of controller
         super().__init__(name=name)
         self.type = 'position_controller_v0'
-        self.effort = max_efforts
-        self.close_mask = close_mask
-        return 
+        
+        self.grippers = grippers
+        self.gripper_name = gripper_name
+        self.total_test_time = test_time
 
-    def close(self,time):
-        return 
-    
-    def open(self,time):
-        return 
+        gripper_info = self.grippers.get_dof_limits()
+        dof_limits = gripper_info[0]
+        self.close_positions  = np.zeros((gripper_info.shape[0],len(dof_limits)))
+        #Load controlle info.json
+        c_path = os.path.dirname(os.path.abspath(__file__))
+        controller_json =  os.path.join(c_path,"grippers/controller_info.json")
+        with open(controller_json) as fd:
+            gripper_dict = json.load(fd)
+        self.close_mask = gripper_dict[gripper_name]["close_dir"]
 
-    def forward(self, action, time, grippers, close_position):
-        current_dofs = grippers.get_joint_positions()
-        pos = np.zeros_like(close_position)
+        for i in range(len(dof_limits)):
+            if (self.close_mask[i]==0):
+                self.close_positions[:,i]=(self.grippers.get_joint_positions()[0][i])
+            elif (self.close_mask[i]>0):
+                self.close_positions[:,i]=(dof_limits[i][1])
+            elif (self.close_mask[i]<0):
+                self.close_positions[:,i]=(dof_limits[i][0]) 
+            else: 
+                raise ValueError("clos_dir arrays for grippers can only have 1,-1 and 0 values indicating closing direction")
+        
+
+    def forward(self, time):
+        current_dofs = self.grippers.get_joint_positions()
+        pos = np.zeros_like(self.close_positions)
         for i in range(len(self.close_mask)):
             if (self.close_mask[i]==0):
-                pos[:,i] =  close_position[:,i]
+                pos[:,i] =  self.close_positions[:,i]
             else:
-                pos[:,i] = close_position[:,i] * abs(self.close_mask[i])
+                pos[:,i] = self.close_positions[:,i] * abs(self.close_mask[i])
 
 
-        if action == "h5_hand":
+        if self.gripper_name == "h5_hand":
             pos[:,2]= -1*current_dofs[:,0]
             pos[:,3]= -1*current_dofs[:,1]
             tmp= pos[:,2:]
 
-            grippers.set_joint_positions(tmp, joint_indices = [2,3])
+            self.grippers.set_joint_positions(tmp, joint_indices = [2,3])
 
 
         actions = ArticulationActions(joint_positions = pos)
-        # A controller has to return an ArticulationAction
+        
+        # Save last action and apply to stage view
         self.last_actions = actions
-        #print(pos)
+        self.grippers.apply_action(actions)
         return actions
 
 
-class TransferPositionController(BaseGripperController):
+class TransferPositionController(BaseController):
     """ Transfer Position Controller Version 0
 
     Args:
@@ -109,25 +80,44 @@ class TransferPositionController(BaseGripperController):
         max_effors: max_effort for Gripper "driving dofs"
         robots: ArticulationView for Robots in simulation
     """
+    
 
-    def __init__(self, close_mask, test_time, max_efforts, robots):
-        name = "Controller"
+    def __init__(self, gripper_name, grippers, test_time):
+        name = "Controller" #Stage name
         super().__init__(name=name)
         self.type = 'transfer_position_controller_v0'
-        self.effort = max_efforts
-        self.close_mask = close_mask
-        self.touch_dofs = np.zeros_like(max_efforts)
-        return 
 
-    def close(self,time):
+        self.grippers = grippers
+        self.gripper_name = gripper_name
+        self.total_test_time = test_time
+
+        gripper_info = self.grippers.get_dof_limits()
+        dof_limits = gripper_info[0]
+        self.close_positions  = np.zeros((gripper_info.shape[0],len(dof_limits)))
+        #Load controlle info.json
+        c_path = os.path.dirname(os.path.abspath(__file__))
+        controller_json =  os.path.join(c_path,"grippers/controller_info.json")
+        with open(controller_json) as fd:
+            gripper_dict = json.load(fd)
+        self.close_mask = gripper_dict[gripper_name]["transfer_close_dir"]
+
+        for i in range(len(dof_limits)):
+            if (self.close_mask[i]==0):
+                self.close_positions[:,i]=(self.grippers.get_joint_positions()[0][i])
+            elif (self.close_mask[i]>0):
+                self.close_positions[:,i]=(dof_limits[i][1])
+            elif (self.close_mask[i]<0):
+                self.close_positions[:,i]=(dof_limits[i][0]) 
+            else: 
+                raise ValueError("clos_dir arrays for grippers can only have 1,-1 and 0 values indicating closing direction")
+        
+        self.touch_dofs = np.zeros_like(self.close_positions)
         return 
     
-    def open(self,time):
-        return 
 
-    def forward(self, action, time, grippers, close_position):
-        current_dofs = grippers.get_joint_positions()
-        pos = np.zeros_like(close_position)
+    def forward(self, time):
+        current_dofs = self.grippers.get_joint_positions()
+        pos = np.zeros_like(self.close_positions)
         time = np.squeeze(time)
         uninit = np.argwhere(time==0)
         init = np.argwhere(time!=0)
@@ -136,29 +126,53 @@ class TransferPositionController(BaseGripperController):
         #2 behaviors ready and not ready grasps (view.py gives 0 as time for each workstation that is not set up)
         for i in range(len(self.close_mask)):
             if (self.close_mask[i]== 0):
-                pos[:,i] = close_position[:,i]
-            elif ((abs(self.close_mask[i])-1)==0):
+                pos[:,i] = self.close_positions[:,i]
+            elif ((abs(self.close_mask[i])-1)!=0):
+                pos[:,i] = self.close_positions[:,i] * (abs(self.close_mask[i])-1)
+            else:
                 if(len(init)>0):
                     pos[init,i] =  self.touch_dofs[init,i]
                 if(len(uninit)>0):
-                    pos[uninit,i] = close_position[uninit,i]
-                    
-            else:
-                pos[:,i] = close_position[:,i] * (abs(self.close_mask[i])-1)
+                    pos[uninit,i] = self.close_positions[uninit,i]
 
-        if action == "h5_hand":
+        if self.gripper_name == "h5_hand":
             pos[:,2]= -1*current_dofs[:,0]
             pos[:,3]= -1*current_dofs[:,1]
-            grippers.set_joint_positions(pos[:,2:], joint_indices = [2,3])
+            self.grippers.set_joint_positions(pos[:,2:], joint_indices = [2,3])
 
+        #print("action", pos[0])
         actions = ArticulationActions(joint_positions = pos)
         # A controller has to return an ArticulationAction
         self.last_actions = actions
+        self.grippers.apply_action(actions)
         return actions
 
+class StaticController(BaseController):
+    """ Static Control
+    """
 
+    def __init__(self, gripper_name, grippers, test_time):
+        name = "Controller" #Stage name of controller
+        super().__init__(name=name)
+        self.type = 'static_controller_v0'
+        
+        self.grippers = grippers
+        self.gripper_name = gripper_name
+        self.total_test_time = test_time
 
-class PositionSphereController(BaseGripperController):
+        #Load controlle info.json
+
+    def forward(self, time):
+        current_dofs = self.grippers.get_joint_positions()
+
+        actions = ArticulationActions(joint_positions = current_dofs)
+        
+        # Save last action and apply to stage view
+        self.last_actions = actions
+        self.grippers.apply_action(actions)
+        return actions
+
+class PositionSphereController(BaseController):
     """ Position sphere controller
     UGCS based controller for the movement of grippers using a unified geometric space.
 
@@ -215,29 +229,8 @@ class PositionSphereController(BaseGripperController):
         uninit = np.argwhere(time==0)
         init = np.argwhere(time!=0)
         self.touch_dofs[uninit]= current_dofs[uninit]  
-        
-        #2 behaviors ready and not ready grasps (view.py gives 0 as time for each workstation that is not set up)
-        for i in range(len(self.close_mask)):
-            if (self.close_mask[i]== 0):
-                pos[:,i] = close_position[:,i]
-            elif ((abs(self.close_mask[i])-1)==0):
-                if(len(init)>0):
-                    pos[init,i] =  self.touch_dofs[init,i]
-                if(len(uninit)>0):
-                    pos[uninit,i] = close_position[uninit,i]
-                    
-            else:
-                pos[:,i] = close_position[:,i] * (abs(self.close_mask[i])-1)
+        return 
 
-        if action == "h5_hand":
-            pos[:,2]= -1*current_dofs[:,0]
-            pos[:,3]= -1*current_dofs[:,1]
-            grippers.set_joint_positions(pos[:,2:], joint_indices = [2,3])
-
-        actions = ArticulationActions(joint_positions = pos)
-        # A controller has to return an ArticulationAction
-        self.last_actions = actions
-        return actions
 
 
 """ LIST OF CONTROLLERS: 
@@ -245,8 +238,8 @@ They are the references used in command line to determine the controller to use
 """
 controller_dict = {
     'default': PositionController,
-    'force' : ForceController,
     'position': PositionController,
-    'transfer_default': TransferPositionController
+    'transfer_position': TransferPositionController,
+    'static': StaticController
 }
  
