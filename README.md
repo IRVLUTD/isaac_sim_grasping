@@ -2,7 +2,7 @@
 ![](/media/F1_isaac.png)
 **Overview**:
 This repository hosts a grasp filter simulation crafted with Isaac Sim. It focuses on evaluating and visualizing contemporary robotic grasp datasets. Key updates in version 2.0 include:
-  - **Consolidation**: All previous standalone tools have been integrated into a single platform for improved usability.
+  - **Consolidation**: All previous standalone tools have been integrated into a single standalone for improved usability.
   - **Simplified Testing**: Easier implementation of various grasp tests.
   - **Code Optimization**: The codebase has been streamlined, reducing both size and complexity for better performance.
 
