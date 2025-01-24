@@ -178,7 +178,7 @@ Command:
 This command will run the gravity test using our transferred grasp gripper controller "transfer_position". Additionally, the simulation can now filter grasps where the object and grippers initialize in an overlapped position. 
 
 <p align="center">
-<img  src='media/transfer_close.gif'>
+<img  src='media/transfer_close.gif' width=1000>
 </p>
 
 
