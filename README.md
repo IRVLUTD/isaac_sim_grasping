@@ -178,7 +178,7 @@ Command:
 This command will run the gravity test using our transferred grasp gripper controller "transfer_position". Additionally, the simulation can now filter grasps where the object and grippers initialize in an overlapped position. 
 
 <p align="center">
-<img  src='media/transfer_close.gif' width='1000'>
+<img  src='media/transfer_close.gif'>
 </p>
 
 
@@ -190,7 +190,11 @@ Command:
 ./python.sh /home/felipe/Documents/RL_MGG/isaac_sim_grasping/standalone.py --num_w=10 --test_time=1  --view_mode --dof_given --/log/outputStreamLevel=error
 ```
 
-The grasps will be visualized for 1 sec (test_time) at every workstation. An alternative visualization tool can be found on the[viz_optas](viz_optas) folder. 
+The grasps will be visualized for 1 sec (test_time) at every workstation. An alternative visualization tool can be found on the [viz_optas](viz_optas) folder. 
+
+<p align="center">
+<img  src='media/visualize.gif'>
+</p>
 
 ## Documentation
 - [Importing a new Gripper](docs/import_grippers.md)
