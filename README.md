@@ -8,7 +8,7 @@ This repository hosts a grasp filter simulation crafted with Isaac Sim. It focus
 
 ### Citing MultiGripperGrasp Toolkit
 
-This toolkit was developed to assess synthetically generated grasps for our MultiGripperGrasp (MGG) dataset. It was featured in a research paper at IROS 2024, with the original repository available at the [iros_2024 branch](https://github.com/IRVLUTD/isaac_sim_grasping/tree/iros_2024). Paper details:
+This toolkit was developed to evaluate synthetically generated grasps for our MultiGripperGrasp (MGG) dataset. It was featured in a research paper at IROS 2024, with the original repository available at the [iros_2024 branch](https://github.com/IRVLUTD/isaac_sim_grasping/tree/iros_2024). Paper details:
 
 **MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands**
 
