@@ -144,24 +144,25 @@ class Manager:
         """
         print("Saving File at: ",output_path)
         new_json = self.json
-        #Single elements
-        new_json['standalone'] = "standalone"
+        
+        # Single elements
         new_json['gripper'] = self.gripper
         new_json['object_id'] = self.object
         new_json["test_type"] = self.test_type
         new_json['controller'] = self.controller
         new_json['test_duration'] = self.total_test_time
 
-        #Lists
+        # Lists
         new_json['pose'] = self.grasps.tolist()
         new_json['dofs'] = self.dofs.tolist()
         new_json["result_time"] = self.result_time.tolist()
         new_json["result"] = self.result.tolist()
+        new_json['final_dofs'] = self.final_dofs.tolist()
         
-        #NEW
+        # Runtime info
         new_json['runtime'] = time.time()-self.init_time
         new_json['physics_dt'] = self.physics_dt
-        new_json['final_dofs'] = self.final_dofs.tolist()
+        new_json['timestamp'] = time.time()
 
         with open(output_path,'w') as outfile:
             json.dump(new_json,outfile)

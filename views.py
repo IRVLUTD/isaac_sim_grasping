@@ -35,9 +35,7 @@ class View():
                 prim_paths_expr= work_path[:-1]+"*"+"/object/base_link", 
                 track_contact_forces = True, 
                 prepare_contact_sensors = True, 
-                contact_filter_prim_paths_expr  = contact_names_expr, 
-                reset_xform_properties = False,
-                disable_stablization = False))
+                contact_filter_prim_paths_expr  = contact_names_expr))
         self.grippers = world.scene.add(
             ArticulationView(
                 prim_paths_expr = work_path[:-1]+"*"+"/gripper",
@@ -62,11 +60,12 @@ class View():
         self.current_job_IDs=[]
         self.dofs = []
         self.t = time.time()
+        self.init_step=0
 
         # Controller and test init
-        self.base_controller = controller_dict[controller]
-        self.test = test_dict[test_type](self.objects, manager.gripper_dict, test_time)
-        self.test_type = self.test.label
+        self.controller_class = controller_dict[controller]
+        self.test_class = test_dict[test_type]
+
         #Add physics Step
         world.add_physics_callback("physics_steps", callback_fn=self.physics_step)
         
@@ -99,10 +98,14 @@ class View():
         self.objects.set_world_poses(self.init_positions, self.init_rotations)
 
         # Get max efforts and dofs
-        self.controller = self.base_controller(self.manager.gripper, self.grippers, self.test_time)
-        self.controller_type = self.controller.type # Save info of controller used (for results)
+        self.controller = self.controller_class(self.manager.gripper, self.grippers, self.test_time)
+        self.controller_type = self.controller.label # Save info of controller used (for results)
         
         self.new_dofs = np.zeros_like(self.dofs)
+
+        self.test = self.test_class(self.objects, self.manager.gripper_dict, self.test_time)
+        self.test_type = self.test.label
+        #self.outside_start = time.time()
         return
     
     def physics_step(self,step_size):
@@ -110,39 +113,35 @@ class View():
 
         step_size: time since last physics step. Depends on physics_dt
         """
+        #outside_end = time.time()
+        #start_time = time.time()
+        finish_ind = np.array([],dtype=int)
 
         # Check for overlap
-        if (self.dof_given == False): # Don't filter overlap for grasps with dof given (Assume they are correct)
-            initial_ind = np.argwhere(self.initial_check==0) #ws indices
+        if (self.dof_given == False and self.view_mode==False): # Don't filter overlap for grasps with dof given (Assume they are correct)
+            initial_ind = np.argwhere(self.initial_check==0)[:,0] #ws indices
             if(len(initial_ind)>0):
                 # Get the spheres which are overlapped
-                tmp = np.count_nonzero(np.sum(np.squeeze(self.objects.get_contact_force_matrix(initial_ind)),axis =2),axis=1)
-
-                # Mark them as failed 
-                finish_ind = initial_ind[tmp>=1]
-                print("Collision filter:", finish_ind)
-                self.world.pause()
-                if(len(finish_ind)>0):
-                    self.current_times[finish_ind] = -1
-                    self.test_finish(finish_ind)
-                self.initial_check[initial_ind]=1
-
+                tmp = np.count_nonzero(np.sum(self.objects.get_contact_force_matrix(initial_ind),axis =2),axis=1)
+                col_ind = initial_ind[tmp>=1]
+                self.current_times[col_ind] = -1
+                self.initial_check[initial_ind]= 1
+                finish_ind = np.concatenate([finish_ind, col_ind])
+        
 
         #Check  for active workstations
-        active_ind = np.argwhere(self.current_job_IDs>=0) #ws indices
+        active_ind = np.setdiff1d(np.argwhere(self.current_job_IDs>=0),finish_ind) #ws indices
         if(len(active_ind)>0):
             # Calculate workstations which have failed the test
-            finish_ind = self.test.failure_condition(self.init_positions, 
-                                        self.init_rotations, active_ind)    
-            if(len(finish_ind)>0):
-                self.test_finish(finish_ind)
-            
-        # Apply gravity to ready grasps
-        tmp_active = np.squeeze(self.current_job_IDs>=0)
-        g_ind = np.argwhere(np.multiply(np.squeeze((self.grasp_set_up==1)),tmp_active) ==1)[:,0] # optimizable
+            failed_ind = self.test.failure_condition(self.init_positions, 
+                                        self.init_rotations, active_ind)
+            finish_ind = np.concatenate([finish_ind, failed_ind])    
 
         # Rigid Body Probing, mark grasps as ready
-        rb_ind = np.argwhere(np.multiply(np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0]
+        tmp_active = np.squeeze(self.current_job_IDs>=0)
+        rb_ind = np.setdiff1d(np.argwhere(
+            np.multiply(
+                np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0], finish_ind)
         if (len(rb_ind)>0):
             self.set_up_timers[rb_ind] +=step_size
 
@@ -152,8 +151,10 @@ class View():
                 rb_ind
             )
             
+            nonsetup_ind = np.setdiff1d(rb_ind, setup_ind)
+
             #Update grasp_setup
-            self.current_times[setup_ind]=0
+            self.current_times[nonsetup_ind]=0
             self.grasp_set_up[setup_ind]=1
             self.new_dofs[setup_ind] = self.grippers.get_joint_positions(indices= setup_ind)
 
@@ -165,18 +166,30 @@ class View():
             self.objects.set_velocities([0,0,0,0,0,0])
 
         # Update time
-        self.current_times += step_size
+        update_ind = np.setdiff1d(active_ind, np.argwhere(self.current_times== -1))
+        self.current_times[update_ind] += step_size
 
-        # End of testing time
-        time_ind = np.argwhere(np.multiply(np.squeeze((self.current_times>self.test_time)),tmp_active))[:,0]
+        # Failed grasps; gripper never touched object
+        failed_ind = np.argwhere(np.squeeze(self.set_up_timers>self.test_time))[:,0]
+        if(len(failed_ind)>0): 
+            self.current_times[failed_ind] = -1
+            finish_ind = np.concatenate([finish_ind, failed_ind])
+
+        # Reset workstations with failed grasps
+        finish_ind = np.unique(finish_ind)
+        if (len(finish_ind)>0):
+            self.test_finish(finish_ind)
+
+        # End of testing time - Reset workstations with successful Grasps
+        time_ind = np.argwhere(np.squeeze(self.current_times>self.test_time))[:,0]
         if (len(time_ind)>0):
             self.test_finish(time_ind, status=1)
 
-        # Failed grasps; gripper never touched object
-        failed_ind = np.argwhere(np.multiply(np.squeeze((self.set_up_timers>self.test_time)),tmp_active))[:,0]
-        if(len(failed_ind)>0): 
-            self.current_times[failed_ind] = -1
-            self.test_finish(failed_ind)
+        
+        #end_time = time.time()
+        #print(f"Total time of physics_step: {end_time - start_time:.6f} seconds")
+        #print(f"Total time outside: {outside_end - self.outside_start:.6f} seconds")
+        #self.outside_start = time.time()
         return
     
     def test_finish(self, finish_ind, status = 0):
@@ -192,7 +205,7 @@ class View():
                                  self.current_times[finish_ind],
                                  self.new_dofs[finish_ind],
                                  status)
-        
+
         # Get new jobs
         self.dofs[finish_ind], self.current_poses[finish_ind], self.current_job_IDs[finish_ind] =self.get_jobs(len(finish_ind))
         self.current_times[finish_ind] = 0
@@ -208,7 +221,6 @@ class View():
         object_Ts = np.matmul(self.ws_Ts[finish_ind],object_Ts)
         for i in range(object_Ts.shape[0]):
             self.init_positions[finish_ind[i]], self.init_rotations[finish_ind[i]] = pose_from_tf_matrix(object_Ts[i].astype(float))
-        self.objects.set_velocities([0,0,0,0,0,0],finish_ind) 
+        #self.objects.set_velocities([0,0,0,0,0,0],finish_ind) 
         self.objects.set_world_poses(self.init_positions[finish_ind], self.init_rotations[finish_ind],finish_ind)
-
         return

@@ -63,7 +63,7 @@
     "physics_frequency": 240,
     "contact_names":[ "base_link","link_0_0", "link_2_0","link_3_0", "link_4_0", "link_5_0","link_6_0","link_7_0","link_8_0","link_9_0","link_10_0",
                     "link_11_0","link_12_0","link_13_0","link_14_0","link_15_0"],   
-    "contact_th":4,
+    "contact_th":3,
     "opened_dofs": [0, 0, -0.09, -0.174533,
                    0, 1.16937, 0, 0,
                    -0.174533, 0, -0.15708, -0.174533, 

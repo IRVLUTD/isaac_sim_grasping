@@ -1,5 +1,120 @@
 import numpy as np
+from omni.isaac.core.controllers import BaseController
+import os
+import json
 
+class GenericController(BaseController):
+    """
+    Base class for all controller types. This class provides common functionality 
+    shared across different controllers. It can also be used 
+    """
+
+    def __init__(self, gripper_name='', grippers= None, test_time = 0):
+        """
+        Initialize the generic controller using Isaac Sim BaseController. 
+
+        Parameters: 
+            gripper_name: Gripper ID.
+            grippers: ArticulationView class containing all the grippers to control.
+            test_time: Time of test to perform
+        """
+        self.name = 'Controller_' + gripper_name
+        super().__init__(name=self.name)
+        #Load controller info.json
+        c_path = os.path.dirname(os.path.abspath(__file__))
+        controller_json =  os.path.join(c_path,"grippers/controller_info.json")
+        with open(controller_json) as fd:
+            self.gripper_dict = json.load(fd)
+        self.label = 'Unknown'  # A label to identify the controller version or type
+
+    def forward(self, time):
+        """
+        Method to be overridden by subclasses. This method computes actions 
+        for the grippers based on the current time.
+
+        Arguments:
+        - time: Current clock time of every workstation in the simulation (W x 1 numpy array)
+        """
+        raise NotImplementedError("Subclass must implement abstract method")
+    
+class GenericTest():
+    """
+    Base class for all test types. This class provides common functionality 
+    shared across different tests.
+    """
+
+    def __init__(self):
+        """ Initialize the test controller. It must always contain a label with its tag
+        """
+        self.label = "Unknown"
+        return
+    
+    def failure_condition(self, init_pos, init_rot, indices):
+        ''' Method to be overridden by subclasses. Function to evaluate if the test has failed. 
+        W = number of workstations to check
+
+        Arguments:
+        - init_pos: Initial positions of objects (numpy W x 3 array)
+        - init_rot: Initial rotation of objects (numpy W x 4 array)
+        - indices: numpy array with ID indices of objects to check 
+
+        Return:
+        - finish_ind: array with all the indices within indices that failed the test
+        '''
+        return NotImplementedError("Subclass must implement abstract method")
+    
+    def setup_condition(self, init_pos, init_rot, indices):
+        ''' Function to test if the objects advance from the setup phase. Default lets every object pass the setup phase, use ifthere is no desire for such a phase.
+
+        Arguments:
+        - init_pos: Initial positions of objects (numpy W x 3 array)
+        - init_rot: Initial rotation of objects (numpy W x 4 array)
+        - indices: numpy array with ID indices of objects to check 
+
+        Return:
+        - setup_ind: array with all the indices within indices that passed the setup phase
+        '''
+        setup_ind = indices
+        return setup_ind
+    
+    def test_step(self, current_times):
+        ''' Method to be overridden by subclasses. Step function to run at every physics step. 
+
+        Arguments:
+        - current_times: Current clock time of every workstation in the simulation (W x 1 numpy array)
+        '''
+
+        return NotImplementedError("Subclass must implement abstract method")
+
+def import_urdf(manager, job):
+    """ Import URDF from manager.grippers dictionary
+
+    Args: -- DEPRICATED
+    """
+    import omni.kit.commands
+
+    #Adding a .urdf file
+    urdf_interface = _urdf.acquire_urdf_interface()
+    # Set the settings in the import config
+    import_config = _urdf.ImportConfig()
+    import_config.merge_fixed_joints = False
+    import_config.convex_decomp = False
+    import_config.import_inertia_tensor = True
+    import_config.fix_base = True
+    import_config.make_default_prim = True
+    import_config.self_collision = False
+    import_config.create_physics_scene = True
+    import_config.import_inertia_tensor = True
+    import_config.default_drive_strength = 1047.19751
+    import_config.default_position_drive_damping = 52.35988
+    import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION
+    import_config.distance_scale = 1
+    import_config.density = 0.0
+
+    urdf_path = manager.object_dict[job['object_id']]
+    
+    result, prim_path = omni.kit.commands.execute( "URDFParseAndImportFile", urdf_path=urdf_path,import_config=import_config,)
+    return
 
 def spherical_raycasts(origin, num_rays=100, max_distance=1000.0, mesh_dirs = None):
     all_hits = []
@@ -94,6 +209,13 @@ def check_mesh_overlap(mesh_path):
     #print("Hits: ", num_hits)
     return num_hits > 1 # Always counts itself
 
+def overlap_check_thread(mesh_path, result, timings):
+    start_time = time.time()
+    result[mesh_path] = check_mesh_overlap(mesh_path)
+    end_time = time.time()
+    timings[mesh_path] = end_time - start_time
+
+
 if __name__ == "__main__":
     # utilities tester using simulator
     from omni.isaac.kit import SimulationApp
@@ -111,6 +233,12 @@ if __name__ == "__main__":
     import omni.isaac.core.utils.prims as prim_utils
     from omni.isaac.core.objects import DynamicSphere, GroundPlane, VisualSphere
     import carb
+    import threading
+    from pxr import PhysicsSchemaTools
+    from omni.physx import get_physx_scene_query_interface
+    import time
+    import random
+
     # Get the world
     world = World()
     # Load a scene or add objects
@@ -128,27 +256,46 @@ if __name__ == "__main__":
     
     # Example: Add a ground plane for the rays to potentially hit
     # Create three spheres (treated as meshes for this example)
-    sphere1 = create_sphere("Sphere1", [0, 0, 0], 1.0)
-    sphere2 = create_sphere("Sphere2", [0.1, 0, 0], 1.0)
-    sphere3 = create_sphere("Sphere3", [0, 0.1, 0], 1.0)
+    # Create 100 spheres with random positions
+    spheres = []
+    for i in range(100):
+        x = random.uniform(-1, 1)  # Random x position
+        y = random.uniform(-1, 1)  # Random y position
+        z = random.uniform(-1, 1)    # Random z position, above ground to avoid immediate collision
+        sphere = create_sphere(f"Sphere{i}",  [x, y, z], 0.5)
+        spheres.append(sphere)
 
+    
     world.reset()
 
-    sphere1.initialize(world.physics_sim_view)
-    sphere2.initialize(world.physics_sim_view)
-    sphere3.initialize(world.physics_sim_view)
+    for sphere in spheres:
+        sphere.initialize(world.physics_sim_view)
+
 
     body_found = False
 
     # Simulation loop (optional for visualization or further simulation)
     while(True):  # Simulate for 100 frames
         world.step(render=True)
-        
         if world.is_playing():
+            start_time = time.time()
             # Check overlaps between each pair of spheres
-            meshes = ["/World/Sphere1", "/World/Sphere2", "/World/Sphere3"]
+            meshes = [f"/World/Sphere{i}" for i in range(100)]
+            threads = []
+            results = {}
+            timings = {}
+
             for i in range(len(meshes)):
                 check_mesh_overlap(meshes[i])
+
+            end_time = time.time()
+
+            for mesh, overlap in results.items():
+                #print(f"Overlap for {mesh}: {'Detected' if overlap else 'Not detected'}")
+                #print(f"Time taken for {mesh}: {timings[mesh]:.6f} seconds")
+                break
+
+            print(f"Total time for all checks: {end_time - start_time:.6f} seconds")
         #world.pause()
 
     # Clean up

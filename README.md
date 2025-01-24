@@ -1,6 +1,14 @@
-# MultiGripperGrasp Toolkit
-![](https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/F1_isaac.png)
-Simulation based grasp filter. This repository contains a grasp filter developed using Isaac Sim, it provides the usage and visualization tools for the MultiGripperGrasp dataset.
+# MultiGripperGrasp Toolkit 2.0
+![](/media/F1_isaac.png)
+**Overview**:
+This repository hosts a grasp filter simulation crafted with Isaac Sim. It focuses on evaluating and visualizing contemporary robotic grasp datasets. Key updates in version 2.0 include:
+  - **Consolidation**: All previous standalone tools have been integrated into a single platform for improved usability.
+  - **Simplified Testing**: Easier implementation of various grasp tests.
+  - **Code Optimization**: The codebase has been streamlined, reducing both size and complexity for better performance.
+
+### Citing MultiGripperGrasp Toolkit
+
+This toolkit was developed to assess synthetically generated grasps for our MultiGripperGrasp (MGG) dataset. It was featured in a research paper at IROS 2024, with the original repository available at the [iros_2024 branch](https://github.com/IRVLUTD/isaac_sim_grasping/tree/iros_2024). Paper details:
 
 **MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands**
 
@@ -8,9 +16,7 @@ Luis Felipe Casas, Ninad Khargonkar, Balakrishnan Prabhakaran, Yu Xiang
 
 [[paper](https://arxiv.org/pdf/2403.09841.pdf)] [[video](https://www.youtube.com/watch?v=pm1K6wbc830)] [[arXiv](https://arxiv.org/abs/2403.09841)] [[project site](https://irvlutd.github.io/MultiGripperGrasp)] [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)]
 
-### Citing MulitGripperGrasp Toolkit
-
-Please cite MulitGripperGrasp Toolkit if it helps your research:
+If the MultiGripperGrasp Toolkit has been useful for your research, we'd really appreciate if you could cite it as it will help our ongoing work.
 
     @misc{casas2024multigrippergraspdatasetroboticgrasping,
       title={MultiGripperGrasp: A Dataset for Robotic Grasping from Parallel Jaw Grippers to Dexterous Hands}, 
@@ -26,28 +32,24 @@ Please cite MulitGripperGrasp Toolkit if it helps your research:
 
 MultiGripperGrasp Toolkit is released under the [GNU General Public License v3.0](LICENSE).
 
-### Contents
-- [MultiGripperGrasp Toolkit](#multigrippergrasp-toolkit)
-    - [Citing MulitGripperGrasp Toolkit](#citing-mulitgrippergrasp-toolkit)
+### Table of Contents
+
+- [MultiGripperGrasp Toolkit 2.0](#multigrippergrasp-toolkit-20)
+    - [Citing MultiGripperGrasp Toolkit](#citing-multigrippergrasp-toolkit)
     - [License](#license)
-    - [Contents](#contents)
-  - [Prerequisites](#prerequisites)
+    - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
-    - [Alternate Visualization Tool](#alternate-visualization-tool)
-  - [Running the Simulation](#running-the-simulation)
-    - [Important Files/Folders description](#important-filesfolders-description)
-    - [Parameters and Inputs](#parameters-and-inputs)
-    - [Transferred Grasps](#transferred-grasps)
-    - [Reproducing Paper Results](#reproducing-paper-results)
-  - [More Documentation](#more-documentation)
+      - [Running MGG Data](#running-mgg-data)
+      - [Running Alternative Tests.](#running-alternative-tests)
+      - [Testing grasps without joint values data](#testing-grasps-without-joint-values-data)
+      - [Visualizing Grasps](#visualizing-grasps)
+  - [Documentation](#documentation)
     - [Helpful Links](#helpful-links)
     - [Notes](#notes)
 
-## Prerequisites
-
-This code was tested with Isaac Sim 2023.1.0 on Linux.
 
 ## Installation
+This repository was tested using Isaac Sim 4.2.0 on Ubuntu
 
 1. Clone the repo:
 
@@ -55,148 +57,147 @@ This code was tested with Isaac Sim 2023.1.0 on Linux.
     git clone git@github.com:IRVLUTD/isaac_sim_grasping.git
     ```
 
-2. Install the Isaac Sim 2023.1.0 and cd to its python directory:
-   Follow the instructions in the [Isaac Sim Website](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) for proper installation.
-    Normally the python.sh is on the following directory:
-    ```Shell
-    cd ~/.local/share/ov/pkg/isaac_sim-2023.1.0
-    ```
+2. Install the Isaac Sim 4.2.0 and Navigate to its Python directory:
+   Follow the instructions in the [Isaac Sim Website](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) for proper installation. 
+   Normally the python.sh is on the directory `~/.local/share/ov/pkg/(isaac-sim version)`. You can access it directly by opening Isaac Sim in terminal using the Omniverse Launcher.
 
-3. Install the required libraries using the Isaac Sim python environment:
+3. Install the required libraries using the Isaac Sim `python.sh` environment. :
    ```Shell
     ./python.sh -m pip install tqdm
     ```
-    Note: Only tqdm must be installed, all other libraries should come with the Isaac Sim version.
+    - Note: Only tqdm must be installed, all other libraries should come with the Isaac Sim version. If you would like to use other libraries you would need to use the same method.
 
-4. Download the MultiGripperGrasp dataset and the object .usd models from the [dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data). Links can also be found at the end of this document.
-
-
-
-## Visualizing Dataset Samples
-To visualize the dataset a [visualization standalone](visualize_grasps.py) is included in the repository. The script must be ran with the Isaac Sim python.sh. The script requires the following parameters:
-
-- json_dir: Grasp data directory (dataset .json folder). Note: the program does not read .json files within folders, therefore, a valid directory would be the Allegro folder within the dataset. 
-- gripper_dir: Gripper directory (folder containing all the gripper .usd folders)
-- objects_dir: Object directory (folder containing all the object .usd folders)
-- num_w: Number of Workstations to run simultaneously (gripper, object pair) (default: 15)
-- (Optional) ub: Upper bound to filter the grasps with (applied to fall time).
-- (Optional) lb: Lower bound to filter the grasps with (applied to fall time).
-- (Optional) transfer: Used for visualizing transfered grasps.
-- (Optional) device: Specifies which gpu device to run Isaac Sim with.
-
-Note: To run the simulation without warnings add the following parameters to the command: 
- ```Shell
- --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
- ```
-
-Example command to run the visualization script:
-``` Shell
-./python.sh (repo directory)/visualize_grasps.py --json_dir=(dataset .json folder) --gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --num_w=10 --ub=3 --lb=0 --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
-```
-<p align="center">
-<img src='media/visualize.gif'>
-</p>
-
-### Alternate Visualization Tool
-Please refer to the scripts under the [viz_optas](./viz_optas/README.md) folder for an alternative way to visualize the grasps without the IsaacSim dependency!
 
 ## Running the Simulation
-The simulation can use any gripper and object provided they are prepared correctly (See the documentation to add [grippers](docs/add_grippers.md) and [objects](docs/add_objects.md)). It loads the grasp information from the files specified and creates multiple "workstations" to test all the grasps. Then, it tries to perform the grasps with the specified control routines. When the object falls or the testing time is up, the time they took to fall is recorded and then saved to the output file. If any grasps is unable to touch the object, it will be recorded as a negative "fall time" value. Once the grasp test is completed, the workstation will reset and load a new grasp for testing. When all the grasps are finished, the output file is saved, the complete simulation will reset and a new file loaded. 
+The simulation can use any gripper and object, provided they are prepared correctly. We offer ready to use objects and grippers from our lab and the MGG dataset; the grippers are included in the repository, and the objects must be downloaded externally ([object_usd](https://utdallas.box.com/v/multi-gripper-grasp-data)). Refer to the documentation for guidance on how to:
+
+- Import your own grippers [import_grippers.md](docs/import_grippers.md)
+- Import your own objects [import_objects.md](docs/import_objects.md)
+
+
+**Simulation Process:**
+
+- **Load Grasp Information**: The simulation starts by loading the necessary grasp data from a correctly formatted .json file. ([grasp data format](docs/grasp_data_format.md))
+- **Create Workstations**: Multiple "workstations" are set up to simulate multiple grasps simultaneously.
+- **Perform Grasps**: Using the specified gripper controller, the simulation attempts to execute the grasps while conducting the specified test on the object.
+- **Records Results**: Once a test is completed, the result (including time and status) is saved to an output file with the same name as the grasps.json file. The status is either passed or failed.
+- **Asynchronous Operation**: Grasp tests are performed asynchronously across all workstations. After completing a test, each workstation resets and loads the next grasp for testing.
+- **Completion and Reset**: When all grasps are tested, the output file is finalized, the entire simulation environment is reset, and a new simulation file is loaded to start the process anew.
+
 <p align="center">
 <img src='media/transfer_far.gif'>
 </p>
 
 ### Important Files/Folders description
-1) standalone.py: Graspit grasps standalone executable
-2) transfer_st.py: Transfered grasps standalone executable
-3) visualize_grasps.py: Standalone executable to visualize filtered grasps
-4) views.py: Simulation's behavioral code
-5) managers.py: Contains grasp information and the reporting of results for all the standalones
-6) controllers.py: Developed gripper controllers
-7) utils.py: General utility functions
-8) grippers: Gripper .usd files
-
+1) standalone.py: Standalone executable of the simulation
+2) views.py: Simulation's behavioral code
+3) managers.py: Contains the class responsible for loading grasp information and the reporting of results.
+4) controllers.py: Developed gripper controllers
+5) tests.py: Developed tests.
+6) utils_local.py: General utility functions
+7) sim_utils.py: Simulation utility functions
+8) grippers: Gripper .usd files folder
+9) grasps: Sample .json file with grasp information
 
 ### Parameters and Inputs
-A standalone executable for the graspit grasps ([standalone.py](standalone.py)) and for transferred grasps ([transfer_st.py](transfer_st.py)) are included within the repository. A sample command to run the graspit grasps is shown below along with the available options. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory.
+The new MGG Toolkit has been overhauled to only use one standalone executable `standalone.py`. With it you are able to run the simulation with complete grasp data, without specified joint values for the grasps or in visualization mode. 
 
 The standalone.py takes as input:
-- json_dir: Grasp data to filter directory (dataset .json folder). Note: the program does not read .json files within folders, therefore, a valid directory would be the Allegro folder within the dataset. 
-- gripper_dir: Gripper directory (folder containing all the gripper .usd folder)
-- objects_dir: Object directory (folder containing all the object .usd folder)
-- output_dir: Output directory (directory to save the filtered grasps .json file)
-- num_w: Number of Workstations to run simultaneously (object-gripper pair) (default: 150)
-- test_time: Total test time for each grasp test (default:3).
-- controller: Controller reference (within [controllers.py](controllers.py))(default: position)
-- (Optional) print_results: Verbosity of standalone after finishing one .json file.
+- json_dir: Directory of grasp data to filter. The program does not read .json files within folders, therefore, a valid directory would be the Allegro folder within the [MGG dataset](https://utdallas.box.com/v/multi-gripper-grasp-data). Defaults to the repository /grasps folder. 
+
+- gripper_dir: Gripper directory (folder containing all the gripper .usd files). Defaults to the repository /grippers folder.
+  
+- objects_dir: Object directory (folder containing all the object .usd folder). Defaults to the repository /objects folder. **Note**: the objects are not included into the repo, you must download them externally ([object_usd](https://utdallas.box.com/v/multi-gripper-grasp-data)) and may add the folder to the repository directory if you would like to omit this input. 
+  
+- output_dir: Output directory where the results will be stored in .json files. The format information can be found in the [grasp data format](docs/grasp_data_format.md) page. Defaults to a /output folder in the repository, it will create one if it doesn't exits.
+  
+- num_w: Number of Workstations to run grasps simultaneously (default: 100).
+  
+- test_time: Total test time for each grasp test in seconds (default:3).
+
+- controller: Controller reference (within [controllers.py](controllers.py) controller_dict)(default: position). For more information on how to use the different controllers and how to create a new refer to [controllers.md](docs/controllers.md).
+  
+- test_type: Test reference (within [tests.py](tests.py) test_dict)(default: gravity). For more information on how to use the different tests and how to create a new one refer to [tests.md](docs/tests.md).
+
+- (Optional) dof_given: Boolean parameter to signal the simulation if the joint value information or Degrees of Freedom (DoF) information is given. If so the simulation will try to load the values, else it will start each grasp at the gripper's specified opened position.
+- (Optional) print_results: Verbosity of standalone after finishing one .json file. Prints results...
+- (Optional) view_mode: launches the simulation in view mode, showing the grasps directly without performing any test, every grasp will be shown for the total test time.
+- (Optional) force_reset: Relaunches Isaac Sim after completing the simulation of 1 .json file, this can be handy when the simulation takes to long to reset on its own.
 - (Optional) device: GPU device to use for Isaac Sim (default: 0)
 - (Optional) headless: Run the simulation headless 
 
-Note: To run the simulation without warnings add the following parameters to the command: 
+Note: To run the simulation without warnings printed in the terminal add the following parameter to the command: 
 ```Shell
- --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+ --/log/outputStreamLevel=error
 ```
 
-Sample run command:
+Sample commands to run the simulation are shown below for multiple configurations. Note: for Isaac Sim standalone executables, the commands must be run from the isaac sim python.sh directory. We  assume you have added the objects folder to the repository. 
+
+#### Running MGG Data 
+
+The original MGG dataset was tested using the repository's position controller and the gravity test. The simulation consisted on actively closing the gripper joints while applying gravity to the object and recording the time it took for the object to fall. Refer to the original [paper](https://arxiv.org/pdf/2403.09841.pdf) for more information. 
+
+Command:
 ```Shell
-./python.sh (repo directory)/standalone.py --json_dir=(.json files folder) --gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --controller=position --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+./python.sh (repo directory)/standalone.py --json_dir=(path to grasp data) --num_w=25 --test_time=3 --test_type=gravity --dof_given --/log/outputStreamLevel=error 
 ```
+This command will create 25 workstations and will perform the gravity test for 3 seconds on each grasp. We also include the --dof_given flag to signal the simulation to load the grasp data from the grasps. 
+
 <p align="center">
-<img src='https://github.com/IRVLUTD/isaac_sim_grasping/blob/main/media/robotiq_Clock.gif'>
+<img src='media/robotiq_Clock.gif'>
 </p>
 
-### Transferred Grasps
-The grasp filter is able to evaluate the object fall-off time for a large amount of generated grasps. The successful grasps of one gripper can represent successful grasps in others and increase the overall amount of successful grasps in the dataset. To test this hypothesis, we implemented the grasp transfer of successful grasps from one gripper to others and evaluated the transferred grasps using antoher Isaac Sim standalone ([transfer_st.py](transfer_st.py)).
+#### Running Alternative Tests.
 
-We utilize an alignment between grippers to transfer grasps, which used a common notion of gripper pose (translation and orientation). The translation refers to the palm center of the gripper, and the orientation is with respect to a canonical pose of the gripper palm pointing in a fixed direction. Thus, any grasp pose from a gripper was transferred to another by using this pose alignment. We first transform a source gripper pose to its aligned pose, and then transform the aligned pose to the target gripper.
+State of the Art (SotA) datasets use different tests to evaluate grasps in simulation. One popular test used in both the [Multidex](https://sites.google.com/view/gendexgrasp/multidex) and the [DexGraspNet](https://pku-epic.github.io/DexGraspNet/) datasets is to apply forces on the objects in the +/- direction of the x, y, z axes of the world coordinate frame while fixing the grippers' joint values. The new MGG Toolkit makes it easy to implement these tests by creating new controller and test classes. In the case of running the previous configuration you would use the subsequent command.
+
+Command:
+```Shell
+./python.sh /home/felipe/Documents/RL_MGG/isaac_sim_grasping/standalone.py --num_w=25 --test_time=6 --test_type=axes_forces --controller=static --dof_given --/log/outputStreamLevel=error 
+```
+
+This command would create 25 workstations, use the new test of "axes_forces" and the static controller to fix the joint values throughout the test. Since the json_dir is not specified it will use the files on the [/grasps](/grasps) folder.
+
+<p align="center">
+<img src='media/axes_forces.gif'>
+</p>
+
+
+#### Testing grasps without joint values data
+Furthermore, for the implementation of transferred grasps from our original MGG [paper](https://arxiv.org/pdf/2403.09841.pdf), we have added the option to use predetermined initial joint values for all the grasps. You can observe the opened position of all grippers and command to run our transferred grasps experiments below:
 
 <p align="center">
 <img  src='media/transfer_grasp.png' width='1000'>
 </p>
 
-
-The transfer_st.py takes as input:
-- json_dir: Grasp data to filter directory (dataset .json file folder). Note: the program does not read .json files within folders, therefore, a valid directory would be the Allegro folder within the dataset. 
-- gripper_dir: Gripper directory (folder containing all the gripper .usd folders)
-- objects_dir: Object directory (folder containing all the object .usd folders)
-- output_dir: Output directory (directory to save the filtered grasps .json file)
-- num_w: Number of Workstations to run simultaneously (object-gripper pair) (default: 150)
-- test_time: Total test time for each grasp test (default:3).
-- controller: Controller reference (within [controllers.py](controllers.py)) (default: transfer_default)
-- (Optional) print_results: Verbosity of standalone after finishing one .json file.
-- (Optional) device: GPU device to use for Isaac Sim (default: 0)
-- (Optional) headless: Run the simulation headless 
-
-Note: To run the simulation without warnings add the following parameters to the command: 
-```Shell
- --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
+Command:
+``` Shell
+./python.sh /home/felipe/Documents/RL_MGG/isaac_sim_grasping/standalone.py --num_w=25 --test_time=3 --test_type=gravity --controller=transfer_position --/log/outputStreamLevel=error 
 ```
 
-Sample run command:
-```Shell
-./python.sh (repo directory)/transfer_st.py --json_dir=(.json files folder) --gripper_dir=(repo directory)/grippers --objects_dir=(object .usd folder) --output_dir=(output directory) --num_w=100 --test_time=3 --headless --print_results --/log/level=error --/log/fileLogLevel=error --/log/outputStreamLevel=error
-```
+This command will run the gravity test using our transferred grasp gripper controller "transfer_position". Additionally, the simulation can now filter grasps where the object and grippers initialize in an overlapped position. 
 
 <p align="center">
-<img src='media/transfer_close.gif' width='1000'>
+<img  src='media/transfer_close.gif' width='1000'>
 </p>
 
-### Reproducing Paper Results
-As of this version, the simulation uses a specific .json structure. The [managers.py](managers.py) file is the responsible for reading and transforming the relevant grasp information to the format used by the program. The information is:
-- The gripper name: Must be exactly the name with which the gripper is saved within the gripper directory.
-- The object name: Must be exactly the name with which the object is saved within the object directory.
-- Grasp pose data: 7 dimensional vector containing the gripper and object relative pose. (0-2 denotes the postion, 3-6 denotes the quaternion). Must be changed to the Isaac Sim quaternion convention (w, x, y, z)
-- Joint Value Data: vector containing the Degree of Freedom (DoF) information of the grasps. 
 
-Additionally within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) you can find the configuration parameters used for each gripper. In order to reproduce the paper results, one must run the simulation with the same values. A detailed description of each field can be found within the [Adding a new Gripper](docs/add_grippers.md) page. All the files provided within this repository and in the [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. 
+#### Visualizing Grasps
+Finally, to visualize grasps from the .json files without performing the grasps the standalone can be executed in viewer mode. 
 
-Note: To reproduce the transferred grasp results the same must be done with the transfer parameters in [gripper_isaac_info.json](grippers/gripper_isaac_info.json). 
+Command:
+``` Shell
+./python.sh /home/felipe/Documents/RL_MGG/isaac_sim_grasping/standalone.py --num_w=10 --test_time=1  --view_mode --dof_given --/log/outputStreamLevel=error
+```
 
-## More Documentation
-- [Adding a new Gripper](docs/add_grippers.md)
-- [Adding a new Object](docs/add_objects.md)
-- [Available Gripper Controllers](docs/controllers.md)
-- [Graspit Grasp Generation Code](https://github.com/IRVLUTD/neuralgrasps-dataset-generation/tree/multigrippergrasp)
+The grasps will be visualized for 1 sec (test_time) at every workstation. An alternative visualization tool can be found on the[viz_optas](viz_optas) folder. 
+
+## Documentation
+- [Importing a new Gripper](docs/import_grippers.md)
+- [Importing a new Object](docs/import_objects.md)
+- [Gripper Controllers](docs/controllers.md)
+- [Custom Tests](docs/tests.md)
+- [Grasp Data Format](docs/grasp_data_format.md)
 
 ### Helpful Links
 - MultiGripperGrasp Shared Folder [here](https://utdallas.box.com/v/multi-gripper-grasp-data). This folder has the following data along with a README for the dataset:
@@ -210,3 +211,4 @@ Note: To reproduce the transferred grasp results the same must be done with the 
 ### Notes
 - Deactivate conda if you have an active environment, it may cause some errors when running isaac sim.
 - Always use complete paths for the directories, errors may occur otherwise.
+- For proper testing a hypertuning of the gripper .usds may be required (e.g joint velocities)

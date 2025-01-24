@@ -1,11 +1,14 @@
 # Every Controller must have same inputs
-from omni.isaac.core.controllers import BaseController, BaseGripperController
-from omni.isaac.core.utils.types import ArticulationActions, ArticulationAction
+
+from omni.isaac.core.utils.types import ArticulationActions
+
+
 import numpy as np
 import json
 import os
+from sim_utils import GenericController
 
-class PositionController(BaseController):
+class PositionController(GenericController):
     """ Position Controller Version 0
 
     Args:
@@ -16,9 +19,8 @@ class PositionController(BaseController):
     """
 
     def __init__(self, gripper_name, grippers, test_time):
-        name = "Controller" #Stage name of controller
-        super().__init__(name=name)
-        self.type = 'position_controller_v0'
+        super().__init__(gripper_name, grippers, test_time)
+        self.label = 'position_controller_v0'
         
         self.grippers = grippers
         self.gripper_name = gripper_name
@@ -27,12 +29,7 @@ class PositionController(BaseController):
         gripper_info = self.grippers.get_dof_limits()
         dof_limits = gripper_info[0]
         self.close_positions  = np.zeros((gripper_info.shape[0],len(dof_limits)))
-        #Load controlle info.json
-        c_path = os.path.dirname(os.path.abspath(__file__))
-        controller_json =  os.path.join(c_path,"grippers/controller_info.json")
-        with open(controller_json) as fd:
-            gripper_dict = json.load(fd)
-        self.close_mask = gripper_dict[gripper_name]["close_dir"]
+        self.close_mask = self.gripper_dict[gripper_name]["close_dir"]
 
         for i in range(len(dof_limits)):
             if (self.close_mask[i]==0):
@@ -71,7 +68,7 @@ class PositionController(BaseController):
         return actions
 
 
-class TransferPositionController(BaseController):
+class TransferPositionController(GenericController):
     """ Transfer Position Controller Version 0
 
     Args:
@@ -83,9 +80,8 @@ class TransferPositionController(BaseController):
     
 
     def __init__(self, gripper_name, grippers, test_time):
-        name = "Controller" #Stage name
-        super().__init__(name=name)
-        self.type = 'transfer_position_controller_v0'
+        super().__init__(gripper_name, grippers, test_time)
+        self.label = 'transfer_position_controller_v0'
 
         self.grippers = grippers
         self.gripper_name = gripper_name
@@ -94,12 +90,7 @@ class TransferPositionController(BaseController):
         gripper_info = self.grippers.get_dof_limits()
         dof_limits = gripper_info[0]
         self.close_positions  = np.zeros((gripper_info.shape[0],len(dof_limits)))
-        #Load controlle info.json
-        c_path = os.path.dirname(os.path.abspath(__file__))
-        controller_json =  os.path.join(c_path,"grippers/controller_info.json")
-        with open(controller_json) as fd:
-            gripper_dict = json.load(fd)
-        self.close_mask = gripper_dict[gripper_name]["transfer_close_dir"]
+        self.close_mask = self.gripper_dict[gripper_name]["transfer_close_dir"]
 
         for i in range(len(dof_limits)):
             if (self.close_mask[i]==0):
@@ -111,7 +102,7 @@ class TransferPositionController(BaseController):
             else: 
                 raise ValueError("clos_dir arrays for grippers can only have 1,-1 and 0 values indicating closing direction")
         
-        self.touch_dofs = np.zeros_like(self.close_positions)
+        self.touch_dofs = self.grippers.get_joint_positions()
         return 
     
 
@@ -147,20 +138,16 @@ class TransferPositionController(BaseController):
         self.grippers.apply_action(actions)
         return actions
 
-class StaticController(BaseController):
+class StaticController(GenericController):
     """ Static Control
     """
 
     def __init__(self, gripper_name, grippers, test_time):
-        name = "Controller" #Stage name of controller
-        super().__init__(name=name)
-        self.type = 'static_controller_v0'
-        
+        super().__init__(gripper_name, grippers, test_time)
+        self.label = 'static_controller_v0'
         self.grippers = grippers
         self.gripper_name = gripper_name
         self.total_test_time = test_time
-
-        #Load controlle info.json
 
     def forward(self, time):
         current_dofs = self.grippers.get_joint_positions()
@@ -172,7 +159,7 @@ class StaticController(BaseController):
         self.grippers.apply_action(actions)
         return actions
 
-class PositionSphereController(BaseController):
+class PositionSphereController(GenericController):
     """ Position sphere controller
     UGCS based controller for the movement of grippers using a unified geometric space.
 
@@ -184,9 +171,8 @@ class PositionSphereController(BaseController):
         robots: ArticulationView for Robots in simulation
     """
 
-    def __init__(self, close_mask, test_time, max_efforts, robots):
-        name = "Controller"
-        super().__init__(name=name)
+    def __init__(self, gripper_name, grippers, test_time):
+        super().__init__(gripper_name, grippers, test_time)
 
         # Initialize vectors on unit sphere
         self.vectors = np.zeros((14,3))
@@ -210,16 +196,10 @@ class PositionSphereController(BaseController):
         # Use an external .json file
         
         
-        self.type = 'sphere_position_controller'
+        self.label = 'sphere_position_controller'
         self.effort = max_efforts
         self.close_mask = close_mask
         self.touch_dofs = np.zeros_like(max_efforts)
-        return 
-
-    def close(self,time):
-        return 
-    
-    def open(self,time):
         return 
 
     def forward(self, action, time, grippers, close_position):

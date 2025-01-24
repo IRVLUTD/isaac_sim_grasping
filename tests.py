@@ -1,8 +1,10 @@
 from utils_local import te_batch, re_batch
 import numpy as np
+from sim_utils import GenericTest
 
-class SimpleGravity:
+class SimpleGravity(GenericTest):
     def __init__(self, objects, gripper_dict, total_test_time):
+        super().__init__()
         self.label = "gravity"
         self.objects = objects
         self.contact_th = gripper_dict['contact_th'] 
@@ -48,9 +50,11 @@ class SimpleGravity:
         self.objects.apply_forces(gravity)
         return
     
-class SixAxisForce:
+class AxesForces(GenericTest):
     def __init__(self, objects, gripper_dict, total_test_time):
+        super().__init__()
         self.objects = objects
+        self.label = 'axes_forces'
         self.contact_th = gripper_dict['contact_th'] 
         self.test_time = total_test_time
         return
@@ -66,7 +70,7 @@ class SixAxisForce:
         current_positions, current_rotations = self.objects.get_world_poses(indices)
         t_error = abs(te_batch(init_pos[indices], current_positions))
 
-        finish_ind = indices[t_error>2]
+        finish_ind = indices[t_error>0.02]
         return finish_ind
     
     def setup_condition(self, init_pos, init_rot, indices):
@@ -101,12 +105,32 @@ class SixAxisForce:
         self.objects.apply_forces(forces)
         return
 
+empty_array = np.array([],dtype=int)
+class Controller_tester(GenericTest):
+    def __init__(self, objects, gripper_dict, total_test_time):
+        super().__init__()
+        self.label = "control_test"
+        self.objects = objects
+        self.test_time = total_test_time
+        pos, self.o = self.objects.get_world_poses()
+        self.pos = pos - np.array([0,0,5])
+        return
+    def failure_condition(self, init_pos, init_rot, indices):
+        return empty_array
+    def setup_condition(self, init_pos, init_rot, indices):
+        return empty_array
+    
+    def test_step(self, current_times):
+        self.objects.set_world_poses(self.pos,self.o)
+        self.objects.set_velocities([0,0,0,0,0,0]) 
+        return
+    
 
 """ LIST OF Tests to Perform: 
 They are the references used in command line to determine the controller to use
 """
 test_dict = {
-    'default': SimpleGravity,
     'gravity' : SimpleGravity,
-    'six_axis': SixAxisForce,
+    'axes_forces': AxesForces,
+    'control_test': Controller_tester,
 }

@@ -10,9 +10,6 @@ objects/
 output/
 /outputs
 
-grasps/
-/grasps
-
 __pycache__/
 *.pyc
 # Byte-compiled / optimized / DLL files

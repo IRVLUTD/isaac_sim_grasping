@@ -6,6 +6,7 @@ import argparse
 import sys
 import time
 
+
 st_path = os.path.dirname(os.path.abspath(__file__))
 
 def make_parser():
@@ -23,19 +24,19 @@ def make_parser():
     parser.add_argument('--gripper_dir', type=str, help='Directory of Gripper urdf/usd', default=os.path.join(st_path,'grippers'))
     parser.add_argument('--objects_dir', type=str, help='Directory of Object usd', default=os.path.join(st_path,'objects'))
     parser.add_argument('--output_dir', type=str, help='Output directroy for filterd grasps', default='')
-    parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=150)
+    parser.add_argument('--num_w', type=int, help='Number of Workstations used in the simulation', default=100)
     parser.add_argument('--device', type=int, help='Gpu to use', default=0)
     parser.add_argument('--test_time', type=int, help='Total time for each grasp test', default=3)
     parser.add_argument('--print_results', type=bool, help='Enable printing of grasp statistics after filtering a document',
                          default=False, action = argparse.BooleanOptionalAction)
     parser.add_argument('--controller', type=str,
                         help='Gripper Controller to use while testing, should match the controller dictionary in the Manager Class',
-                        default='default')
-    parser.add_argument('--test_type', type=str, help='Test type to perform', default='default')
+                        default='position')
+    parser.add_argument('--test_type', type=str, help='Test type to perform', default='gravity')
     parser.add_argument('--/log/outputStreamLevel', type=str, help='isaac sim logging arguments', default='', required=False)
     return parser
 
-def import_gripper(work_path,usd_path, EF_axis):
+def import_gripper(work_path,usd_path, EF_axis=-3):
         """ Imports Gripper to World
 
         Args:
@@ -81,7 +82,7 @@ def import_gripper(work_path,usd_path, EF_axis):
         robot = world.scene.add(Articulation(prim_path = work_path+"/gripper", name="gripper",
                             position = gripper_pose[0], orientation = gripper_pose[1]))
         robot.set_enabled_self_collisions(False)
-        return robot, T_EF
+        return robot
 
 def import_object(work_path, usd_path):
     """ Import Object .usd to World
@@ -91,31 +92,9 @@ def import_object(work_path, usd_path):
         usd_path: path to .usd file of object
     """
     add_reference_to_stage(usd_path=usd_path, prim_path=work_path+"/object")
-    object_parent = world.scene.add(GeometryPrim(prim_path = work_path+"/object", name="object"))
-    l = get_prim_children(object_parent.prim)
-    #print(l)
+    world.scene.add(GeometryPrim(prim_path = work_path+"/object", name="object"))
 
-    prim = get_prim_at_path(work_path+"/object"+ '/base_link/collisions/mesh_0')
-    '''
-    MassAPI = UsdPhysics.MassAPI.Get(world.stage, prim.GetPath())
-    try: 
-        og_mass = MassAPI.GetMassAttr().Get()
-        if og_mass ==0:
-            og_mass = 1
-            print("Failure reading object mass, setting to default value of 1 kg.")
-    except:
-        og_mass = 1
-        print("Failure reading object mass, setting to default value of 1 kg.")
-
-    # Create Rigid Body attribute
-    og_mass = 1
-    '''
-
-    object_prim = RigidPrim(prim_path= get_prim_path(l[0]))
-
-    mass= 1 #Deprecated use of mass for gravity 
-
-    return object_parent, mass
+    return  
 
 
 if __name__ == "__main__":
@@ -132,6 +111,7 @@ if __name__ == "__main__":
     test_type = args.test_type
     view_mode = args.view_mode
 
+
     #launch Isaac Sim before any other imports
     from omni.isaac.kit import SimulationApp
     config= {
@@ -140,7 +120,8 @@ if __name__ == "__main__":
         'fast_shutdown': True,
         'max_specular_transmission_bounces':0,
         'physics_gpu': args.device,
-        'active_gpu': args.device
+        'active_gpu': args.device,
+        'multi_gpu': True
         }
     simulation_app = SimulationApp(config) # we can also run as headless.
 
@@ -155,7 +136,13 @@ if __name__ == "__main__":
     from omni.isaac.core.articulations import Articulation
     from omni.isaac.core.utils.prims import get_prim_children, get_prim_path, get_prim_at_path
     from omni.isaac.core.utils.transformations import pose_from_tf_matrix
+    from tests import test_dict
+    from controllers import controller_dict
 
+    if controller not in controller_dict.keys():
+        raise ValueError("Given controller is not referenced in the controllers.py dictionary")
+    if test_type not in test_dict.keys():
+        raise ValueError("Given test_type is not referenced in the tests.py dictionary")
 
     # Custom Classes
     from managers import Manager
@@ -205,10 +192,12 @@ if __name__ == "__main__":
         contact_names = []
         for i in manager.c_names:
             contact_names.append(work_path[:-1]+"*"+"/gripper/" +  i)
+        #print("contact_names", contact_names)
+
 
         #Initialize Workstation
-        robot, T_EF = import_gripper(work_path, manager.gripper_path,manager.EF_axis)
-        object_parent, mass = import_object(work_path, manager.object_path)
+        robot = import_gripper(work_path, manager.gripper_path,manager.EF_axis)
+        import_object(work_path, manager.object_path)
         
         #Clone
         cloner = GridCloner(spacing = 1)
@@ -229,7 +218,7 @@ if __name__ == "__main__":
         world.reset()
 
         # Print Robot DoFs
-        print(robot.dof_names)
+        print("dof_names", robot.dof_names)
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
         
         #Debug
@@ -238,7 +227,7 @@ if __name__ == "__main__":
         # Set desired physics Context options
         world.reset()
         physicsContext = world.get_physics_context()
-        #physicsContext.set_solver_type("PGS")
+        physicsContext.set_solver_type("TGS")
         physicsContext.set_physics_dt(manager.physics_dt)
         physicsContext.enable_gpu_dynamics(True)
         physicsContext.enable_stablization(True)
@@ -283,10 +272,8 @@ if __name__ == "__main__":
             world.clear()
             t = time.time() -t
             print('Reseted, time in seconds: ', t)
-
-        if force_reset:
+        else:
             os.execl(sys.executable, sys.executable, *sys.argv)
-            pass
     
     simulation_app.close() # close Isaac Sim
         
