@@ -141,7 +141,7 @@ Command:
 ```Shell
 ./python.sh (repo directory)/standalone.py --json_dir=(path to grasp data) --num_w=25 --test_time=3 --test_type=gravity --dof_given --/log/outputStreamLevel=error 
 ```
-This command will create 25 workstations and will perform the gravity test for 3 seconds on each grasp. We also include the --dof_given flag to signal the simulation to load the grasp data from the grasps. 
+This command will create 25 workstations and will perform the gravity test for 3 seconds on each grasp. We also include the --dof_given flag to signal the simulation to load the grasp's joint values (DoF) from the grasp data file. 
 
 <p align="center">
 <img src='media/robotiq_Clock.gif'>
