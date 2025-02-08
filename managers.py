@@ -120,17 +120,20 @@ class Manager:
         
         Args:
             job_ID: IDs of workstations where objects fell
-            test_time: total test time
+            value: total test time for each test
+            new_dofs: Dofs recorded at the end of setup phase
+            status: Failed or passed status
         """
 
         job_ID = np.squeeze(job_ID).astype(int)
         value = np.squeeze(value)
-
-        if(self.completed[job_ID].any()):
-            pass
-        else:
-            self.result_time[job_ID] = value
-            self.final_dofs[job_ID] = new_dofs
+        
+        active = (self.completed[job_ID]==0)
+        job_ID = job_ID[active]
+        
+        if len(job_ID):
+            self.result_time[job_ID] = value[active]
+            self.final_dofs[job_ID] = new_dofs[active]
             self.completed[job_ID] = 1
             self.result[job_ID] = status
         return

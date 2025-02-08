@@ -116,10 +116,12 @@ class View():
         #outside_end = time.time()
         #start_time = time.time()
         finish_ind = np.array([],dtype=int)
+        tmp_active = np.squeeze(self.current_job_IDs>=0)
 
         # Check for overlap
         if (self.dof_given == False and self.view_mode==False): # Don't filter overlap for grasps with dof given (Assume they are correct)
-            initial_ind = np.argwhere(self.initial_check==0)[:,0] #ws indices
+            initial_ind = np.argwhere(np.multiply(tmp_active,
+                np.squeeze(self.initial_check==0))==1)[:,0] #ws indices
             if(len(initial_ind)>0):
                 # Get the spheres which are overlapped
                 tmp = np.count_nonzero(np.sum(self.objects.get_contact_force_matrix(initial_ind),axis =2),axis=1)
@@ -138,7 +140,6 @@ class View():
             finish_ind = np.concatenate([finish_ind, failed_ind])    
 
         # Rigid Body Probing, mark grasps as ready
-        tmp_active = np.squeeze(self.current_job_IDs>=0)
         rb_ind = np.setdiff1d(np.argwhere(
             np.multiply(
                 np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0], finish_ind)

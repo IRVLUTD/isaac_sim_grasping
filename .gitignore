@@ -10,6 +10,7 @@ objects/
 output/
 /outputs
 
+
 __pycache__/
 *.pyc
 # Byte-compiled / optimized / DLL files

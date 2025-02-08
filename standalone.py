@@ -222,7 +222,8 @@ if __name__ == "__main__":
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
         
         #Debug
-        add_light()
+        if head:
+            add_light()
 
         # Set desired physics Context options
         world.reset()
