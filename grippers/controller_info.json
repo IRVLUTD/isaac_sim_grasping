@@ -1,9 +1,15 @@
 {
 "fetch_gripper": {
-    "close_dir": [1,1],
-    "transfer_close_dir": [2,2],
-    "opened_dofs": [-0.025,-0.025],
-    "palm_pose": [-0.1343, 0, 0, 1, 0, 0, 0]
+    "close_dir": [-1,-1],
+    "transfer_close_dir": [-2,-2],
+    "opened_dofs": [0.05,0.05],
+    "palm_pose": [-0.06, 0, 0, 1, 0, 0, 0]
+    }, 
+"fetch_gripper_UMI": {
+    "close_dir": [-1,-1],
+    "transfer_close_dir": [-2,-2],
+    "opened_dofs": [0.05,0.05],
+    "palm_pose": [-0.13, 0, 0, 1, 0, 0, 0]
     }, 
 "franka_panda": {
     "close_dir": [-1, -1],

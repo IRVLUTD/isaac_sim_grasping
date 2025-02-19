@@ -78,6 +78,8 @@ def import_gripper(work_path,usd_path, EF_axis=-3):
         gripper_pose= pose_from_tf_matrix(T_EF.astype(float))
         
         # Adding Robot usd
+        #print("GRIPPER POSE")
+        #print(T_EF)
         add_reference_to_stage(usd_path=usd_path, prim_path=work_path+"/gripper")
         robot = world.scene.add(Articulation(prim_path = work_path+"/gripper", name="gripper",
                             position = gripper_pose[0], orientation = gripper_pose[1]))
@@ -101,7 +103,7 @@ if __name__ == "__main__":
     #Parser
     parser = make_parser()
     args = parser.parse_args()
-    head = args.headless
+    headless = args.headless
     force_reset = args.force_reset
     dof_flag = args.dof_given
     num_w = args.num_w
@@ -115,7 +117,7 @@ if __name__ == "__main__":
     #launch Isaac Sim before any other imports
     from omni.isaac.kit import SimulationApp
     config= {
-        "headless": head,
+        "headless": headless,
         'max_bounces':0,
         'fast_shutdown': True,
         'max_specular_transmission_bounces':0,
@@ -168,7 +170,7 @@ if __name__ == "__main__":
             os.makedirs(output_directory)
 
     world = World(set_defaults = False)
-    render = not head
+    render = not headless
 
     #Load json files 
     json_files = [pos_json for pos_json in os.listdir(json_directory) if pos_json.endswith('.json')]
@@ -222,7 +224,7 @@ if __name__ == "__main__":
         viewer.dofs, viewer.current_poses, viewer.current_job_IDs = viewer.get_jobs(num_w)
         
         #Debug
-        if head:
+        if render:
             add_light()
 
         # Set desired physics Context options

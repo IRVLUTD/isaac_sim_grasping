@@ -26,6 +26,8 @@ class GenericController(BaseController):
         with open(controller_json) as fd:
             self.gripper_dict = json.load(fd)
         self.label = 'Unknown'  # A label to identify the controller version or type
+        self.grippers = grippers
+        self.total_test_time = test_time
 
     def forward(self, time):
         """

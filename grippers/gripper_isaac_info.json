@@ -2,10 +2,18 @@
 "fetch_gripper": {
     "EF_axis": 1, 
     "physics_frequency": 240,
-    "contact_names": ["l_gripper_finger_link_joint","r_gripper_finger_link_joint"],
+    "contact_names": ["base_link", "l_gripper_finger_link","r_gripper_finger_link"],
     "contact_th":2,
-    "opened_dofs": [-0.025,-0.025],
-    "palm_pose": [-0.1343, 0, 0, 1, 0, 0, 0]
+    "opened_dofs": [0.05,0.05],
+    "palm_pose": [-0.06, 0, 0, 1, 0, 0, 0]
+    }, 
+"fetch_gripper_UMI": {
+    "EF_axis": 1, 
+    "physics_frequency": 240,
+    "contact_names": ["base_link", "l_gripper_finger_link","r_gripper_finger_link"],
+    "contact_th":2,
+    "opened_dofs": [0.05,0.05],
+    "palm_pose": [-0.13, 0, 0, 1, 0, 0, 0]
     }, 
 "franka_panda": {
     "EF_axis": 3, 
