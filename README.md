@@ -39,6 +39,7 @@ MultiGripperGrasp Toolkit is released under the [GNU General Public License v3.0
     - [Parameters and Inputs](#parameters-and-inputs)
     - [Transferred Grasps](#transferred-grasps)
     - [Reproducing Paper Results](#reproducing-paper-results)
+  - [Isaac Sim DoF order](#isaac-sim-dof-order) 
   - [More Documentation](#more-documentation)
     - [Helpful Links](#helpful-links)
     - [Notes](#notes)
@@ -191,6 +192,22 @@ As of this version, the simulation uses a specific .json structure. The [manager
 Additionally within the [gripper_isaac_info.json](grippers/gripper_isaac_info.json) you can find the configuration parameters used for each gripper. In order to reproduce the paper results, one must run the simulation with the same values. A detailed description of each field can be found within the [Adding a new Gripper](docs/add_grippers.md) page. All the files provided within this repository and in the [[dataset folder](https://utdallas.box.com/v/multi-gripper-grasp-data)] are set up for use out of the box. To reproduce the results you will need to run the simulation on the dataset and save to a different folder (output_dir). This will override the fall_time values and save the latest results on the new file with the relevant information: grasp pose information, grasp dof information, test type, total test time, fall time. 
 
 Note: To reproduce the transferred grasp results the same must be done with the transfer parameters in [gripper_isaac_info.json](grippers/gripper_isaac_info.json). 
+
+## Isaac Sim DoF order
+To use robots in Isaac Sim, they must first be converted to the .usd format. During this process, the resulting robot model often has a different Degree of Freedom (DoF) order compared to the original model. As a result, loading grasps from this dataset directly into another software tool may cause them to load incorrectly. Below, we provide the Isaac Sim DoF order for all grippers in our repository. Note that DoF names may also differ from those in the original gripper .urdf file. In such cases, please refer to our repository and load the gripper into Isaac Sim to verify the DoFs we mention below.
+
+ - h5_hand: ['left_link_joint', 'right_link_joint', 'left_tip_joint', 'right_tip_joint']
+ - shadow_hand: ['index_finger_joint1', 'little_finger_joint1', 'middle_finger_joint1', 'ring_finger_joint1', 'thumb_joint1', 'index_finger_join2', 'little_finger_joint2', 'middle_finger_joint2', 'ring_finger_joint2', 'thumb_joint2', 'index_finger_joint3', 'little_finger_joint3', 'middle_finger_joint3', 'ring_finger_joint3', 'thumb_joint3', 'index_finger_joint4', 'little_finger_joint4', 'middle_finger_joint4', 'ring_finger_joint4', 'thumb_joint4', 'little_finger_joint5', 'thumb_joint5']
+ - HumanHand: ['palm_index1_0_joint', 'palm_mid1_0_joint', 'palm_pinky1_0_joint', 'palm_ring1_0_joint', 'palm_thumb1_0_joint', 'index1_0_index1_joint', 'mid1_0_mid1_joint', 'pinky1_0_pinky1_joint', 'ring1_0_ring1_joint', 'thumb1_0_thumb1_joint', 'index1_index2_joint', 'mid1_mid2_joint', 'pinky1_pinky2_joint', 'ring1_ring2_joint', 'thumb1_thumb2_joint', 'index2_index3_joint', 'mid2_mid3_joint', 'pinky2_pinky3_joint', 'ring2_ring3_joint', 'thumb2_thumb3_joint']
+ - jaco_robot: ['jaco_finger_joint_0', 'jaco_finger_joint_2', 'jaco_finger_joint_4']
+ - fetch_gripper: ['l_gripper_finger_joint', 'r_gripper_finger_joint']
+ - franka_panda: ['panda_finger_joint1', 'panda_finger_joint2']
+ - Allegro: ['joint_0_0', 'joint_12_0', 'joint_4_0', 'joint_8_0', 'joint_1_0', 'joint_13_0', 'joint_5_0', 'joint_9_0', 'joint_2_0', 'joint_14_0', 'joint_6_0', 'joint_10_0', 'joint_3_0', 'joint_15_0', 'joint_7_0', 'joint_11_0']
+ - robotiq_3finger: ['RIQ_palm_RIQ_link_0_joint', 'RIQ_palm_RIQ_link_0_joint_b', 'RIQ_palm_RIQ_link_1_joint_a', 'RIQ_link_0_RIQ_link_1_joint_c', 'RIQ_link_0_RIQ_link_1_joint_b', 'RIQ_link_1_RIQ_link_2_joint_a', 'RIQ_link_1_RIQ_link_2_joint_c', 'RIQ_link_1_RIQ_link_2_joint_b', 'RIQ_link_2_RIQ_link_3_joint_a', 'RIQ_link_2_RIQ_link_3_joint_c', 'RIQ_link_2_RIQ_link_3_joint_b']
+ - sawyer: ['finger_joint1', 'finger_joint2']
+ - Barrett: ['a_palm_link1_joint', 'b_palm_link1_joint', 'c_palm_link2_joint_0', 'a_link1_link2_joint', 'b_link1_link2_joint', 'c_link2_link3_joint', 'a_link2_link3_joint', 'b_link2_link3_joint']
+ - wsg_50: ['base_joint_gripper_left', 'base_joint_gripper_right']
+
 
 ## More Documentation
 - [Adding a new Gripper](docs/add_grippers.md)
