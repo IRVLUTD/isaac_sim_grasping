@@ -278,6 +278,7 @@ class V_View():
             n: number of jobs to request
         """
         dofs, poses, job_IDs = self.manager.request_jobs(n)
+        # print(dofs)
         return dofs, poses, job_IDs
     
     def post_reset(self):
@@ -352,10 +353,14 @@ class V_View():
         # Rigid Body Probing, mark grasps as ready
         rb_ind = np.argwhere(np.multiply(np.squeeze(self.grasp_set_up==0 ),tmp_active)==1)[:,0]
         if (len(rb_ind)>0):
-            #self.objects.set_velocities([0,0,0,0,0,0],rb_ind) #
+            self.objects.set_velocities([0,0,0,0,0,0],rb_ind) #
             #self.objects_parents.set_world_poses(self.init_positions[rb_ind], self.init_rotations[rb_ind],rb_ind)
             self.objects.set_world_poses(self.init_positions[rb_ind], self.init_rotations[rb_ind],rb_ind)
             
+        # Set object position and velocities
+        self.objects.set_velocities([0,0,0,0,0,0]) 
+        #self.objects_parents.set_world_poses(self.init_positions, self.init_rotations)
+        self.objects.set_world_poses(self.init_positions, self.init_rotations)
         
         # Apply gripper actions
         set_up_timers = np.zeros_like(self.current_times)
@@ -374,6 +379,7 @@ class V_View():
         if(len(failed_ind)>0): 
             self.current_times[failed_ind] = -1
             self.test_finish(failed_ind)
+        self.grippers.set_joint_positions(self.dofs)
         return
     
     def test_finish(self, finish_ind):
