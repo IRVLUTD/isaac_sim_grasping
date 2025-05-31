@@ -4,7 +4,6 @@ from omni.isaac.core.utils.types import ArticulationActions
 import numpy as np
 import json
 import os
-import tf.transformations as tf
 from sim_utils import GenericController
 from utils_local import load_pickle, save_pickle, get_joint_transformations, get_inverse_joint_transformations
 
