@@ -495,7 +495,7 @@ class V_Manager:
         if transfer:
             self.dofs[tmp] = np.zeros_like(self.dofs[0])
         else:
-            self.dofs[tmp] = np.asarray(self.json['dofs'])[tmp]
+            self.dofs[tmp] = np.asarray(self.json['final_dofs'])[tmp]
 
         # Verbosity of json data loading
         self.n_jobs = self.grasps.shape[0]
