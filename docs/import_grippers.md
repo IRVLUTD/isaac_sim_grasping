@@ -1,8 +1,8 @@
 # Importing a new Gripper
-To get a new gripper into Isaac Sim, import it via the GUI and save it as a `.usd` file in your gripper directory. Follow the same format as the grippers in the repository [gripper directory](../grippers). Make sure your `.usd` grippers are tested and ready for simulation. For quicker setup, use the GUI example from [Isaac Sim Manual](https://docs.omniverse.nvidia.com/isaacsim/latest/core_api_tutorials/tutorial_core_hello_world.html).
+To get a new gripper into Isaac Sim, import it via the GUI and save it as a `.usd` file in your gripper directory. Follow the same format as the grippers in the repository [gripper directory](../grippers). Make sure your `.usd` grippers are tested and ready for simulation. For quicker setup, use the GUI example from [Isaac Sim Manual](https://docs.omniverse.nvidia.com/isaacsim/latest/core_api_tutorials/tutorial_core_hello_world.html). The following instructions were used to import objects into old versions of Isaac Sim (2023.1.0) for an updated version please refer to the manual referenced before.
 
 
-## Steps to Add grippers:
+## Steps to Add grippers (OLD Isaac Sim version):
 1) **Prepare the .usd File**: Import your gripper into Isaac Sim, ensuring it has the right attributes like max efforts, joint velocities, and colliders. Convert `.urdf` files using Isaac Utils > Workflows > URDF Importer.
 
 <p align="center">

@@ -1,7 +1,7 @@
 # Importing a new Objects
-To add a new object to Isaac Sim, use the GUI to import it and save as a `.usd` file. Refer to the [Isaac Sim manual](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html) for more information about the supported formats. 
+To add a new object to Isaac Sim, use the GUI to import it and save as a `.usd` file. Refer to the [Isaac Sim manual](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html) for more information about the supported formats. The following instructions were used to import objects into old versions of Isaac Sim (2023.1.0) for an updated version please refer to the manual referenced before.
 
-## Steps to Add objects:
+## Steps to Add objects (Old Isaac Version):
 1) **Import and Save:** import the Object and save as `.usd`. Preferably using instanceable meshes for memory efficiency.
 
 <p align="center">
